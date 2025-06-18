@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Roles</title>
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    async function fetchRoles() {
+      const res = await fetch('/roles/');
+      const roles = await res.json();
+      const list = document.getElementById('role-list');
+      list.innerHTML = '';
+      roles.forEach(role => {
+        const item = document.createElement('li');
+        item.className = 'list-group-item d-flex justify-content-between align-items-center';
+        item.innerHTML = `
+          <span>${role.name}</span>
+          <button class="btn btn-sm btn-danger" onclick="deleteRole(${role.id})">Delete</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    async function addRole() {
+      const roleName = document.getElementById('new-role').value;
+      if (!roleName.trim()) return;
+
+      await fetch('/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: roleName })
+      });
+      document.getElementById('new-role').value = '';
+      fetchRoles();
+    }
+
+    async function deleteRole(id) {
+      await fetch(`/roles/${id}`, { method: 'DELETE' });
+      fetchRoles();
+    }
+
+    window.onload = fetchRoles;
+  </script>
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4">Manage Roles</h2>
+
+    <div class="mb-3 row">
+      <div class="col-md-6">
+        <input type="text" id="new-role" class="form-control" placeholder="Enter new role">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" onclick="addRole()">Add Role</button>
+      </div>
+    </div>
+
+    <ul class="list-group mb-4" id="role-list"></ul>
+
+    <a href="/" class="btn btn-secondary">← Back to Home</a>
+  </div>
+
+  <!-- Optional Bootstrap JS (not needed for now) -->
+</body>
+</html>
