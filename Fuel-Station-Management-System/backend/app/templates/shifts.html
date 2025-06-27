@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management - FuelSys Pro</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+   
+  
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <style>
+     #calendar {
+      max-width: 1000px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+/* Content Area */
+        .content {
+            padding: 30px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: #2d5016;
+            margin-bottom: 10px;
+        }
+
+        /* Add Shift Card */
+        .add-shift-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e8f5e8;
+        }
+
+        .add-shift-card h3 {
+            color: #2d5016;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            color: #2d5016;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #e8f5e8;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #8BC34A;
+            box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8BC34A 0%, #689F38 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 195, 74, 0.3);
+        }
+
+        /* Calendar Card */
+        .calendar-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e8f5e8;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header h3 {
+            color: #2d5016;
+            font-size: 1.3rem;
+        }
+
+        .view-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            border: 2px solid #8BC34A;
+            background: white;
+            color: #8BC34A;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .view-btn.active,
+        .view-btn:hover {
+            background: #8BC34A;
+            color: white;
+        }
+
+        #calendar {
+            margin: 20px 0;
+        }
+
+        /* Role Legend */
+        .role-legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 12px;
+            background: #f8fdf4;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .role-admin { background-color: #FF5722; }
+        .role-manager { background-color: #2196F3; }
+        .role-attendant { background-color: #8BC34A; }
+        .role-security { background-color: #9C27B0; }
+
+        /* History Table Card */
+        .history-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            border: 1px solid #e8f5e8;
+        }
+
+        .history-card h3 {
+            color: #2d5016;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e8f5e8;
+        }
+
+        .history-table th {
+            background: #f8fdf4;
+            color: #2d5016;
+            font-weight: 600;
+        }
+
+        .history-table tr:hover {
+            background: #f8fdf4;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background: #E8F5E8;
+            color: #2d5016;
+        }
+
+        .status-ongoing {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            background: rgba(0, 0, 0, 0.5);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            margin: 5% auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal h3 {
+            color: #2d5016;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* Custom Calendar Colors */
+        .fc-event {
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 2px 6px !important;
+            font-size: 11px !important;
+            font-weight: 500 !important;
+        }
+
+        .fc-button-primary {
+            background: #8BC34A !important;
+            border-color: #8BC34A !important;
+        }
+
+        .fc-button-primary:hover {
+            background: #689F38 !important;
+            border-color:
+        
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        
+      <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-gas-pump"></i>
+                <h2><span>FuelSys Pro</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li><a href="sales.html"><i class="fas fa-cash-register"></i><span> Sales & Billing</span></a></li>
+                    <li><a href="inventory.html"><i class="fas fa-oil-can"></i> <span>Fuel Inventory</span></a></li>
+                    <li><a href="pumps.html"><i class="fas fa-gas-pump"></i> <span>Pumps</span></a></li>
+                    <li><a href="/staff/page"><i class="fas fa-users"></i> <span>Staff</span></a></li>
+                    <li class="active"><a href="/shifts/page"><i class="fa fa-calendar"></i><span> Shifts</span></a></li>
+                    <li><a href="customers.html"><i class="fa-solid fa-spray-can-sparkles"></i> <span>Lubricants</span></a></li>
+                    <li><a href="reports.html"><i class="fas fa-chart-bar"></i><span> Reports</span></a></li>
+                    <li><a href="suppliers.html"><i class="fas fa-truck"></i> <span>Suppliers</span></a></li>
+                    <li><a href="/expenses/page"><i class="fas fa-money-bill-wave"></i> <span>Expenses</span></a></li>
+                    <li><a href="settings.html"><i class="fas fa-cog"></i><span> Settings</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-toggle">
+    <i class="fas fa-angle-left"></i>
+</div>
+
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search...">
+                </div>
+                <div class="user-actions">
+                    <div class="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/40" alt="User">
+                        <span>Admin</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="page-header">
+                    <h1>Manage Shifts</h1>
+                        
+  <!-- Add Shift Card -->
+                <div class="add-shift-card">
+                    <h3>Schedule New Shift</h3>
+                    <form id="shiftForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Staff Member</label>
+                                <select id="userSelect" required>
+                                    <option value="">Select Staff</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="shiftDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Start Time</label>
+                                <input type="time" id="startTime" required>
+                            </div>
+                            <div class="form-group">
+                                <label>End Time</label>
+                                <input type="time" id="endTime" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <input type="text" id="notes" placeholder="Optional notes...">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary">Add Shift</button>
+                    </form>
+                </div>
+
+                <!-- Calendar Card -->
+                <div class="calendar-card">
+                    <div class="calendar-header">
+                        <h3>Shift Calendar</h3>
+                        <div class="view-buttons">
+                            <button class="view-btn" data-view="timeGridDay">Day</button>
+                            <button class="view-btn active" data-view="timeGridWeek">Week</button>
+                            <button class="view-btn" data-view="dayGridMonth">Month</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Role Legend -->
+                    <div class="role-legend">
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #FF5722;"></div>
+        <span>Admin</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #2196F3;"></div>
+        <span>Manager</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #FFC107;"></div>
+        <span>Cashier</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-color" style="background-color: #8BC34A;"></div>
+        <span>Pump Attendant</span>
+    </div>
+</div>
+
+
+                    <div id="calendar"></div>
+                </div>
+
+                <!-- History Table Card -->
+                <div class="history-card">
+                    <h3>Recent Shifts (Last 30 Days)</h3>
+                    <div class="table-container">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Staff Name</th>
+                                    <th>Role</th>
+                                    <th>Date</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <!-- Sample data -->
+                               
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Shift</h3>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="editUserId">
+
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="editDate" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" id="editStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" id="editEndTime" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" id="editNotes" placeholder="Optional notes...">
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 10px;">
+                    <button type="submit" class="btn-primary">Update</button>
+                    <button type="button" id="deleteBtn" class="btn-delete">Delete</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="history-card">
+ 
+
+
+
+
+ <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script> 
+
+let calendar;
+let currentEvent = null;
+let roleColors = {};
+let roleNames = {};
+let staffData = [];  // global staff data array
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const calendarEl = document.getElementById('calendar');
+    const userSelect = document.getElementById('userSelect');
+
+    // Fetch roles and store colors/names
+    const rolesRes = await fetch('/shifts/roles');
+    const rolesData = await rolesRes.json();
+
+    rolesData.forEach(role => {
+        roleColors[role.id] = role.color;
+        roleNames[role.id] = role.name;
+    });
+
+    // Load staff into dropdown and assign to global staffData
+    const staffRes = await fetch('/shifts/staff');
+    staffData = await staffRes.json();
+
+    // Clear existing options if any
+    userSelect.innerHTML = '<option value="">Select Staff</option>';
+
+    staffData.forEach(staff => {
+        const option = document.createElement('option');
+        option.value = staff.id;
+        option.textContent = staff.name;
+        userSelect.appendChild(option);
+    });
+
+    // Initialize FullCalendar
+    calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+        events: async function(fetchInfo, successCallback) {
+            try {
+                const res = await fetch('/shifts/api');
+                const events = await res.json();
+
+                const formatted = events.map(e => ({
+                    id: e.id,
+                    title: e.staff_name || 'Staff',
+                    start: e.start,
+                    end: e.end,
+                    backgroundColor: roleColors[e.role_id] || '#8BC34A',
+                    borderColor: roleColors[e.role_id] || '#8BC34A',
+                    textColor: 'white',
+                    extendedProps: e  // send whole event props for easier access
+                }));
+
+                successCallback(formatted);
+            } catch (err) {
+                console.error('Error fetching events:', err);
+            }
+        },
+        eventClick: (info) => {
+            const e = info.event;
+            currentEvent = e;
+
+            document.getElementById('editId').value = e.id;
+            document.getElementById('editUserId').value = e.extendedProps.user_id || '';
+            document.getElementById('editDate').value = formatDateLocal(e.start);
+
+            document.getElementById('editStartTime').value = formatTimeLocal(e.start);
+            document.getElementById('editEndTime').value = formatTimeLocal(e.end);
+
+            document.getElementById('editNotes').value = e.extendedProps.notes || '';
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+    });
+
+    calendar.render();
+    loadHistoryTable();
+
+    // View switching buttons
+    document.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            calendar.changeView(this.dataset.view);
+        });
+    });
+
+    // Add shift
+    document.getElementById('shiftForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const selectedUserId = document.getElementById('userSelect').value;
+        if (!selectedUserId) {
+            alert('Please select a staff member');
+            return;
+        }
+
+        const selectedUser = staffData.find(s => s.id == selectedUserId);
+        if (!selectedUser) {
+            alert('Selected staff member not found');
+            return;
+        }
+
+        const payload = {
+            user_id: selectedUserId,
+            role_id: selectedUser.role_id,  // Correct key name
+            shift_date: document.getElementById('shiftDate').value,
+            start_time: document.getElementById('startTime').value,
+            end_time: document.getElementById('endTime').value,
+            notes: document.getElementById('notes').value
+        };
+
+        const res = await fetch('/shifts/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            calendar.refetchEvents();
+            loadHistoryTable();
+            document.getElementById('shiftForm').reset();
+            alert("Shift Added");
+        } else {
+            alert('Failed to add shift');
+        }
+    });
+
+    // Update shift
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const id = document.getElementById('editId').value;
+        const user_id = document.getElementById('editUserId').value;
+
+        if (!user_id) {
+            alert('User ID missing');
+            return;
+        }
+
+        const payload = {
+            user_id: user_id,
+            role_id: currentEvent.extendedProps.role_id,
+            shift_date: document.getElementById('editDate').value,
+            start_time: document.getElementById('editStartTime').value,
+            end_time: document.getElementById('editEndTime').value,
+            notes: document.getElementById('editNotes').value
+        };
+
+        const res = await fetch(`/shifts/update/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            closeModal();
+            calendar.refetchEvents();
+            loadHistoryTable();
+        } else {
+            alert("Update failed");
+        }
+    });
+
+    // Delete shift
+    document.getElementById('deleteBtn').addEventListener('click', async () => {
+        const id = document.getElementById('editId').value;
+        if (confirm('Are you sure you want to delete this shift?')) {
+            const res = await fetch(`/shifts/delete/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                closeModal();
+                calendar.refetchEvents();
+                loadHistoryTable();
+            } else {
+                alert('Delete failed');
+            }
+        }
+    });
+});
+
+// Load recent shifts into history table
+async function loadHistoryTable() {
+    try {
+        const response = await fetch('/shifts/history');
+        const data = await response.json();
+        const tableBody = document.getElementById('historyTableBody');
+        tableBody.innerHTML = '';
+
+        data.forEach(shift => {
+            const roleColor = roleColors[shift.role_id] || '#8BC34A';
+            const roleName = roleNames[shift.role_id] || 'Unknown';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${shift.staff_name}</td>
+                <td><span style="color: ${roleColor}">●</span> ${roleName}</td>
+                <td>${formatDate(shift.shift_date)}</td>
+                <td>${shift.start_time}</td>
+                <td>${shift.end_time}</td>
+                <td>${shift.duration}</td>
+                <td><span class="status-badge status-completed">${shift.status || 'Completed'}</span></td>
+                <td>${shift.notes || '-'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    } catch (err) {
+        console.error('Error loading history:', err);
+    }
+}
+
+function formatTimeLocal(date) {
+    return date.toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+}
+function formatDateLocal(date) {
+    return date.toLocaleDateString('en-CA'); // Returns YYYY-MM-DD
+}
+
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+window.addEventListener('click', function (event) {
+    if (event.target === document.getElementById('editModal')) {
+        closeModal();
+    }
+});
+
+
+
+</script>
+
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    
+</body>
+</html>
