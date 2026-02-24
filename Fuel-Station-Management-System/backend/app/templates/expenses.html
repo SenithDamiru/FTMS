@@ -99,63 +99,28 @@
             font-weight: 500;
         }
         
-        .category-fuel {
-            background-color: #e3f2fd;
-            color: #1565c0;
-        }
+        .category-fuel        { background-color: #e3f2fd; color: #1565c0; }
+        .category-utilities   { background-color: #e8f5e9; color: #2e7d32; }
+        .category-maintenance { background-color: #fff3e0; color: #e65100; }
+        .category-salaries    { background-color: #f3e5f5; color: #6a1b9a; }
+        .category-other       { background-color: #e0e0e0; color: #424242; }
         
-        .category-utilities {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-        }
+        .expense-amount { font-weight: 600; }
         
-        .category-maintenance {
-            background-color: #fff3e0;
-            color: #e65100;
-        }
-        
-        .category-salaries {
-            background-color: #f3e5f5;
-            color: #6a1b9a;
-        }
-        
-        .category-other {
-            background-color: #e0e0e0;
-            color: #424242;
-        }
-        
-        .expense-amount {
-            font-weight: 600;
-        }
-        
-        .expense-actions {
-            display: flex;
-            gap: 5px;
-        }
+        .expense-actions { display: flex; gap: 5px; }
         
         .btn-icon {
-            width: 30px;
-            height: 30px;
+            width: 30px; height: 30px;
             border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-flex; align-items: center; justify-content: center;
             background: none;
             border: 1px solid #dee2e6;
             color: #6c757d;
             cursor: pointer;
             transition: all 0.2s;
         }
-        
-        .btn-icon:hover {
-            background: #f8f9fa;
-            color: #4361ee;
-        }
-        
-        .btn-icon.delete:hover {
-            color: #c62828;
-            border-color: #ffcdd2;
-        }
+        .btn-icon:hover         { background: #f8f9fa; color: #4361ee; }
+        .btn-icon.delete:hover  { color: #c62828; border-color: #ffcdd2; }
         
         .expense-summary {
             background: #fff;
@@ -172,315 +137,240 @@
             padding: 15px;
             margin-bottom: 15px;
         }
+        .summary-card h3 { margin: 0 0 10px; font-size: 1rem; color: #6c757d; }
+        .summary-amount  { font-size: 1.5rem; font-weight: 600; color: #212529; margin: 5px 0; }
+        .summary-comparison { font-size: 0.85rem; color: #6c757d; display: flex; align-items: center; }
+        .trend-up   { color: #2e7d32; margin-right: 5px; }
+        .trend-down { color: #c62828; margin-right: 5px; }
         
-        .summary-card h3 {
-            margin: 0 0 10px;
-            font-size: 1rem;
-            color: #6c757d;
-        }
-        
-        .summary-amount {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #212529;
-            margin: 5px 0;
-        }
-        
-        .summary-comparison {
-            font-size: 0.85rem;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-        }
-        
-        .trend-up {
-            color: #2e7d32;
-            margin-right: 5px;
-        }
-        
-        .trend-down {
-            color: #c62828;
-            margin-right: 5px;
-        }
-        
-        .category-list {
-            margin-top: 20px;
-        }
-        
+        .category-list { margin-top: 20px; }
         .category-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid #eee;
         }
+        .category-info   { display: flex; align-items: center; gap: 10px; }
+        .category-color  { width: 12px; height: 12px; border-radius: 50%; }
+        .category-name   { font-size: 0.9rem; }
+        .category-percentage { font-size: 0.85rem; color: #6c757d; }
+        .category-amount { font-weight: 500; }
         
-        .category-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .category-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-        
-        .category-name {
-            font-size: 0.9rem;
-        }
-        
-        .category-percentage {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        
-        .category-amount {
-            font-weight: 500;
-        }
-        
-        .chart-container {
-            height: 200px;
-            margin: 20px 0;
-            position: relative;
-        }
+        .chart-container { height: 200px; margin: 20px 0; position: relative; }
         
         .btn {
-            padding: 8px 15px;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.85rem;
-            border: 1px solid transparent;
-            transition: all 0.2s;
+            padding: 8px 15px; border-radius: 6px; font-weight: 500;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.85rem; border: 1px solid transparent; transition: all 0.2s;
         }
+        .btn-primary  { background: #4361ee; color: white; }
+        .btn-primary:hover { background: #3451d1; }
+        .btn-outline  { background: white; border-color: #dee2e6; color: #495057; }
+        .btn-outline:hover { background: #f8f9fa; border-color: #adb5bd; }
+        .btn-block    { display: block; width: 100%; text-align: center; padding: 10px; justify-content: center; }
         
-        .btn-primary {
-            background: #4361ee;
-            color: white;
-        }
-        
-        .btn-outline {
-            background: white;
-            border-color: #dee2e6;
-            color: #495057;
-        }
-        
-        .btn-block {
-            display: block;
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-        }
-        
-        .no-expenses {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-        }
-        
-        .no-expenses i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            opacity: 0.5;
-        }
+        .no-expenses { text-align: center; padding: 40px 20px; color: #6c757d; }
+        .no-expenses i { font-size: 3rem; margin-bottom: 15px; opacity: 0.5; }
         
         .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;
         }
-        
-        .pagination-info {
-            font-size: 0.85rem;
-            color: #6c757d;
-        }
-        
-        .pagination-controls {
-            display: flex;
-            gap: 5px;
-        }
-        
+        .pagination-info { font-size: 0.85rem; color: #6c757d; }
+        .pagination-controls { display: flex; gap: 5px; }
         .page-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #fff;
-            border: 1px solid #dee2e6;
-            color: #495057;
-            cursor: pointer;
+            width: 32px; height: 32px; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #fff; border: 1px solid #dee2e6; color: #495057; cursor: pointer;
         }
-        
-        .page-btn.active {
-            background: #4361ee;
-            border-color: #4361ee;
-            color: white;
-        }
-        
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .page-btn.active  { background: #4361ee; border-color: #4361ee; color: white; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-
-
-/* FIXED MODAL STYLES */
+        /* ══════════════════════════════════════
+           SHARED MODAL BASE
+        ══════════════════════════════════════ */
         .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 10px;
-            overflow-y: auto;
+            display: none; position: fixed; inset: 0;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center; align-items: center;
+            z-index: 1000; padding: 10px; overflow-y: auto;
         }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            padding: 25px 30px;
-            border-radius: 12px;
-            width: 420px;
-            max-width: 95%;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            position: relative;
-            animation: slideDown 0.3s ease forwards;
-        }
+        .modal.show { display: flex; }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            } 
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .modal-close-btn {
-            position: absolute;
-            top: 12px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            color: #666;
-            transition: color 0.2s ease;
+            position: absolute; top: 12px; right: 15px;
+            background: none; border: none; font-size: 1.8rem; font-weight: 700;
+            cursor: pointer; color: #666; transition: color 0.2s ease;
         }
+        .modal-close-btn:hover { color: #000; }
 
-        .modal-close-btn:hover {
-            color: #000;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
+        .form-group { margin-bottom: 18px; }
         .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #333;
-            font-size: 0.95rem;
+            display: block; font-weight: 600; margin-bottom: 6px;
+            color: #333; font-size: 0.95rem;
         }
-
         .modal .form-control {
-            width: 100%;
-            padding: 10px 12px;
-            font-size: 1rem;
-            border: 1.8px solid #ccc;
-            border-radius: 6px;
-            transition: border-color 0.2s ease;
-            box-sizing: border-box;
-            color: #222;
+            width: 100%; padding: 10px 12px; font-size: 1rem;
+            border: 1.8px solid #ccc; border-radius: 6px;
+            transition: border-color 0.2s ease; box-sizing: border-box; color: #222;
         }
-
         .modal .form-control:focus {
-            outline: none;
-            border-color: #3f51b5;
-            box-shadow: 0 0 6px rgba(63, 81, 181, 0.4);
+            outline: none; border-color: #3f51b5;
+            box-shadow: 0 0 6px rgba(63,81,181,0.4);
         }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 80px;
-        }
+        textarea.form-control { resize: vertical; min-height: 80px; }
 
         .form-actions {
-            margin-top: 25px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 14px;
+            margin-top: 25px; display: flex; justify-content: flex-end; gap: 14px;
         }
-
         .form-actions .btn {
-            cursor: pointer;
-            padding: 10px 18px;
-            font-size: 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            border: none;
-            transition: background-color 0.2s ease;
-            min-width: 100px;
+            cursor: pointer; padding: 10px 18px; font-size: 1rem; border-radius: 6px;
+            font-weight: 600; border: none; transition: background-color 0.2s ease; min-width: 100px;
+        }
+        .form-actions .btn-primary           { background-color: #3f51b5; color: white; }
+        .form-actions .btn-primary:hover     { background-color: #303f9f; }
+        .form-actions .btn-outline           { background-color: transparent; color: #3f51b5; border: 2px solid #3f51b5; }
+        .form-actions .btn-outline:hover     { background-color: #3f51b5; color: white; }
+
+        /* ══════════════════════════════════════
+           ADD EXPENSE MODAL  (original sizing)
+        ══════════════════════════════════════ */
+        #expenseModal .modal-content {
+            background-color: #fff; padding: 25px 30px;
+            border-radius: 12px; width: 420px; max-width: 95%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative; animation: slideDown 0.3s ease forwards;
         }
 
-        .form-actions .btn-primary {
-            background-color: #3f51b5;
-            color: white;
+        /* ══════════════════════════════════════
+           FULL REPORT MODAL
+        ══════════════════════════════════════ */
+        #reportModal .modal-content {
+            background: #fff; border-radius: 14px;
+            width: 900px; max-width: 96vw; max-height: 90vh;
+            overflow-y: auto; padding: 30px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            position: relative; animation: slideDown 0.3s ease forwards;
         }
 
-        .form-actions .btn-primary:hover {
-            background-color: #303f9f;
+        .report-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #f0f0f0;
+        }
+        .report-header h2 { font-size: 1.4rem; font-weight: 700; color: #1a1a2e; margin: 0; }
+        .report-header p  { font-size: 0.82rem; color: #6c757d; margin: 3px 0 0; }
+
+        .report-kpi-row {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px;
+        }
+        .report-kpi {
+            background: #f8f9ff; border: 1px solid #e8ecff;
+            border-radius: 10px; padding: 14px 16px;
+        }
+        .report-kpi .kpi-label { font-size: 0.75rem; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
+        .report-kpi .kpi-value { font-size: 1.25rem; font-weight: 700; color: #1a1a2e; margin-top: 4px; }
+        .report-kpi .kpi-sub   { font-size: 0.75rem; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+        .kpi-up   { color: #2e7d32; }
+        .kpi-down { color: #c62828; }
+
+        .report-charts-row {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 28px;
+        }
+        .report-chart-box {
+            background: #fafafa; border: 1px solid #eee;
+            border-radius: 10px; padding: 16px;
+        }
+        .report-chart-box h4 { font-size: 0.9rem; font-weight: 600; color: #333; margin: 0 0 14px; }
+        .report-chart-box canvas { max-height: 200px; }
+
+        .report-table-section h4 {
+            font-size: 0.95rem; font-weight: 600; color: #333;
+            margin: 0 0 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .report-table-section h4 i { color: #4361ee; }
+
+        .report-table {
+            width: 100%; border-collapse: collapse; font-size: 0.85rem;
+        }
+        .report-table th {
+            background: #f4f6ff; color: #495057; font-weight: 600;
+            padding: 10px 12px; text-align: left; border-bottom: 2px solid #e8ecff;
+            font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .report-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+        .report-table tr:last-child td { border-bottom: none; }
+        .report-table tr:hover td { background: #f8f9ff; }
+
+        .cat-pill {
+            display: inline-block; padding: 3px 9px; border-radius: 10px;
+            font-size: 0.72rem; font-weight: 600;
         }
 
-        .form-actions .btn-outline {
-            background-color: transparent;
-            color: #3f51b5;
-            border: 2px solid #3f51b5;
+        .report-footer-actions {
+            display: flex; gap: 10px; margin-top: 24px;
+            padding-top: 18px; border-top: 1px solid #eee; justify-content: flex-end;
         }
 
-        .form-actions .btn-outline:hover {
-            background-color: #3f51b5;
-            color: white;
+        /* ══════════════════════════════════════
+           EXPORT MODAL
+        ══════════════════════════════════════ */
+        #exportModal .modal-content {
+            background: #fff; border-radius: 14px; width: 440px; max-width: 95%;
+            padding: 28px 30px; box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            position: relative; animation: slideDown 0.3s ease forwards;
         }
+
+        .export-header { margin-bottom: 22px; }
+        .export-header h2 { font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin: 0 0 4px; }
+        .export-header p  { font-size: 0.83rem; color: #6c757d; margin: 0; }
+
+        .export-options { display: flex; gap: 14px; margin-bottom: 22px; }
+
+        .export-option {
+            flex: 1; border: 2px solid #e0e0e0; border-radius: 10px;
+            padding: 18px 14px; text-align: center; cursor: pointer;
+            transition: all 0.22s; background: #fafafa;
+        }
+        .export-option:hover            { border-color: #4361ee; background: #f0f3ff; }
+        .export-option.selected         { border-color: #4361ee; background: #eef1ff; }
+        .export-option .export-icon     { font-size: 2rem; margin-bottom: 8px; }
+        .export-option.csv  .export-icon { color: #2e7d32; }
+        .export-option.pdf  .export-icon { color: #c62828; }
+        .export-option .export-type     { font-weight: 700; font-size: 0.95rem; color: #1a1a2e; }
+        .export-option .export-desc     { font-size: 0.75rem; color: #6c757d; margin-top: 4px; }
+
+        .export-scope { margin-bottom: 20px; }
+        .export-scope label { font-size: 0.85rem; font-weight: 600; color: #495057; margin-bottom: 8px; display: block; }
+        .scope-radio-group { display: flex; flex-direction: column; gap: 8px; }
+        .scope-radio {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 12px; border: 1.5px solid #e0e0e0;
+            border-radius: 7px; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; color: #333;
+        }
+        .scope-radio:hover           { border-color: #4361ee; background: #f5f7ff; }
+        .scope-radio input           { accent-color: #4361ee; }
+
+        .export-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .export-actions .btn { min-width: 110px; justify-content: center; }
+
+        .btn-success       { background: #2e7d32; color: white; border: none; }
+        .btn-success:hover { background: #256428; }
 
         @media (max-width: 480px) {
-            .modal-content {
-                width: 95%;
-                padding: 20px;
-            }
-            .form-actions .btn {
-                min-width: 80px;
-                padding: 8px 14px;
-            }
+            #expenseModal .modal-content { width: 95%; padding: 20px; }
+            .form-actions .btn { min-width: 80px; padding: 8px 14px; }
+            .report-kpi-row     { grid-template-columns: 1fr 1fr; }
+            .report-charts-row  { grid-template-columns: 1fr; }
+            .export-options     { flex-direction: column; }
         }
-
-
     </style>
 </head>
 <body>
     <div class="dashboard">
-        <!-- Sidebar -->
-         
         <aside class="sidebar">
             <div class="logo">
                 <i class="fas fa-gas-pump"></i>
@@ -489,7 +379,7 @@
             <nav>
                 <ul>
                     <li><a href="index.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                    <li><a href="sales.html"><i class="fas fa-cash-register"></i><span> Sales & Billing</span></a></li>
+                    <li><a href="sales.html"><i class="fas fa-cash-register"></i><span> Sales &amp; Billing</span></a></li>
                     <li><a href="inventory.html"><i class="fas fa-oil-can"></i> <span>Fuel Inventory</span></a></li>
                     <li><a href="pumps.html"><i class="fas fa-gas-pump"></i> <span>Pumps</span></a></li>
                     <li><a href="/staff/page"><i class="fas fa-users"></i> <span>Staff</span></a></li>
@@ -502,14 +392,10 @@
                 </ul>
             </nav>
             <div class="sidebar-toggle">
-    <i class="fas fa-angle-left"></i>
-</div>
-
-
+                <i class="fas fa-angle-left"></i>
+            </div>
         </aside>
 
-
-        <!-- Main Content -->
         <main class="main-content">
             <header>
                 <div class="search-bar">
@@ -536,12 +422,13 @@
                         <button class="btn btn-primary" id="addExpenseBtn">
                             <i class="fas fa-plus"></i> Add Expense
                         </button>
-                        <button class="btn btn-outline">
+                        <!-- EXPORT BUTTON — opens export modal -->
+                        <button class="btn btn-outline" id="exportBtn">
                             <i class="fas fa-download"></i> Export
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="expenses-container">
                     <div class="expenses-list">
                         <div class="expense-filters">
@@ -556,7 +443,6 @@
                                     <option>Other</option>
                                 </select>
                             </div>
-                            
                             <div class="filter-group">
                                 <label>Date Range:</label>
                                 <div class="date-range">
@@ -565,12 +451,11 @@
                                     <input type="text" class="date-input" id="endDate" placeholder="End Date">
                                 </div>
                             </div>
-                            
                             <button class="btn btn-outline">
                                 <i class="fas fa-filter"></i> Apply
                             </button>
                         </div>
-                        
+
                         <div class="table-responsive">
                             <table class="expense-table">
                                 <thead>
@@ -587,93 +472,73 @@
                                     <tr class="expense-item">
                                         <td>Jun 18, 2023</td>
                                         <td>
-                                            <div style="font-weight: 500;">Fuel Delivery</div>
-                                            <div style="font-size: 0.8rem; color: #6c757d;">Invoice #INV-2023-1042</div>
+                                            <div style="font-weight:500;">Fuel Delivery</div>
+                                            <div style="font-size:0.8rem;color:#6c757d;">Invoice #INV-2023-1042</div>
                                         </td>
                                         <td><span class="expense-category category-fuel">Fuel</span></td>
                                         <td>Bank Transfer</td>
-                                        <td class="expense-amount" style="color: #c62828;">-₹2,450,000</td>
+                                        <td class="expense-amount" style="color:#c62828;">Rs.2,450,000</td>
                                         <td>
                                             <div class="expense-actions">
-                                                <button class="btn-icon" title="View">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                <button class="btn-icon" title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-icon delete" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                <button class="btn-icon" title="View"><i class="fas fa-eye"></i></button>
+                                                <button class="btn-icon" title="Edit"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-icon delete" title="Delete"><i class="fas fa-trash"></i></button>
                                             </div>
                                         </td>
                                     </tr>
-                                    
-                                    
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <div class="pagination">
-                            <div class="pagination-info">
-                                Showing 1 to 5 of 24 entries
-                            </div>
+                            <div class="pagination-info">Showing 1 to 5 of 24 entries</div>
                             <div class="pagination-controls">
-                                <button class="page-btn" disabled>
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
+                                <button class="page-btn" disabled><i class="fas fa-chevron-left"></i></button>
                                 <button class="page-btn active">1</button>
                                 <button class="page-btn">2</button>
                                 <button class="page-btn">3</button>
                                 <button class="page-btn">4</button>
                                 <button class="page-btn">5</button>
-                                <button class="page-btn">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
+                                <button class="page-btn"><i class="fas fa-chevron-right"></i></button>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="expense-summary">
                         <h2>Expense Summary</h2>
-                        <p style="color: #6c757d; margin-top: -10px; margin-bottom: 20px;">June 1 - June 18, 2023</p>
-                        
+                        <p style="color:#6c757d;margin-top:-10px;margin-bottom:20px;">June 1 - June 18, 2023</p>
+
                         <div class="summary-card">
                             <h3>Total Expenses</h3>
-                            <div class="summary-amount">₹2,681,800</div>
+                            <div class="summary-amount">Rs.2,681,800</div>
                             <div class="summary-comparison">
-                                <i class="fas fa-arrow-up trend-up"></i>
-                                12.5% increase from last month
+                                <i class="fas fa-arrow-up trend-up"></i> 12.5% increase from last month
                             </div>
                         </div>
-                        
+
                         <div class="summary-card">
                             <h3>Average Daily Expenses</h3>
-                            <div class="summary-amount">₹149,000</div>
+                            <div class="summary-amount">Rs.149,000</div>
                             <div class="summary-comparison">
-                                <i class="fas fa-arrow-down trend-down"></i>
-                                5.2% decrease from last month
+                                <i class="fas fa-arrow-down trend-down"></i> 5.2% decrease from last month
                             </div>
                         </div>
-                        
+
                         <div class="chart-container">
-                            <!-- Placeholder for chart -->
-                            <div style="width: 100%; height: 100%; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
-                                <i class="fas fa-chart-pie" style="font-size: 2rem; opacity: 0.3;"></i>
+                            <div style="width:100%;height:100%;background:#f8f9fa;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#6c757d;">
+                                <i class="fas fa-chart-pie" style="font-size:2rem;opacity:0.3;"></i>
                             </div>
                         </div>
-                        
+
                         <h3>By Category</h3>
-                        <div class="category-list">
-                            
-                            
-                        
-                        </div>
-                        
-                        <button class="btn btn-outline btn-block" style="margin-top: 20px;">
+                        <div class="category-list"></div>
+
+                        <!-- FULL REPORT BUTTON — opens report modal -->
+                        <button class="btn btn-outline btn-block" style="margin-top:20px;" id="viewReportBtn">
                             <i class="fas fa-chart-line"></i> View Full Report
                         </button>
-                        
-                        <button class="btn btn-primary btn-block" style="margin-top: 10px;" id="addExpenseBtn2">
+
+                        <button class="btn btn-primary btn-block" style="margin-top:10px;" id="addExpenseBtn2">
                             <i class="fas fa-plus"></i> Add New Expense
                         </button>
                     </div>
@@ -682,27 +547,22 @@
         </main>
     </div>
 
-
-
-
-  <!-- Expense Modal -->
+    <!-- ══════════════════════════════════════
+         ADD EXPENSE MODAL  (unchanged)
+    ══════════════════════════════════════ -->
     <div id="expenseModal" class="modal">
         <div class="modal-content">
             <button type="button" class="modal-close-btn close-modal" aria-label="Close">&times;</button>
-
-            <h2 style="margin-bottom: 20px; color: #333;">Add Expense</h2>
-
+            <h2 style="margin-bottom:20px;color:#333;">Add Expense</h2>
             <form id="expenseForm">
                 <div class="form-group">
                     <label for="expenseDate">Date</label>
                     <input type="text" id="expenseDate" class="form-control date-input" required>
                 </div>
-
                 <div class="form-group">
                     <label for="expenseTitle">Description</label>
                     <input type="text" id="expenseTitle" class="form-control" placeholder="Enter description" required>
                 </div>
-
                 <div class="form-group">
                     <label for="expenseCategory">Category</label>
                     <select id="expenseCategory" class="form-control" required>
@@ -714,12 +574,10 @@
                         <option value="Other">Other</option>
                     </select>
                 </div>
-
                 <div class="form-group">
-                    <label for="expenseAmount">Amount (₹)</label>
+                    <label for="expenseAmount">Amount (Rs.)</label>
                     <input type="number" id="expenseAmount" class="form-control" placeholder="0.00" step="0.01" required>
                 </div>
-
                 <div class="form-group">
                     <label for="expensePaymentMethod">Payment Method</label>
                     <select id="expensePaymentMethod" class="form-control" required>
@@ -731,12 +589,10 @@
                         <option value="UPI">UPI</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="expenseDescription">Notes</label>
                     <textarea id="expenseDescription" class="form-control" rows="3" placeholder="Additional notes (optional)"></textarea>
                 </div>
-
                 <div class="form-actions">
                     <button type="button" class="btn btn-outline close-modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Expense</button>
@@ -745,269 +601,669 @@
         </div>
     </div>
 
+    <!-- ══════════════════════════════════════
+         FULL REPORT MODAL
+    ══════════════════════════════════════ -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <button type="button" class="modal-close-btn" id="closeReportModal">&times;</button>
+
+            <div class="report-header">
+                <div>
+                    <h2><i class="fas fa-chart-bar" style="color:#4361ee;margin-right:8px;"></i>Full Expense Report</h2>
+                    <p id="reportDateRange">Loading date range...</p>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-outline" id="reportExportBtn" style="font-size:0.8rem;padding:6px 12px;">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Row -->
+            <div class="report-kpi-row">
+                <div class="report-kpi">
+                    <div class="kpi-label">Total Expenses</div>
+                    <div class="kpi-value" id="rpt-total">—</div>
+                    <div class="kpi-sub kpi-up"><i class="fas fa-arrow-up"></i><span id="rpt-total-trend">—</span></div>
+                </div>
+                <div class="report-kpi">
+                    <div class="kpi-label">Daily Average</div>
+                    <div class="kpi-value" id="rpt-avg">—</div>
+                    <div class="kpi-sub" style="color:#6c757d;">per day this period</div>
+                </div>
+                <div class="report-kpi">
+                    <div class="kpi-label">Transactions</div>
+                    <div class="kpi-value" id="rpt-count">—</div>
+                    <div class="kpi-sub" style="color:#6c757d;">total records</div>
+                </div>
+                <div class="report-kpi">
+                    <div class="kpi-label">Top Category</div>
+                    <div class="kpi-value" id="rpt-top-cat" style="font-size:1rem;">—</div>
+                    <div class="kpi-sub" style="color:#6c757d;" id="rpt-top-cat-pct">—</div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="report-charts-row">
+                <div class="report-chart-box">
+                    <h4><i class="fas fa-chart-pie" style="color:#4361ee;margin-right:6px;"></i>Spend by Category</h4>
+                    <canvas id="reportDonutChart"></canvas>
+                </div>
+                <div class="report-chart-box">
+                    <h4><i class="fas fa-chart-bar" style="color:#4361ee;margin-right:6px;"></i>Category Comparison</h4>
+                    <canvas id="reportBarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Category breakdown table -->
+            <div class="report-table-section">
+                <h4><i class="fas fa-list"></i> Category Breakdown</h4>
+                <table class="report-table" id="reportCategoryTable">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>% of Total</th>
+                            <th>Transactions</th>
+                            <th>Avg per Transaction</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportCategoryTableBody">
+                        <tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Recent transactions table -->
+            <div class="report-table-section" style="margin-top:24px;">
+                <h4><i class="fas fa-receipt"></i> Recent Transactions</h4>
+                <table class="report-table" id="reportTxTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Payment</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTxTableBody">
+                        <tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="report-footer-actions">
+                <button class="btn btn-outline" id="closeReportBtn">Close</button>
+                <button class="btn btn-success" id="reportDownloadPdf">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+                <button class="btn btn-primary" id="reportDownloadCsv">
+                    <i class="fas fa-file-csv"></i> Download CSV
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         EXPORT MODAL
+    ══════════════════════════════════════ -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <button type="button" class="modal-close-btn" id="closeExportModal">&times;</button>
+
+            <div class="export-header">
+                <h2><i class="fas fa-download" style="color:#4361ee;margin-right:8px;"></i>Export Expenses</h2>
+                <p>Choose a format and scope for your export</p>
+            </div>
+
+            <!-- Format picker -->
+            <div style="font-size:0.85rem;font-weight:600;color:#495057;margin-bottom:10px;">Export Format</div>
+            <div class="export-options">
+                <div class="export-option csv selected" data-format="csv">
+                    <div class="export-icon"><i class="fas fa-file-csv"></i></div>
+                    <div class="export-type">CSV</div>
+                    <div class="export-desc">Opens in Excel / Google Sheets</div>
+                </div>
+                <div class="export-option pdf" data-format="pdf">
+                    <div class="export-icon"><i class="fas fa-file-pdf"></i></div>
+                    <div class="export-type">PDF</div>
+                    <div class="export-desc">Formatted printable report</div>
+                </div>
+            </div>
+
+            <!-- Scope picker -->
+            <div class="export-scope">
+                <label>What to export</label>
+                <div class="scope-radio-group">
+                    <label class="scope-radio">
+                        <input type="radio" name="exportScope" value="current" checked>
+                        Current filtered view (with applied date range &amp; category)
+                    </label>
+                    <label class="scope-radio">
+                        <input type="radio" name="exportScope" value="all">
+                        All expenses (complete history)
+                    </label>
+                </div>
+            </div>
+
+            <div class="export-actions">
+                <button class="btn btn-outline" id="cancelExportBtn">Cancel</button>
+                <button class="btn btn-primary" id="confirmExportBtn">
+                    <i class="fas fa-download"></i> Download
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-   
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const API_BASE = '/expenses';
+    <!-- jsPDF + AutoTable for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
-    const expenseTableBody = document.querySelector('.expense-table tbody');
-    const categorySelect = document.querySelector('.form-select');
-    const startDateInput = document.getElementById('startDate');
-    const endDateInput = document.getElementById('endDate');
-    const chartCanvas = document.createElement('canvas');
-    document.querySelector('.chart-container').innerHTML = '';
-    document.querySelector('.chart-container').appendChild(chartCanvas);
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const API_BASE = '/expenses';
 
-    let expenseChart;
+        /* ── shared state ── */
+        let allExpenses   = [];
+        let summaryData   = {};
+        let activeFilters = { category: '', start_date: '', end_date: '' };
 
-    const modal = document.getElementById('expenseModal');
-    const addExpenseBtns = document.querySelectorAll('#addExpenseBtn, #addExpenseBtn2');
-    const closeModalBtns = document.querySelectorAll('.close-modal');
-    const expenseForm = document.getElementById('expenseForm');
+        const expenseTableBody = document.querySelector('.expense-table tbody');
+        const categorySelect   = document.querySelector('.form-select');
+        const startDateInput   = document.getElementById('startDate');
+        const endDateInput     = document.getElementById('endDate');
 
-    let selectedExpenseId = null;
+        /* ── main chart (sidebar) ── */
+        const chartCanvas = document.createElement('canvas');
+        document.querySelector('.chart-container').innerHTML = '';
+        document.querySelector('.chart-container').appendChild(chartCanvas);
+        let expenseChart;
 
-    flatpickr("#startDate", { dateFormat: "Y-m-d" });
-    flatpickr("#endDate", { dateFormat: "Y-m-d" });
-    flatpickr("#expenseDate", { dateFormat: "Y-m-d" });
+        /* ── report chart refs ── */
+        let reportDonutChart, reportBarChart;
 
-    addExpenseBtns.forEach(btn =>
-  btn.addEventListener('click', () => {
-    selectedExpenseId = null;
-    expenseForm.reset();
-    openModal();
-  })
-);
+        flatpickr("#startDate",    { dateFormat: "Y-m-d" });
+        flatpickr("#endDate",      { dateFormat: "Y-m-d" });
+        flatpickr("#expenseDate",  { dateFormat: "Y-m-d" });
 
-    closeModalBtns.forEach(btn => btn.addEventListener('click', () => closeModal()));
-    window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        /* ════════════════════════════════════
+           ADD EXPENSE MODAL  (unchanged logic)
+        ════════════════════════════════════ */
+        const expenseModal    = document.getElementById('expenseModal');
+        const addExpenseBtns  = document.querySelectorAll('#addExpenseBtn, #addExpenseBtn2');
+        const closeModalBtns  = document.querySelectorAll('.close-modal');
+        const expenseForm     = document.getElementById('expenseForm');
+        let selectedExpenseId = null;
 
-   function openModal() {
-  modal.classList.add('show');
-  document.body.style.overflow = 'hidden';
-}
+        addExpenseBtns.forEach(btn => btn.addEventListener('click', () => {
+            selectedExpenseId = null;
+            expenseForm.reset();
+            openModal(expenseModal);
+        }));
 
-function closeModal() {
-  modal.classList.remove('show');
-  document.body.style.overflow = 'auto';
-  selectedExpenseId = null;
-  expenseForm.reset();
-}
+        closeModalBtns.forEach(btn => btn.addEventListener('click', () => closeModal(expenseModal)));
+        window.addEventListener('click', e => { if (e.target === expenseModal) closeModal(expenseModal); });
 
-document.querySelectorAll('.close-modal').forEach(btn =>
-  btn.addEventListener('click', closeModal)
-);
+        /* ════════════════════════════════════
+           FULL REPORT MODAL
+        ════════════════════════════════════ */
+        const reportModal = document.getElementById('reportModal');
 
-window.addEventListener('click', (e) => {
-  if (e.target === modal) closeModal();
-});
+        document.getElementById('viewReportBtn').addEventListener('click', openReportModal);
+        document.getElementById('closeReportModal').addEventListener('click', () => closeModal(reportModal));
+        document.getElementById('closeReportBtn').addEventListener('click',   () => closeModal(reportModal));
+        window.addEventListener('click', e => { if (e.target === reportModal) closeModal(reportModal); });
 
-
-
-
-
-    function renderExpenses(expenses) {
-        expenseTableBody.innerHTML = '';
-        expenses.forEach(e => {
-            const row = document.createElement('tr');
-            row.classList.add('expense-item');
-            row.innerHTML = `
-                <td>${e.date}</td>
-                <td><div style="font-weight: 500;">${e.title}</div><div style="font-size: 0.8rem; color: #6c757d;">${e.description}</div></td>
-                <td><span class="expense-category category-${e.category.toLowerCase()}">${e.category}</span></td>
-                <td>${e.payment_method}</td>
-                <td class="expense-amount" style="color: #c62828;">-₹${parseFloat(e.amount).toLocaleString()}</td>
-                <td>
-                    <div class="expense-actions">
-                        <button class="btn-icon edit-btn" title="Edit" data-id="${e.id}"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon delete delete-btn" title="Delete" data-id="${e.id}"><i class="fas fa-trash"></i></button>
-                    </div>
-                </td>
-            `;
-            expenseTableBody.appendChild(row);
+        /* report → export shortcut */
+        document.getElementById('reportExportBtn').addEventListener('click', () => {
+            closeModal(reportModal);
+            openModal(exportModal);
         });
+        document.getElementById('reportDownloadCsv').addEventListener('click', () => doExport('csv', 'current'));
+        document.getElementById('reportDownloadPdf').addEventListener('click', () => doExport('pdf', 'current'));
 
-        // Attach event listeners after rendering
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const id = btn.getAttribute('data-id');
-                await fetch(`${API_BASE}/delete/${id}`, { method: 'DELETE' });
-                loadExpenses();
-                loadSummary();
+        async function openReportModal() {
+            openModal(reportModal);
+            await buildReport();
+        }
+
+        async function buildReport() {
+            /* fetch fresh data */
+            const params = new URLSearchParams();
+            if (activeFilters.category)   params.append('category',   activeFilters.category);
+            if (activeFilters.start_date) params.append('start_date', activeFilters.start_date);
+            if (activeFilters.end_date)   params.append('end_date',   activeFilters.end_date);
+
+            const [expRes, sumRes] = await Promise.all([
+                fetch(`${API_BASE}/?${params}`),
+                fetch(`${API_BASE}/summary?${params}`)
+            ]);
+            const expenses = await expRes.json();
+            const summary  = await sumRes.json();
+
+            /* date range label */
+            const sd = activeFilters.start_date || 'beginning';
+            const ed = activeFilters.end_date   || 'today';
+            document.getElementById('reportDateRange').textContent = `Period: ${sd} → ${ed}`;
+
+            /* KPIs */
+            const total    = summary.total || 0;
+            const avgDay   = summary.average_per_day || 0;
+            const count    = expenses.length;
+            const byCat    = summary.by_category || {};
+            const topEntry = Object.entries(byCat).sort((a,b) => b[1]-a[1])[0];
+            const topCat   = topEntry ? topEntry[0] : '—';
+            const topPct   = topEntry && total > 0 ? ((topEntry[1]/total)*100).toFixed(1)+'%' : '—';
+
+            document.getElementById('rpt-total').textContent      = 'Rs.' + total.toLocaleString();
+            document.getElementById('rpt-total-trend').textContent = 'vs last period';
+            document.getElementById('rpt-avg').textContent        = 'Rs.' + Math.round(avgDay).toLocaleString();
+            document.getElementById('rpt-count').textContent      = count;
+            document.getElementById('rpt-top-cat').textContent    = topCat;
+            document.getElementById('rpt-top-cat-pct').textContent = topPct + ' of spend';
+
+            /* chart colours */
+            const colorMap = {
+                Fuel: '#1565c0', Utilities: '#2e7d32',
+                Maintenance: '#e65100', Salaries: '#6a1b9a', Other: '#757575'
+            };
+            const cats   = Object.keys(byCat);
+            const vals   = Object.values(byCat);
+            const colors = cats.map(c => colorMap[c] || '#90a4ae');
+
+            /* donut */
+            if (reportDonutChart) reportDonutChart.destroy();
+            reportDonutChart = new Chart(document.getElementById('reportDonutChart'), {
+                type: 'doughnut',
+                data: { labels: cats, datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+                options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, cutout: '60%' }
             });
-        });
 
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const id = btn.getAttribute('data-id');
-                const expense = await fetch(`${API_BASE}/`).then(res => res.json()).then(data => data.find(e => e.id == id));
-                if (expense) {
-                    document.getElementById('expenseDate').value = expense.date;
-                    
-document.getElementById('expenseTitle').value = expense.title;
-document.getElementById('expenseCategory').value = expense.category;
-document.getElementById('expenseAmount').value = expense.amount;
-document.getElementById('expensePaymentMethod').value = expense.payment_method;
-document.getElementById('expenseDescription').value = expense.description;
-
-
-                    selectedExpenseId = id;
-                    openModal();
+            /* bar */
+            if (reportBarChart) reportBarChart.destroy();
+            reportBarChart = new Chart(document.getElementById('reportBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: cats,
+                    datasets: [{ label: 'Amount (Rs.)', data: vals, backgroundColor: colors, borderRadius: 5 }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { ticks: { callback: v => 'Rs.' + v.toLocaleString(), font: { size: 10 } } },
+                        x: { ticks: { font: { size: 10 } } }
+                    }
                 }
             });
-        });
-    }
 
-
-
-
-    async function loadExpenses() {
-        const category = categorySelect.value !== 'All Categories' ? categorySelect.value : '';
-        const startDate = startDateInput.value;
-        const endDate = endDateInput.value;
-
-        const params = new URLSearchParams();
-        if (category) params.append('category', category);
-        if (startDate) params.append('start_date', startDate);
-        if (endDate) params.append('end_date', endDate);
-
-        const res = await fetch(`${API_BASE}/?${params.toString()}`);
-        const data = await res.json();
-        renderExpenses(data);
-    }
-
-    async function loadSummary() {
-        const startDate = startDateInput.value;
-        const endDate = endDateInput.value;
-
-        const params = new URLSearchParams();
-        if (startDate) params.append('start_date', startDate);
-        if (endDate) params.append('end_date', endDate);
-
-        const res = await fetch(`${API_BASE}/summary?${params.toString()}`);
-        const data = await res.json();
-
-        document.querySelector('.summary-amount').textContent = `₹${parseFloat(data.total).toLocaleString()}`;
-        document.querySelectorAll('.summary-amount')[1].textContent = `₹${parseFloat(data.average_per_day).toFixed(2).toLocaleString()}`;
-
-        const catList = document.querySelector('.category-list');
-        catList.innerHTML = '';
-
-        const colors = {
-            "Fuel": "#1565c0",
-            "Utilities": "#2e7d32",
-            "Maintenance": "#e65100",
-            "Salaries": "#6a1b9a",
-            "Other": "#424242"
-        };
-
-        const totalAmount = data.total;
-        const labels = [];
-        const values = [];
-        const bgColors = [];
-
-        for (const [category, amount] of Object.entries(data.by_category)) {
-            const percent = totalAmount > 0 ? (amount / totalAmount * 100).toFixed(1) : 0;
-            const color = colors[category] || "#888";
-
-            // Update DOM list
-            const html = `
-                <div class="category-item">
-                    <div class="category-info">
-                        <div class="category-color" style="background: ${color};"></div>
-                        <span class="category-name">${category}</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <span class="category-percentage">${percent}%</span>
-                        <span class="category-amount">₹${parseFloat(amount).toLocaleString()}</span>
-                    </div>
-                </div>
-            `;
-            catList.insertAdjacentHTML('beforeend', html);
-
-            // Prepare chart data
-            labels.push(category);
-            values.push(amount);
-            bgColors.push(color);
-        }
-
-        updateChart(labels, values, bgColors);
-    }
-
-    function updateChart(labels, values, colors) {
-        if (expenseChart) {
-            expenseChart.destroy();
-        }
-        expenseChart = new Chart(chartCanvas, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Expenses by Category',
-                    data: values,
-                    backgroundColor: colors
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                cutout: '65%'
+            /* category breakdown table */
+            const tbody = document.getElementById('reportCategoryTableBody');
+            tbody.innerHTML = '';
+            const catColors = { Fuel:'#e3f2fd,#1565c0', Utilities:'#e8f5e9,#2e7d32', Maintenance:'#fff3e0,#e65100', Salaries:'#f3e5f5,#6a1b9a', Other:'#e0e0e0,#424242' };
+            cats.forEach(cat => {
+                const amt     = byCat[cat];
+                const pct     = total > 0 ? ((amt/total)*100).toFixed(1) : '0.0';
+                const catTxns = expenses.filter(e => e.category === cat);
+                const avg     = catTxns.length ? Math.round(amt / catTxns.length) : 0;
+                const [bg, fg] = (catColors[cat] || '#e0e0e0,#424242').split(',');
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td><span class="cat-pill" style="background:${bg};color:${fg};">${cat}</span></td>
+                        <td style="font-weight:600;">Rs.${amt.toLocaleString()}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="flex:1;height:6px;background:#eee;border-radius:3px;overflow:hidden;">
+                                    <div style="width:${pct}%;height:100%;background:${fg};border-radius:3px;"></div>
+                                </div>
+                                <span style="font-size:0.78rem;color:#6c757d;white-space:nowrap;">${pct}%</span>
+                            </div>
+                        </td>
+                        <td>${catTxns.length}</td>
+                        <td>Rs.${avg.toLocaleString()}</td>
+                    </tr>
+                `);
+            });
+            if (!cats.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No data for this period</td></tr>';
             }
-        });
-    }
 
-    // Filter button triggers both
-    document.querySelector('.btn-outline i.fa-filter').parentElement.addEventListener('click', () => {
-        loadExpenses();
-        loadSummary();
-    });
-
-    // Initial load
-    loadExpenses();
-    loadSummary();
-
-    expenseForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-       const data = {
-    date: document.getElementById('expenseDate').value,
-    title: document.getElementById('expenseTitle').value,
-    category: document.getElementById('expenseCategory').value,
-    amount: parseFloat(document.getElementById('expenseAmount').value),
-    payment_method: document.getElementById('expensePaymentMethod').value,
-    description: document.getElementById('expenseDescription').value
-};
-
-
-        if (selectedExpenseId) {
-            await fetch(`${API_BASE}/update/${selectedExpenseId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+            /* recent transactions table (last 10) */
+            const txBody = document.getElementById('reportTxTableBody');
+            txBody.innerHTML = '';
+            const recent = [...expenses].sort((a,b) => new Date(b.date)-new Date(a.date)).slice(0,10);
+            recent.forEach(e => {
+                const [bg, fg] = (catColors[e.category] || '#e0e0e0,#424242').split(',');
+                txBody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${e.date}</td>
+                        <td>
+                            <div style="font-weight:500;">${e.title}</div>
+                            ${e.description ? `<div style="font-size:0.75rem;color:#6c757d;">${e.description}</div>` : ''}
+                        </td>
+                        <td><span class="cat-pill" style="background:${bg};color:${fg};">${e.category}</span></td>
+                        <td>${e.payment_method}</td>
+                        <td style="font-weight:600;color:#c62828;">Rs.${parseFloat(e.amount).toLocaleString()}</td>
+                    </tr>
+                `);
             });
-        } else {
-            await fetch(`${API_BASE}/add`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+            if (!recent.length) {
+                txBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#6c757d;padding:20px;">No transactions found</td></tr>';
+            }
+
+            /* store for export */
+            allExpenses = expenses;
+            summaryData = summary;
+        }
+
+        /* ════════════════════════════════════
+           EXPORT MODAL
+        ════════════════════════════════════ */
+        const exportModal   = document.getElementById('exportModal');
+        let selectedFormat  = 'csv';
+
+        document.getElementById('exportBtn').addEventListener('click', () => openModal(exportModal));
+        document.getElementById('closeExportModal').addEventListener('click', () => closeModal(exportModal));
+        document.getElementById('cancelExportBtn').addEventListener('click',  () => closeModal(exportModal));
+        window.addEventListener('click', e => { if (e.target === exportModal) closeModal(exportModal); });
+
+        /* format toggle */
+        document.querySelectorAll('.export-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.export-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedFormat = opt.dataset.format;
+            });
+        });
+
+        document.getElementById('confirmExportBtn').addEventListener('click', async () => {
+            const scope = document.querySelector('input[name="exportScope"]:checked').value;
+            closeModal(exportModal);
+            await doExport(selectedFormat, scope);
+        });
+
+        /* ════════════════════════════════════
+           EXPORT ENGINE
+        ════════════════════════════════════ */
+        async function doExport(format, scope) {
+            /* fetch required data */
+            let expenses = allExpenses;
+            let summary  = summaryData;
+
+            if (!expenses.length || scope === 'all') {
+                const params = scope === 'all' ? new URLSearchParams() : buildFilterParams();
+                const [r1, r2] = await Promise.all([
+                    fetch(`${API_BASE}/?${params}`),
+                    fetch(`${API_BASE}/summary?${params}`)
+                ]);
+                expenses = await r1.json();
+                summary  = await r2.json();
+            }
+
+            if (format === 'csv') exportCSV(expenses);
+            else                  exportPDF(expenses, summary);
+        }
+
+        function exportCSV(expenses) {
+            const headers = ['Date', 'Description', 'Category', 'Payment Method', 'Amount (Rs.)', 'Notes'];
+            const rows    = expenses.map(e => [
+                e.date,
+                `"${(e.title || '').replace(/"/g, '""')}"`,
+                e.category,
+                e.payment_method,
+                parseFloat(e.amount).toFixed(2),
+                `"${(e.description || '').replace(/"/g, '""')}"`
+            ]);
+            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = `expenses_${today()}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportPDF(expenses, summary) {
+            const { jsPDF } = window.jspdf;
+            const doc  = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const W    = doc.internal.pageSize.getWidth();
+            const byCat = summary.by_category || {};
+            const total = summary.total || 0;
+
+            /* ── header band ── */
+            doc.setFillColor(26, 122, 74);
+            doc.rect(0, 0, W, 28, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+            doc.text('FuelSys Pro — Expense Report', 14, 12);
+            doc.setFontSize(9);  doc.setFont('helvetica', 'normal');
+            doc.text(`Generated: ${new Date().toLocaleDateString('en-IN', { dateStyle: 'long' })}`, 14, 20);
+            doc.text(`Total: Rs.${total.toLocaleString()}`, W - 14, 20, { align: 'right' });
+
+            /* ── KPI summary row ── */
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+            let y = 36;
+            const kpis = [
+                ['Total Expenses',    'Rs.' + total.toLocaleString()],
+                ['Transactions',      expenses.length.toString()],
+                ['Daily Average',     'Rs.' + Math.round(summary.average_per_day || 0).toLocaleString()],
+                ['Categories',        Object.keys(byCat).length.toString()]
+            ];
+            const colW = (W - 28) / 4;
+            kpis.forEach(([label, val], i) => {
+                const x = 14 + i * colW;
+                doc.setFillColor(240, 248, 244);
+                doc.roundedRect(x, y, colW - 4, 16, 2, 2, 'F');
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(100);
+                doc.text(label, x + (colW-4)/2, y + 5, { align: 'center' });
+                doc.setFont('helvetica', 'bold');   doc.setFontSize(9); doc.setTextColor(26, 122, 74);
+                doc.text(val,   x + (colW-4)/2, y + 12, { align: 'center' });
+            });
+            y += 24;
+
+            /* ── Category breakdown ── */
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(30, 30, 30);
+            doc.text('Spend by Category', 14, y); y += 5;
+            doc.autoTable({
+                startY: y,
+                head: [['Category', 'Amount (Rs.)', '% of Total', 'Transactions']],
+                body: Object.entries(byCat).sort((a,b) => b[1]-a[1]).map(([cat, amt]) => {
+                    const txCount = expenses.filter(e => e.category === cat).length;
+                    const pct     = total > 0 ? ((amt/total)*100).toFixed(1)+'%' : '0%';
+                    return [cat, 'Rs.'+amt.toLocaleString(), pct, txCount];
+                }),
+                theme: 'striped',
+                headStyles:   { fillColor: [26, 122, 74], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+                bodyStyles:   { fontSize: 8 },
+                alternateRowStyles: { fillColor: [245, 250, 247] },
+                margin: { left: 14, right: 14 }
+            });
+            y = doc.lastAutoTable.finalY + 10;
+
+            /* ── Transactions table ── */
+            if (y > 220) { doc.addPage(); y = 16; }
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(30, 30, 30);
+            doc.text('Transaction Detail', 14, y); y += 5;
+            doc.autoTable({
+                startY: y,
+                head: [['Date', 'Description', 'Category', 'Payment', 'Amount (Rs.)']],
+                body: expenses.map(e => [
+                    e.date,
+                    (e.title || '').substring(0, 35),
+                    e.category,
+                    e.payment_method,
+                    'Rs.' + parseFloat(e.amount).toLocaleString()
+                ]),
+                theme: 'striped',
+                headStyles:   { fillColor: [26, 122, 74], textColor: 255, fontSize: 8, fontStyle: 'bold' },
+                bodyStyles:   { fontSize: 7.5 },
+                alternateRowStyles: { fillColor: [245, 250, 247] },
+                columnStyles: { 4: { halign: 'right' } },
+                margin: { left: 14, right: 14 }
+            });
+
+            /* ── footer on every page ── */
+            const pages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pages; i++) {
+                doc.setPage(i);
+                doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(150);
+                doc.text(`FuelSys Pro • Confidential • Page ${i} of ${pages}`, W / 2, 290, { align: 'center' });
+            }
+
+            doc.save(`expenses_${today()}.pdf`);
+        }
+
+        /* ════════════════════════════════════
+           EXISTING EXPENSE LOGIC (unchanged)
+        ════════════════════════════════════ */
+        function renderExpenses(expenses) {
+            expenseTableBody.innerHTML = '';
+            expenses.forEach(e => {
+                const row = document.createElement('tr');
+                row.classList.add('expense-item');
+                row.innerHTML = `
+                    <td>${e.date}</td>
+                    <td><div style="font-weight:500;">${e.title}</div><div style="font-size:0.8rem;color:#6c757d;">${e.description}</div></td>
+                    <td><span class="expense-category category-${e.category.toLowerCase()}">${e.category}</span></td>
+                    <td>${e.payment_method}</td>
+                    <td class="expense-amount" style="color:#c62828;">Rs.${parseFloat(e.amount).toLocaleString()}</td>
+                    <td>
+                        <div class="expense-actions">
+                            <button class="btn-icon edit-btn" title="Edit" data-id="${e.id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-icon delete delete-btn" title="Delete" data-id="${e.id}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </td>`;
+                expenseTableBody.appendChild(row);
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-id');
+                    await fetch(`${API_BASE}/delete/${id}`, { method: 'DELETE' });
+                    loadExpenses(); loadSummary();
+                });
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id      = btn.getAttribute('data-id');
+                    const expense = await fetch(`${API_BASE}/`).then(r => r.json()).then(d => d.find(e => e.id == id));
+                    if (expense) {
+                        document.getElementById('expenseDate').value          = expense.date;
+                        document.getElementById('expenseTitle').value         = expense.title;
+                        document.getElementById('expenseCategory').value      = expense.category;
+                        document.getElementById('expenseAmount').value        = expense.amount;
+                        document.getElementById('expensePaymentMethod').value = expense.payment_method;
+                        document.getElementById('expenseDescription').value   = expense.description;
+                        selectedExpenseId = id;
+                        openModal(expenseModal);
+                    }
+                });
             });
         }
 
-        closeModal();
+        async function loadExpenses() {
+            const params = buildFilterParams();
+            const res    = await fetch(`${API_BASE}/?${params}`);
+            const data   = await res.json();
+            allExpenses  = data;
+            renderExpenses(data);
+        }
+
+        async function loadSummary() {
+            const params = buildFilterParams();
+            const res    = await fetch(`${API_BASE}/summary?${params}`);
+            const data   = await res.json();
+            summaryData  = data;
+
+            document.querySelector('.summary-amount').textContent            = `Rs.${parseFloat(data.total).toLocaleString()}`;
+            document.querySelectorAll('.summary-amount')[1].textContent      = `Rs.${parseFloat(data.average_per_day).toFixed(2).toLocaleString()}`;
+
+            const catList  = document.querySelector('.category-list');
+            catList.innerHTML = '';
+            const colors   = { Fuel:'#1565c0', Utilities:'#2e7d32', Maintenance:'#e65100', Salaries:'#6a1b9a', Other:'#424242' };
+            const total    = data.total;
+            const labels   = [], values = [], bgColors = [];
+
+            for (const [cat, amt] of Object.entries(data.by_category)) {
+                const pct   = total > 0 ? (amt / total * 100).toFixed(1) : 0;
+                const color = colors[cat] || '#888';
+                catList.insertAdjacentHTML('beforeend', `
+                    <div class="category-item">
+                        <div class="category-info">
+                            <div class="category-color" style="background:${color};"></div>
+                            <span class="category-name">${cat}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:15px;">
+                            <span class="category-percentage">${pct}%</span>
+                            <span class="category-amount">Rs.${parseFloat(amt).toLocaleString()}</span>
+                        </div>
+                    </div>`);
+                labels.push(cat); values.push(amt); bgColors.push(color);
+            }
+            updateChart(labels, values, bgColors);
+        }
+
+        function updateChart(labels, values, colors) {
+            if (expenseChart) expenseChart.destroy();
+            expenseChart = new Chart(chartCanvas, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data: values, backgroundColor: colors }] },
+                options: { plugins: { legend: { display: false } }, cutout: '65%' }
+            });
+        }
+
+        function buildFilterParams() {
+            activeFilters.category   = categorySelect.value !== 'All Categories' ? categorySelect.value : '';
+            activeFilters.start_date = startDateInput.value;
+            activeFilters.end_date   = endDateInput.value;
+            const p = new URLSearchParams();
+            if (activeFilters.category)   p.append('category',   activeFilters.category);
+            if (activeFilters.start_date) p.append('start_date', activeFilters.start_date);
+            if (activeFilters.end_date)   p.append('end_date',   activeFilters.end_date);
+            return p;
+        }
+
+        document.querySelector('.btn-outline i.fa-filter').parentElement.addEventListener('click', () => {
+            loadExpenses(); loadSummary();
+        });
+
         loadExpenses();
         loadSummary();
+
+        expenseForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const data = {
+                date:           document.getElementById('expenseDate').value,
+                title:          document.getElementById('expenseTitle').value,
+                category:       document.getElementById('expenseCategory').value,
+                amount:         parseFloat(document.getElementById('expenseAmount').value),
+                payment_method: document.getElementById('expensePaymentMethod').value,
+                description:    document.getElementById('expenseDescription').value
+            };
+            if (selectedExpenseId) {
+                await fetch(`${API_BASE}/update/${selectedExpenseId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            } else {
+                await fetch(`${API_BASE}/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            }
+            closeModal(expenseModal);
+            loadExpenses(); loadSummary();
+        });
+
+        /* ════════════════════════════════════
+           HELPERS
+        ════════════════════════════════════ */
+        function openModal(m)  { m.classList.add('show'); document.body.style.overflow = 'hidden'; }
+        function closeModal(m) { m.classList.remove('show'); document.body.style.overflow = 'auto'; selectedExpenseId = null; }
+        function today()       { return new Date().toISOString().split('T')[0]; }
     });
-});
-</script>
-
-
+    </script>
 </body>
 </html>
