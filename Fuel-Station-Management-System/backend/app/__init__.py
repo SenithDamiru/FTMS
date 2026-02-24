@@ -22,7 +22,8 @@ def create_app():
     from .routes.expenses_routes import expenses_bp
     app.register_blueprint(expenses_bp)
 
-
+    from .routes.ml_routes import ml_bp
+    app.register_blueprint(ml_bp)
 
     from flask import render_template
     @app.route('/')

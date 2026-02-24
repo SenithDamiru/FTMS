@@ -8,7 +8,9 @@ cd fuel-station-management/backend
 2. Create and Activate Virtual Environment
 
 python3 -m venv venv
-source venv/bin/activate
+source backend/venv/bin/activate
+
+python3 backend/main.py
 
 🧪 2. Install Required Packages
 In your virtual environment:
