@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank Prediction - FuelSys Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tank_prediction.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- ══════ SIDEBAR ══════ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fas fa-gas-pump"></i>
+            <h2>FuelSys <span>Pro</span></h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                <li><a href="sales.html"><i class="fas fa-cash-register"></i><span>Sales &amp; Billing</span></a></li>
+                <li><a href="inventory.html"><i class="fas fa-oil-can"></i><span>Fuel Inventory</span></a></li>
+                <li class="active"><a href="#"><i class="fas fa-chart-line"></i><span>Tank Prediction</span></a></li>
+                <li><a href="pumps.html"><i class="fas fa-gas-pump"></i><span>Pumps</span></a></li>
+                <li><a href="/staff/page"><i class="fas fa-users"></i><span>Staff</span></a></li>
+                <li><a href="/shifts/page"><i class="fa fa-calendar"></i><span>Shifts</span></a></li>
+                <li><a href="customers.html"><i class="fa-solid fa-spray-can-sparkles"></i><span>Lubricants</span></a></li>
+                <li><a href="reports.html"><i class="fas fa-chart-bar"></i><span>Reports</span></a></li>
+                <li><a href="suppliers.html"><i class="fas fa-truck"></i><span>Suppliers</span></a></li>
+                <li><a href="/expenses/page"><i class="fas fa-money-bill-wave"></i><span>Expenses</span></a></li>
+                <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-toggle" id="sidebarToggle">
+            <i class="fas fa-angle-left toggle-icon"></i>
+        </div>
+    </aside>
+
+    <!-- ══════ MAIN ══════ -->
+    <main class="main-content">
+        <header>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search...">
+            </div>
+            <div class="user-actions">
+                <div class="datetime-display">
+                    <div class="time" id="clock">--:--:--</div>
+                    <div class="date" id="dateDisplay">—</div>
+                </div>
+                <div class="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge">3</span>
+                </div>
+                <div class="user-profile">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="page-header">
+                <div>
+                    <h1>Tank Depletion Prediction</h1>
+                    <div class="breadcrumb">Dashboard / Fuel Inventory / <span>Prediction</span></div>
+                </div>
+            </div>
+
+            <!-- Stat Row -->
+            <div class="stat-row">
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fas fa-gas-pump"></i></div>
+                    <div class="stat-info"><div class="label">Total Tanks</div><div class="value" id="statTotal">5</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon yellow"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info"><div class="label">Tanks Healthy</div><div class="value" id="statHealthy">–</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-info"><div class="label">Low Warning</div><div class="value" id="statWarning">–</div></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fas fa-fire"></i></div>
+                    <div class="stat-info"><div class="label">Critical</div><div class="value" id="statCritical">–</div></div>
+                </div>
+            </div>
+
+            <!-- Main Prediction Grid -->
+            <div class="prediction-grid">
+
+                <!-- LEFT -->
+                <div class="left-col">
+
+                    <!-- Input Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-header-icon"><i class="fas fa-sliders-h"></i></div>
+                            <div>
+                                <h2>Configure Prediction</h2>
+                                <div class="subtitle">Select a tank and enter current fuel level</div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="error-box" id="errorBox">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span id="errorText"></span>
+                                <button class="close-err" onclick="hideError()">×</button>
+                            </div>
+
+                            <form id="predictionForm">
+                                <div class="form-group">
+                                    <label for="tankSelect"><i class="fas fa-gas-pump"></i>Select Tank</label>
+                                    <select id="tankSelect" class="form-control" required>
+                                        <option value="">— Choose a tank —</option>
+                                        {% for k, v in tanks.items() %}
+                                        <option value="{{ k }}"
+                                                data-capacity="{{ v.capacity }}"
+                                                data-fuel-type="{{ v.fuel_type }}">
+                                            {{ v.name }} — {{ v.fuel_type }} ({{ "{:,}".format(v.capacity) }} L)
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="tank-info-box" id="tankInfoBox">
+                                    <div class="tank-info-item">
+                                        <div class="t-label">Fuel Type</div>
+                                        <div class="t-value" id="infoFuelType">–</div>
+                                    </div>
+                                    <div class="tank-info-item">
+                                        <div class="t-label">Max Capacity</div>
+                                        <div class="t-value" id="infoCapacity">–</div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="fuelLevel"><i class="fas fa-fill-drip"></i>Current Fuel Level (Liters)</label>
+                                    <input type="number" id="fuelLevel" class="form-control"
+                                           placeholder="Enter current level in liters"
+                                           min="0" step="1" required>
+                                    <div class="form-hint" id="fuelHint"></div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary" id="predictBtn">
+                                    <i class="fas fa-calculator"></i> Run Prediction
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Loading -->
+                    <div class="card loading-state" id="loadingState" style="display:none;">
+                        <div class="spinner"></div>
+                        <p>Running ML prediction model…</p>
+                    </div>
+
+                    <!-- Results Card -->
+                    <div class="card" id="resultsCard" style="display:none;">
+                        <div class="card-header">
+                            <div class="card-header-icon"><i class="fas fa-chart-bar"></i></div>
+                            <div>
+                                <h2>Prediction Results</h2>
+                                <div class="subtitle" id="resultSubtitle"></div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="status-banner" id="statusBanner">
+                                <i class="fas fa-circle-info"></i>
+                                <span id="statusMessage"></span>
+                            </div>
+
+                            <div class="results-grid">
+                                <div class="result-item highlight">
+                                    <div class="result-label"><i class="fas fa-clock"></i>Days Until Empty</div>
+                                    <div class="result-value" id="resDays">–</div>
+                                </div>
+                                <div class="result-item highlight">
+                                    <div class="result-label"><i class="fas fa-calendar-xmark"></i>Empty Date</div>
+                                    <div class="result-value" id="resDate">–</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label"><i class="fas fa-droplet"></i>Current Level</div>
+                                    <div class="result-value" id="resLevel">–</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label"><i class="fas fa-percent"></i>Tank Utilization</div>
+                                    <div class="result-value" id="resUtil">–</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label"><i class="fas fa-tachometer-alt"></i>Daily Consumption</div>
+                                    <div class="result-value" id="resConsumption">–</div>
+                                </div>
+                                <div class="result-item">
+                                    <div class="result-label"><i class="fas fa-bullseye"></i>Model Accuracy (±)</div>
+                                    <div class="result-value" id="resAccuracy">–</div>
+                                </div>
+                            </div>
+
+                            <div class="progress-section">
+                                <div class="progress-top">
+                                    <span>Tank Fill Level</span>
+                                    <span id="progressLabel">0%</span>
+                                </div>
+                                <div class="progress-track">
+                                    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-outline" onclick="resetForm()">
+                                <i class="fas fa-rotate-left"></i> Make Another Prediction
+                            </button>
+                        </div>
+                    </div>
+
+                </div><!-- /left-col -->
+
+                <!-- RIGHT -->
+                <div class="side-panel">
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-chart-pie"></i> Tank Status</h3>
+                        <div class="quick-stat-row" id="tankStatusList">
+                            <div style="color:var(--text-light);font-size:0.8rem;text-align:center;padding:10px 0;">
+                                Run a prediction to see live status
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-lightbulb"></i> How It Works</h3>
+                        <ul class="tip-list">
+                            <li><i class="fas fa-circle"></i>Select the tank you want to monitor from the dropdown.</li>
+                            <li><i class="fas fa-circle"></i>Enter the current fuel level from your dipstick or sensor reading.</li>
+                            <li><i class="fas fa-circle"></i>The ML model analyses historical consumption to predict depletion.</li>
+                            <li><i class="fas fa-circle"></i>Results show estimated days remaining and the projected empty date.</li>
+                            <li><i class="fas fa-circle"></i>Schedule refills before the critical threshold is reached.</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-card">
+                        <h3><i class="fas fa-triangle-exclamation"></i> Alert Thresholds</h3>
+                        <div class="quick-stat-row">
+                            <div class="quick-stat">
+                                <span class="q-label"><span class="dot" style="background:var(--success);"></span>Healthy</span>
+                                <span class="q-value good">≥ 60%</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="q-label"><span class="dot" style="background:var(--accent-dark);"></span>Warning</span>
+                                <span class="q-value warning">30% – 59%</span>
+                            </div>
+                            <div class="quick-stat">
+                                <span class="q-label"><span class="dot" style="background:var(--danger);"></span>Critical</span>
+                                <span class="q-value danger">&lt; 30%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div><!-- /prediction-grid -->
+        </div><!-- /content -->
+    </main>
+</div>
+
+<script>
+    /* ── Clock ── */
+    function tick() {
+        const now = new Date();
+        document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
+        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    }
+    tick(); setInterval(tick, 1000);
+
+    /* ── Sidebar toggle ── */
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
+    /* ── Refs ── */
+    const tankSelect   = document.getElementById('tankSelect');
+    const fuelLevel    = document.getElementById('fuelLevel');
+    const fuelHint     = document.getElementById('fuelHint');
+    const tankInfoBox  = document.getElementById('tankInfoBox');
+    const predictBtn   = document.getElementById('predictBtn');
+    const loadingState = document.getElementById('loadingState');
+    const resultsCard  = document.getElementById('resultsCard');
+    const errorBox     = document.getElementById('errorBox');
+
+    /* ── Tank select ── */
+    tankSelect.addEventListener('change', function () {
+        const opt = this.options[this.selectedIndex];
+        if (this.value) {
+            document.getElementById('infoFuelType').textContent = opt.dataset.fuelType;
+            document.getElementById('infoCapacity').textContent = parseInt(opt.dataset.capacity).toLocaleString() + ' L';
+            tankInfoBox.classList.add('visible');
+            fuelLevel.max = opt.dataset.capacity;
+            fuelHint.textContent = `Enter a value between 0 and ${parseInt(opt.dataset.capacity).toLocaleString()} liters`;
+            fuelLevel.focus();
+        } else {
+            tankInfoBox.classList.remove('visible');
+            fuelHint.textContent = '';
+        }
+    });
+
+    /* ── Fuel input guard ── */
+    fuelLevel.addEventListener('input', function () {
+        const cap = parseFloat(tankSelect.options[tankSelect.selectedIndex]?.dataset?.capacity || 0);
+        const val = parseFloat(this.value);
+        if (cap && val > cap) { this.value = cap; showError(`Max capacity is ${cap.toLocaleString()} L`); }
+        else if (val < 0)     { this.value = 0; }
+        else                  { hideError(); }
+    });
+
+    /* ── Form submit ── */
+    document.getElementById('predictionForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        hideError();
+
+        const tankId = tankSelect.value;
+        const fuel   = parseFloat(fuelLevel.value);
+        const cap    = parseFloat(tankSelect.options[tankSelect.selectedIndex].dataset.capacity);
+
+        if (!tankId)                 { showError('Please select a tank.');                           return; }
+        if (isNaN(fuel) || fuel < 0) { showError('Enter a valid fuel level.');                       return; }
+        if (fuel > cap)              { showError(`Level cannot exceed ${cap.toLocaleString()} L.`); return; }
+
+        resultsCard.style.display  = 'none';
+        loadingState.style.display = 'block';
+        predictBtn.disabled = true;
+
+        try {
+            const res  = await fetch('/ml/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tank_id: tankId, fuel_level: fuel })
+            });
+            const data = await res.json();
+            loadingState.style.display = 'none';
+            predictBtn.disabled = false;
+
+            if (data.success !== false) {
+                displayResults(data, tankSelect.options[tankSelect.selectedIndex].text);
+            } else {
+                showError(data.error || 'Prediction failed. Please try again.');
+            }
+        } catch {
+            loadingState.style.display = 'none';
+            predictBtn.disabled = false;
+            showError('Network error. Please check your connection and try again.');
+        }
+    });
+
+    /* ── Display results ── */
+    function displayResults(data, tankName) {
+        const banner = document.getElementById('statusBanner');
+        banner.className = 'status-banner ' + (data.status || 'good');
+        document.getElementById('statusMessage').textContent   = data.status_message || '';
+        document.getElementById('resDays').textContent         = (data.days_until_empty ?? '–') + ' days';
+        document.getElementById('resDate').textContent         = data.estimated_empty_date ? fmtDate(data.estimated_empty_date) : '–';
+        document.getElementById('resLevel').textContent        = data.current_level != null ? data.current_level.toLocaleString() + ' L' : '–';
+        document.getElementById('resUtil').textContent         = data.utilization    != null ? data.utilization + '%' : '–';
+        document.getElementById('resConsumption').textContent  = data.predicted_daily_consumption != null ? data.predicted_daily_consumption + ' L/day' : '–';
+        document.getElementById('resAccuracy').textContent     = data.model_accuracy_mae          != null ? '± ' + data.model_accuracy_mae + ' L/day' : '–';
+        document.getElementById('resultSubtitle').textContent  = tankName.split('—')[0].trim();
+
+        const pct  = data.utilization || 0;
+        const fill = document.getElementById('progressFill');
+        document.getElementById('progressLabel').textContent = pct + '%';
+        fill.style.width = pct + '%';
+        fill.style.background = pct < 30
+            ? 'linear-gradient(90deg,#c62828,#e53935)'
+            : pct < 60
+            ? 'linear-gradient(90deg,#d4a800,#f5c518)'
+            : 'linear-gradient(90deg,#1a7a4a,#22a862)';
+
+        const cls = pct < 30 ? 'danger' : pct < 60 ? 'warning' : 'good';
+        const dot = pct < 30 ? '#c62828' : pct < 60 ? '#d4a800' : '#1a7a4a';
+        document.getElementById('tankStatusList').innerHTML = `
+            <div class="quick-stat">
+                <span class="q-label"><span class="dot" style="background:${dot}"></span>${tankName.split('—')[0].trim()}</span>
+                <span class="q-value ${cls}">${pct}% full</span>
+            </div>
+            <div class="quick-stat">
+                <span class="q-label"><i class="fas fa-clock" style="margin-right:5px;color:var(--text-light)"></i>Runway</span>
+                <span class="q-value">${data.days_until_empty ?? '–'} days</span>
+            </div>
+            <div class="quick-stat">
+                <span class="q-label"><i class="fas fa-calendar" style="margin-right:5px;color:var(--text-light)"></i>Refill by</span>
+                <span class="q-value ${cls}">${data.estimated_empty_date ? fmtDate(data.estimated_empty_date) : '–'}</span>
+            </div>
+        `;
+
+        resultsCard.style.display = 'block';
+        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    /* ── Reset ── */
+    function resetForm() {
+        document.getElementById('predictionForm').reset();
+        resultsCard.style.display = 'none';
+        tankInfoBox.classList.remove('visible');
+        fuelHint.textContent = '';
+        hideError();
+        tankSelect.focus();
+    }
+
+    /* ── Helpers ── */
+    function fmtDate(str) {
+        return new Date(str).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' });
+    }
+    function showError(msg) { document.getElementById('errorText').textContent = msg; errorBox.style.display = 'flex'; }
+    function hideError()    { errorBox.style.display = 'none'; }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && resultsCard.style.display === 'block') resetForm();
+    });
+</script>
+</body>
+</html>

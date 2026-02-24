@@ -1,0 +1,732 @@
+/* =====================================================
+   Tank Prediction page – page specific only
+   (works with your existing style.css layout)
+   ===================================================== */
+
+/* page header block */
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:20px;
+}
+
+.breadcrumb{
+    font-size:12px;
+    color:#6c757d;
+    margin-top:4px;
+}
+
+/* top statistics row */
+.stat-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:16px;
+    margin-bottom:22px;
+}
+
+.stat-card{
+    background:#fff;
+    border-radius:10px;
+    padding:16px 18px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    box-shadow:var(--card-shadow);
+}
+
+.stat-icon{
+    width:42px;
+    height:42px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+}
+
+.stat-icon.green{background:#e8f5e9;color:#2e7d32;}
+.stat-icon.yellow{background:#fffde7;color:#f9a825;}
+.stat-icon.orange{background:#fff3e0;color:#ef6c00;}
+.stat-icon.red{background:#ffebee;color:#c62828;}
+
+.stat-info .label{
+    font-size:12px;
+    color:#6c757d;
+}
+
+.stat-info .value{
+    font-size:22px;
+    font-weight:700;
+}
+
+
+/* main grid */
+.prediction-grid{
+    display:grid;
+    grid-template-columns:1fr 320px;
+    gap:18px;
+}
+
+.left-col{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+
+/* generic cards */
+.card{
+    background:#fff;
+    border-radius:10px;
+    box-shadow:var(--card-shadow);
+    overflow:hidden;
+}
+
+.card-header{
+    padding:14px 18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-bottom:1px solid var(--border-color);
+    background:#f8f9fa;
+}
+
+.card-header-icon{
+    width:32px;
+    height:32px;
+    border-radius:7px;
+    background:#e3f2fd;
+    color:#4361ee;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.card-body{
+    padding:18px;
+}
+
+
+/* form */
+.form-group{
+    margin-bottom:16px;
+}
+
+.form-group label{
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:6px;
+    display:block;
+    color:#333;
+}
+
+.form-control{
+    width:100%;
+    padding:9px 12px;
+    border:1px solid var(--border-color);
+    border-radius:8px;
+    outline:none;
+}
+
+.form-control:focus{
+    border-color:#4361ee;
+}
+
+.form-hint{
+    font-size:12px;
+    color:#6c757d;
+    margin-top:4px;
+}
+
+
+/* tank info */
+.tank-info-box{
+    display:none;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    background:#e8f5e9;
+    border:1px solid #c8e6c9;
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:16px;
+}
+
+.tank-info-box.visible{display:grid;}
+
+.t-label{
+    font-size:11px;
+    color:#6c757d;
+    text-transform:uppercase;
+}
+
+.t-value{
+    font-weight:700;
+    color:#2e7d32;
+}
+
+
+/* buttons */
+.btn{
+    padding:10px 16px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.btn-primary{
+    background:#4361ee;
+    color:#fff;
+    width:100%;
+}
+
+.btn-primary:hover{
+    opacity:.9;
+}
+
+.btn-outline{
+    background:#fff;
+    border:1px solid var(--border-color);
+    width:100%;
+    margin-top:10px;
+}
+
+
+/* results */
+.results-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.result-item{
+    background:#f8f9fa;
+    border:1px solid var(--border-color);
+    border-radius:8px;
+    padding:12px 14px;
+}
+
+.result-item.highlight{
+    background:#e3f2fd;
+    border-color:#bbdefb;
+}
+
+.result-label{
+    font-size:11px;
+    color:#6c757d;
+    text-transform:uppercase;
+}
+
+.result-value{
+    font-size:18px;
+    font-weight:700;
+    margin-top:4px;
+}
+
+
+/* status banner */
+.status-banner{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 12px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:16px;
+    border-left:4px solid;
+}
+
+.status-banner.good{
+    background:#e8f5e9;
+    color:#2e7d32;
+    border-left-color:#2e7d32;
+}
+
+.status-banner.warning{
+    background:#fff3e0;
+    color:#ef6c00;
+    border-left-color:#ef6c00;
+}
+
+.status-banner.critical{
+    background:#ffebee;
+    color:#c62828;
+    border-left-color:#c62828;
+}
+
+
+/* progress */
+.progress-track{
+    height:10px;
+    background:#dee2e6;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-fill{
+    height:100%;
+    width:0%;
+    border-radius:20px;
+}
+
+
+/* side panel */
+.side-panel{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.info-card{
+    background:#fff;
+    border-radius:10px;
+    box-shadow:var(--card-shadow);
+    padding:16px 18px;
+}
+
+.quick-stat{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 10px;
+    border-radius:6px;
+    background:#f8f9fa;
+    border:1px solid var(--border-color);
+    margin-bottom:8px;
+}
+
+.q-label{
+    font-size:12px;
+    color:#6c757d;
+}
+
+.q-value{
+    font-weight:700;
+}
+
+.q-value.good{color:#2e7d32;}
+.q-value.warning{color:#ef6c00;}
+.q-value.danger{color:#c62828;}
+
+
+/* error */
+.error-box{
+    display:none;
+    align-items:center;
+    gap:8px;
+    background:#ffebee;
+    color:#c62828;
+    border-left:4px solid #c62828;
+    padding:10px 12px;
+    border-radius:8px;
+    margin-bottom:12px;
+}
+
+.close-err{
+    margin-left:auto;
+    border:none;
+    background:none;
+    cursor:pointer;
+    font-size:18px;
+    color:#c62828;
+}
+
+
+/* loading */
+.loading-state{
+    text-align:center;
+    padding:32px 20px;
+}
+
+.spinner{
+    width:36px;
+    height:36px;
+    border:3px solid #dee2e6;
+    border-top-color:#4361ee;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    margin:0 auto 10px;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
+
+
+/* responsive */
+@media(max-width:992px){
+    .prediction-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:768px){
+    .results-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+
+
+.breadcrumb,
+.stat-info .label,
+.form-hint,
+.t-label,
+.result-label,
+.q-label{
+    font-size:14px;     /* was 11–12 */
+}
+
+.result-value{
+    font-size:20px;     /* was 18 */
+}
+
+.stat-info .value{
+    font-size:24px;
+}
+
+.form-control{
+    font-size:15px;
+}
+
+.status-banner{
+    font-size:15px;
+}
+
+/* -------- card headers more colorful -------- */
+
+.card-header{
+    background:linear-gradient(90deg,#f3f7ff,#eef6ff);
+}
+
+.card-header-icon{
+    background:linear-gradient(135deg,#4361ee,#4cc9f0);
+    color:#fff;
+}
+
+
+/* -------- main cards slight border color -------- */
+
+.card{
+    border:1px solid #eef1f6;
+}
+
+
+/* -------- tank info box more lively -------- */
+
+.tank-info-box{
+    background:linear-gradient(135deg,#e8f5e9,#f1f8e9);
+    border-color:#a5d6a7;
+}
+
+.t-value{
+    font-size:16px;
+}
+
+
+/* -------- result cards more colorful -------- */
+
+.result-item{
+    background:linear-gradient(180deg,#ffffff,#f7f9fc);
+}
+
+.result-item.highlight{
+    background:linear-gradient(135deg,#e3f2fd,#f1f8ff);
+    border-color:#90caf9;
+}
+
+.result-label{
+    letter-spacing:.5px;
+}
+
+
+/* -------- status banners stronger colors -------- */
+
+.status-banner.good{
+    background:linear-gradient(90deg,#e8f5e9,#f1f8e9);
+}
+
+.status-banner.warning{
+    background:linear-gradient(90deg,#fff3e0,#fff8e1);
+}
+
+.status-banner.critical{
+    background:linear-gradient(90deg,#ffebee,#fce4ec);
+}
+
+
+/* -------- progress bar colors -------- */
+
+.progress-fill.good{
+    background:linear-gradient(90deg,#2e7d32,#66bb6a);
+}
+
+.progress-fill.warning{
+    background:linear-gradient(90deg,#ef6c00,#ffb74d);
+}
+
+.progress-fill.critical{
+    background:linear-gradient(90deg,#c62828,#ef5350);
+}
+
+
+/* -------- side panel / how it works / info cards -------- */
+
+.info-card{
+    background:linear-gradient(180deg,#ffffff,#f6f9ff);
+    border:1px solid #e6ecff;
+}
+
+.info-card h4,
+.info-card h5{
+    font-size:16px;
+    margin-bottom:8px;
+    color:#2b3a67;
+    
+}
+
+
+/* -------- colorful quick stats (right panel / how it works blocks) -------- */
+
+.quick-stat{
+    background:linear-gradient(90deg,#f8f9fa,#f1f4ff);
+}
+
+.q-value{
+    font-size:15px;
+}
+
+.q-value.good{
+    color:#2e7d32;
+}
+
+.q-value.warning{
+    color:#ef6c00;
+}
+
+.q-value.danger{
+    color:#c62828;
+}
+
+
+/* -------- stat cards (top row) more colorful -------- */
+
+.stat-card{
+    background:linear-gradient(180deg,#ffffff,#f7f9ff);
+}
+
+.stat-icon.green{
+    background:linear-gradient(135deg,#c8e6c9,#e8f5e9);
+}
+
+.stat-icon.yellow{
+    background:linear-gradient(135deg,#fff9c4,#fffde7);
+}
+
+.stat-icon.orange{
+    background:linear-gradient(135deg,#ffe0b2,#fff3e0);
+}
+
+.stat-icon.red{
+    background:linear-gradient(135deg,#ffcdd2,#ffebee);
+}
+
+
+/* -------- buttons slightly richer -------- */
+
+.btn-primary{
+    background:linear-gradient(135deg,#4361ee,#4cc9f0);
+}
+
+.btn-outline{
+    background:linear-gradient(180deg,#ffffff,#f5f7fb);
+}
+
+
+/* -------- loading spinner nicer -------- */
+
+.spinner{
+    border-top-color:#4cc9f0;
+}
+
+
+/* -------- "How it works" / description sections
+   (works automatically if they are inside .info-card) -------- */
+
+.info-card p,
+.info-card li{
+    font-size:14.5px;
+    line-height:1.6;
+    color:#495057;
+}
+
+
+/* -------- mobile readability -------- */
+
+@media(max-width:768px){
+
+    .stat-info .value{
+        font-size:22px;
+    }
+
+    .result-value{
+        font-size:19px;
+    }
+
+    .form-group label{
+        font-size:17px;
+    }
+}
+
+/* ---------- How it works section colors ---------- */
+
+.info-card h3{
+    color:#2b3a67;
+}
+
+/* list wrapper */
+.tip-list{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+/* list text */
+.tip-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:6px 0;
+    font-size:14.5px;
+    color:#495057;
+}
+
+/* the small circle icon */
+.tip-list li i{
+    color:#4361ee;
+    font-size:9px;
+    margin-top:6px;
+}
+
+/* ---------- subtitles under headers ---------- */
+
+.subtitle{
+    font-size:13.5px;
+    color:#6c757d;
+}
+
+
+/* ---------- progress section text ---------- */
+
+.progress-top{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:6px;
+    font-size:14px;
+    color:#495057;
+}
+
+
+/* ---------- small colored dot used in right panel ---------- */
+
+.dot{
+    display:inline-block;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    margin-right:6px;
+}
+
+/* =====================================================
+   Tank Prediction – colorful icons (page only)
+   ===================================================== */
+
+/* page header icons */
+.page-header i{
+    color:#4361ee;
+}
+
+/* stat cards (top row) icons */
+.stat-card i{
+    font-size:18px;
+}
+
+.stat-icon.green i{color:#2e7d32;}
+.stat-icon.yellow i{color:#f9a825;}
+.stat-icon.orange i{color:#ef6c00;}
+.stat-icon.red i{color:#c62828;}
+
+
+/* card headers icons */
+.card-header-icon i{
+    color:#ffffff;
+}
+
+
+/* form icons (labels) */
+.form-group label i{
+    color:#4361ee;
+    margin-right:6px;
+}
+
+
+/* tank info box icons (if you add any later) */
+.tank-info-box i{
+    color:#2e7d32;
+}
+
+
+/* result grid icons */
+.result-label i{
+    color:#4361ee;
+    margin-right:6px;
+}
+
+
+/* status banner icon */
+.status-banner i{
+    font-size:16px;
+}
+
+.status-banner.good i{color:#2e7d32;}
+.status-banner.warning i{color:#ef6c00;}
+.status-banner.critical i{color:#c62828;}
+
+
+/* right panel (info cards) heading icons */
+.info-card h3 i{
+    color:#4361ee;
+    margin-right:6px;
+}
+
+
+/* right panel quick stat icons */
+.quick-stat i{
+    color:#6c757d;
+}
+
+
+/* how it works bullets */
+.tip-list li i{
+    color:#4cc9f0;
+}
+
+
+/* alert thresholds small icons / dots area */
+.q-label i{
+    color:#4361ee;
+}
+
+
+/* progress section icons (if added later) */
+.progress-top i{
+    color:#4361ee;
+}
+
+
+/* buttons icons */
+.btn i{
+    color:inherit;
+}

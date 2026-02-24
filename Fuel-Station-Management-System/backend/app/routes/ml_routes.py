@@ -6,7 +6,7 @@ ml_bp = Blueprint("ml", __name__, url_prefix="/ml")
 
 @ml_bp.route("/")
 def ml_home():
-    return render_template("ml/index.html", tanks=TANK_INFO)
+    return render_template("tankPrediction.html", tanks=TANK_INFO)
 
 
 @ml_bp.route("/predict", methods=["POST"])
