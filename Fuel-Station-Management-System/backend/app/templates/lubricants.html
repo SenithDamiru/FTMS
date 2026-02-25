@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lubricants - FuelSys Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* ══ FuelSys Pro colour tokens (matches site-wide theme) ══ */
+        :root {
+            --primary:       #1a7a4a;
+            --primary-light: #22a862;
+            --primary-bg:    #e6f4ed;
+            --accent:        #f5c518;
+            --accent-dark:   #d4a800;
+            --accent-bg:     #fffbe6;
+            --danger:        #c62828;
+            --danger-bg:     #ffebee;
+            --warning:       #c17b00;
+            --warning-bg:    #fff8e1;
+            --border:        #dee2e6;
+            --text-dark:     #0d1f15;
+            --text-mid:      #3d5a47;
+            --text-light:    #6b8070;
+            --card-bg:       #ffffff;
+            --page-bg:       #f2f7f4;
+        }
+
+        /* ══ KPI cards ══ */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+        .kpi-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 16px 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            animation: fadeUp 0.4s ease both;
+        }
+        .kpi-card:nth-child(2){animation-delay:.07s}
+        .kpi-card:nth-child(3){animation-delay:.14s}
+        .kpi-card:nth-child(4){animation-delay:.21s}
+        .kpi-icon {
+            width: 42px; height: 42px;
+            border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.05rem; flex-shrink: 0;
+        }
+        .kpi-icon.green  { background: var(--primary-bg); color: var(--primary); }
+        .kpi-icon.yellow { background: var(--accent-bg);  color: var(--accent-dark); }
+        .kpi-icon.red    { background: var(--danger-bg);  color: var(--danger); }
+        .kpi-icon.orange { background: var(--warning-bg); color: var(--warning); }
+        .kpi-info .lbl {
+            font-size: 0.72rem; color: var(--text-light);
+            font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px;
+        }
+        .kpi-info .val {
+            font-size: 1.3rem; font-weight: 800;
+            color: var(--text-dark); line-height: 1.2; margin-top: 2px;
+        }
+
+        /* ══ Tab bar ══ */
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+            width: fit-content;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .tab-btn {
+            padding: 8px 18px;
+            border-radius: 7px;
+            border: none;
+            background: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .tab-btn:hover  { background: var(--primary-bg); color: var(--primary); }
+        .tab-btn.active { background: var(--primary);    color: #fff; }
+        .tab-btn .badge-count {
+            background: var(--danger);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 18px; height: 18px;
+            border-radius: 99px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0 4px;
+        }
+        .tab-btn.active .badge-count { background: rgba(255,255,255,0.3); }
+
+        /* ══ Section panel ══ */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* ══ Section card ══ */
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            overflow: hidden;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, #f4faf7 0%, #fff 100%);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .section-header-left { display: flex; align-items: center; gap: 10px; }
+        .section-header-icon {
+            width: 34px; height: 34px;
+            background: var(--primary-bg); color: var(--primary);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.88rem;
+        }
+        .section-header h2 { font-size: 0.98rem; font-weight: 700; color: var(--text-dark); }
+        .section-subtitle   { font-size: 0.75rem; color: var(--text-light); margin-top: 1px; }
+        .section-body { padding: 20px; }
+
+        /* ══ Filters bar ══ */
+        .filters-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .filter-lbl { font-size: 0.82rem; color: var(--text-light); white-space: nowrap; }
+        .form-select, .form-ctrl, .date-inp {
+            padding: 8px 11px;
+            border: 1.5px solid var(--border);
+            border-radius: 7px;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .form-select:focus, .form-ctrl:focus, .date-inp:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,122,74,0.1);
+        }
+        .date-inp { width: 135px; }
+
+        /* ══ Tables ══ */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .data-table th {
+            background: #f4faf7;
+            color: var(--text-mid);
+            font-weight: 600;
+            padding: 10px 13px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .data-table td {
+            padding: 11px 13px;
+            border-bottom: 1px solid #f0f0f0;
+            color: var(--text-dark);
+            vertical-align: middle;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td     { background: #f8fcfa; }
+
+        /* ══ Badges / pills ══ */
+        .pill {
+            display: inline-flex; align-items: center;
+            padding: 3px 10px; border-radius: 99px;
+            font-size: 0.72rem; font-weight: 600;
+        }
+        .pill-green  { background: var(--primary-bg); color: var(--primary); }
+        .pill-yellow { background: var(--accent-bg);  color: var(--accent-dark); }
+        .pill-red    { background: var(--danger-bg);  color: var(--danger); }
+        .pill-orange { background: var(--warning-bg); color: var(--warning); }
+        .pill-gray   { background: #f0f0f0;            color: #555; }
+
+        .stock-bar-wrap { display: flex; align-items: center; gap: 8px; }
+        .stock-bar {
+            flex: 1; height: 6px;
+            background: var(--border);
+            border-radius: 99px; overflow: hidden;
+            min-width: 60px;
+        }
+        .stock-bar-fill {
+            height: 100%; border-radius: 99px;
+            transition: width 0.5s ease;
+        }
+
+        /* ══ Icon buttons ══ */
+        .btn-icon {
+            width: 30px; height: 30px;
+            border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: none; border: 1.5px solid var(--border);
+            color: var(--text-light); cursor: pointer; transition: all 0.2s;
+            font-size: 0.78rem;
+        }
+        .btn-icon:hover         { background: var(--primary-bg); color: var(--primary); border-color: var(--primary); }
+        .btn-icon.del:hover     { background: var(--danger-bg);  color: var(--danger);  border-color: var(--danger); }
+
+        /* ══ Action buttons ══ */
+        .btn {
+            padding: 8px 16px; border-radius: 7px; font-weight: 600;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.85rem; border: 1.5px solid transparent; transition: all 0.2s;
+            font-family: inherit;
+        }
+        .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .btn-primary:hover { background: var(--primary-light); border-color: var(--primary-light); }
+        .btn-outline { background: #fff; border-color: var(--border); color: var(--text-mid); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+        .btn-yellow { background: var(--accent); color: var(--text-dark); border-color: var(--accent); }
+        .btn-yellow:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+        .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+        /* ══ Pagination ══ */
+        .pagination {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);
+        }
+        .pagination-info { font-size: 0.8rem; color: var(--text-light); }
+        .pagination-controls { display: flex; gap: 5px; }
+        .page-btn {
+            width: 30px; height: 30px; border-radius: 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #fff; border: 1.5px solid var(--border); color: var(--text-mid);
+            cursor: pointer; font-size: 0.78rem;
+        }
+        .page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* ══ Low stock alert banner ══ */
+        .low-stock-banner {
+            background: var(--warning-bg);
+            border: 1px solid #ffe082;
+            border-left: 4px solid var(--accent-dark);
+            border-radius: 8px;
+            padding: 11px 15px;
+            margin-bottom: 18px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--warning);
+            animation: fadeUp 0.3s ease;
+        }
+        .low-stock-banner.show { display: flex; }
+        .low-stock-banner i { font-size: 1.1rem; flex-shrink: 0; }
+        .low-stock-banner a {
+            margin-left: auto; font-size: 0.8rem;
+            color: var(--primary); cursor: pointer; text-decoration: underline;
+        }
+
+        /* ══ Empty state ══ */
+        .empty-state {
+            text-align: center; padding: 42px 20px; color: var(--text-light);
+        }
+        .empty-state i { font-size: 2.8rem; margin-bottom: 12px; opacity: 0.35; display: block; }
+        .empty-state p { font-size: 0.88rem; }
+
+        /* ══ MODAL ══ */
+        .modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            justify-content: center; align-items: center;
+            z-index: 1000; padding: 12px; overflow-y: auto;
+        }
+        .modal.show { display: flex; }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: #fff; border-radius: 12px;
+            width: 480px; max-width: 96vw;
+            padding: 26px 28px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            position: relative;
+            animation: slideDown 0.28s ease forwards;
+        }
+        .modal-content.wide { width: 560px; }
+
+        .modal-title {
+            font-size: 1.1rem; font-weight: 800; color: var(--text-dark);
+            margin-bottom: 20px; display: flex; align-items: center; gap: 9px;
+        }
+        .modal-title i { color: var(--primary); }
+
+        .modal-close {
+            position: absolute; top: 14px; right: 16px;
+            background: none; border: none; font-size: 1.6rem;
+            cursor: pointer; color: #999; transition: color 0.2s; line-height: 1;
+        }
+        .modal-close:hover { color: #333; }
+
+        /* form inside modal */
+        .fg { margin-bottom: 16px; }
+        .fg label {
+            display: block; font-size: 0.82rem; font-weight: 600;
+            color: var(--text-mid); margin-bottom: 5px;
+        }
+        .fg label i { color: var(--primary); margin-right: 4px; font-size: 0.76rem; }
+        .fg .fc {
+            width: 100%; padding: 9px 11px;
+            border: 1.5px solid var(--border); border-radius: 7px;
+            font-size: 0.88rem; color: var(--text-dark);
+            font-family: inherit; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .fg .fc:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,122,74,0.12);
+        }
+        .fg textarea.fc { resize: vertical; min-height: 72px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-actions {
+            margin-top: 22px; display: flex;
+            justify-content: flex-end; gap: 10px;
+        }
+        .form-actions .btn { min-width: 100px; justify-content: center; }
+
+        /* computed total display */
+        .computed-total {
+            background: var(--primary-bg);
+            border: 1px solid #b6dcc7;
+            border-radius: 7px;
+            padding: 10px 14px;
+            font-size: 0.85rem;
+            color: var(--text-mid);
+            margin-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .computed-total strong { font-size: 1.05rem; color: var(--primary); }
+
+        /* delete confirm modal */
+        #deleteModal .modal-content { width: 380px; text-align: center; padding: 30px; }
+        .del-icon {
+            width: 56px; height: 56px; background: var(--danger-bg);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px;
+            font-size: 1.4rem; color: var(--danger);
+        }
+        #deleteModal h3 { font-size: 1.1rem; color: var(--text-dark); margin-bottom: 8px; }
+        #deleteModal p  { font-size: 0.85rem; color: var(--text-light); margin-bottom: 22px; }
+        #deleteModal .form-actions { justify-content: center; }
+
+        /* ══ Animations ══ */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ══ Responsive ══ */
+        @media (max-width: 768px) {
+            .kpi-row     { grid-template-columns: 1fr 1fr; }
+            .tab-bar     { flex-wrap: wrap; }
+            .form-row    { grid-template-columns: 1fr; }
+            .filters-bar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-gas-pump"></i>
+            <h2><span>FuelSys Pro</span></h2>
+        </div>
+        <nav><ul>
+            <li><a href="index.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+            <li><a href="sales.html"><i class="fas fa-cash-register"></i><span>Sales &amp; Billing</span></a></li>
+            <li><a href="inventory.html"><i class="fas fa-oil-can"></i><span>Fuel Inventory</span></a></li>
+            <li><a href="/ml/"><i class="fas fa-chart-line"></i><span>Tank Prediction</span></a></li>
+            <li><a href="pumps.html"><i class="fas fa-gas-pump"></i><span>Pumps</span></a></li>
+            <li><a href="/staff/page"><i class="fas fa-users"></i><span>Staff</span></a></li>
+            <li><a href="/shifts/page"><i class="fa fa-calendar"></i><span>Shifts</span></a></li>
+            <li class="active"><a href="/lubricants/page"><i class="fa-solid fa-spray-can-sparkles"></i><span>Lubricants</span></a></li>
+            <li><a href="reports.html"><i class="fas fa-chart-bar"></i><span>Reports</span></a></li>
+            <li><a href="suppliers.html"><i class="fas fa-truck"></i><span>Suppliers</span></a></li>
+            <li><a href="/expenses/page"><i class="fas fa-money-bill-wave"></i><span>Expenses</span></a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+        </ul></nav>
+        <div class="sidebar-toggle"><i class="fas fa-angle-left"></i></div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="main-content">
+        <header>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search lubricants...">
+            </div>
+            <div class="user-actions">
+                <div class="notifications"><i class="fas fa-bell"></i><span class="badge" id="headerAlertBadge" style="display:none;"></span></div>
+                <div class="user-profile">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>Admin</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Page header -->
+            <div class="page-header">
+                <div>
+                    <h1>Lubricants</h1>
+                    <div style="font-size:0.78rem;color:var(--text-light);margin-top:3px;">
+                        Dashboard / <span style="color:var(--primary);font-weight:600;">Lubricants</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-outline" id="exportBtn"><i class="fas fa-download"></i> Export</button>
+                    <button class="btn btn-primary" id="addProductBtn"><i class="fas fa-plus"></i> Add Product</button>
+                </div>
+            </div>
+
+            <!-- Low stock alert banner -->
+            <div class="low-stock-banner" id="lowStockBanner">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span id="lowStockBannerText">Some products are running low on stock.</span>
+                <a onclick="switchTab('alerts')">View Alerts →</a>
+            </div>
+
+            <!-- KPI Row -->
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-icon green"><i class="fas fa-spray-can-sparkles"></i></div>
+                    <div class="kpi-info"><div class="lbl">Total Products</div><div class="val" id="kpiProducts">–</div></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon yellow"><i class="fas fa-coins"></i></div>
+                    <div class="kpi-info"><div class="lbl">Total Sales</div><div class="val" id="kpiSales">–</div></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon orange"><i class="fas fa-chart-line"></i></div>
+                    <div class="kpi-info"><div class="lbl">Gross Profit</div><div class="val" id="kpiProfit">–</div></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon red"><i class="fas fa-triangle-exclamation"></i></div>
+                    <div class="kpi-info"><div class="lbl">Low Stock</div><div class="val" id="kpiLowStock">–</div></div>
+                </div>
+            </div>
+
+            <!-- Tab bar -->
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('products')" id="tab-products">
+                    <i class="fas fa-boxes-stacked"></i> Products
+                </button>
+                <button class="tab-btn" onclick="switchTab('sales')" id="tab-sales">
+                    <i class="fas fa-receipt"></i> Sales
+                </button>
+                <button class="tab-btn" onclick="switchTab('purchases')" id="tab-purchases">
+                    <i class="fas fa-truck-ramp-box"></i> Purchases
+                </button>
+                <button class="tab-btn" onclick="switchTab('alerts')" id="tab-alerts">
+                    <i class="fas fa-bell"></i> Low Stock
+                    <span class="badge-count" id="alertBadge">0</span>
+                </button>
+            </div>
+
+            <!-- ═══ TAB: PRODUCTS ═══ -->
+            <div class="tab-panel active" id="panel-products">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon"><i class="fas fa-boxes-stacked"></i></div>
+                            <div>
+                                <h2>Product Catalog</h2>
+                                <div class="section-subtitle">All lubricant SKUs and current stock levels</div>
+                            </div>
+                        </div>
+                        <div class="filters-bar" style="margin-bottom:0;">
+                            <label class="filter-lbl">Category:</label>
+                            <select class="form-select" id="productCategoryFilter">
+                                <option value="">All Categories</option>
+                                <option>Engine Oil</option>
+                                <option>Gear Oil</option>
+                                <option>Hydraulic Oil</option>
+                                <option>Grease</option>
+                                <option>Brake Fluid</option>
+                                <option>Coolant</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Category</th>
+                                        <th>Grade</th>
+                                        <th>Unit</th>
+                                        <th>Stock</th>
+                                        <th>Selling Price</th>
+                                        <th>Cost Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productTableBody">
+                                    <tr><td colspan="8"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading products…</p></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ TAB: SALES ═══ -->
+            <div class="tab-panel" id="panel-sales">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon"><i class="fas fa-receipt"></i></div>
+                            <div>
+                                <h2>Sales Records</h2>
+                                <div class="section-subtitle">All lubricant sales transactions</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="addSaleBtn"><i class="fas fa-plus"></i> Record Sale</button>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar">
+                            <label class="filter-lbl">From:</label>
+                            <input type="text" class="date-inp" id="salesStart" placeholder="Start date">
+                            <label class="filter-lbl">To:</label>
+                            <input type="text" class="date-inp" id="salesEnd" placeholder="End date">
+                            <button class="btn btn-outline" id="salesFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Product</th>
+                                        <th>Customer</th>
+                                        <th>Qty</th>
+                                        <th>Unit Price</th>
+                                        <th>Total</th>
+                                        <th>Payment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesTableBody">
+                                    <tr><td colspan="8"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <div class="pagination-info" id="salesPagInfo">–</div>
+                            <div class="pagination-controls" id="salesPagControls"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ TAB: PURCHASES ═══ -->
+            <div class="tab-panel" id="panel-purchases">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon"><i class="fas fa-truck-ramp-box"></i></div>
+                            <div>
+                                <h2>Purchase / Restock Records</h2>
+                                <div class="section-subtitle">Supplier deliveries and stock additions</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-yellow" id="addPurchaseBtn"><i class="fas fa-plus"></i> Record Purchase</button>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar">
+                            <label class="filter-lbl">From:</label>
+                            <input type="text" class="date-inp" id="purchStart" placeholder="Start date">
+                            <label class="filter-lbl">To:</label>
+                            <input type="text" class="date-inp" id="purchEnd" placeholder="End date">
+                            <button class="btn btn-outline" id="purchFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Product</th>
+                                        <th>Supplier</th>
+                                        <th>Qty</th>
+                                        <th>Cost/Unit</th>
+                                        <th>Total Cost</th>
+                                        <th>Invoice Ref</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="purchTableBody">
+                                    <tr><td colspan="8"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <div class="pagination-info" id="purchPagInfo">–</div>
+                            <div class="pagination-controls" id="purchPagControls"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ TAB: LOW STOCK ALERTS ═══ -->
+            <div class="tab-panel" id="panel-alerts">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="fas fa-triangle-exclamation"></i></div>
+                            <div>
+                                <h2>Low Stock Alerts</h2>
+                                <div class="section-subtitle">Products at or below their reorder threshold</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div id="alertsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
+                            <div class="empty-state"><i class="fas fa-check-circle" style="color:var(--primary);"></i><p>No low stock items – all good!</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+    </main>
+</div>
+
+<!-- ══════════ PRODUCT MODAL ══════════ -->
+<div id="productModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('productModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-spray-can-sparkles"></i><span id="productModalTitle">Add Product</span></div>
+        <form id="productForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-tag"></i>Product Name *</label><input class="fc" type="text" id="pName" required placeholder="e.g. Castrol GTX"></div>
+                <div class="fg"><label><i class="fas fa-trademark"></i>Brand *</label><input class="fc" type="text" id="pBrand" required placeholder="e.g. Castrol"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-layer-group"></i>Grade *</label><input class="fc" type="text" id="pGrade" required placeholder="e.g. 5W-30, SAE 40"></div>
+                <div class="fg"><label><i class="fas fa-list"></i>Category *</label>
+                    <select class="fc" id="pCategory" required>
+                        <option value="">Select category</option>
+                        <option>Engine Oil</option><option>Gear Oil</option>
+                        <option>Hydraulic Oil</option><option>Grease</option>
+                        <option>Brake Fluid</option><option>Coolant</option><option>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-ruler"></i>Unit Type *</label>
+                    <select class="fc" id="pUnitType" required>
+                        <option value="">Select unit</option>
+                        <option value="Liters">Liters (L)</option>
+                        <option value="Bottles">Bottles</option>
+                        <option value="Kg">Kg</option>
+                        <option value="Units">Units</option>
+                    </select>
+                </div>
+                <div class="fg"><label><i class="fas fa-triangle-exclamation"></i>Low Stock Threshold *</label><input class="fc" type="number" id="pThreshold" required min="0" step="0.1" placeholder="e.g. 10"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-tag"></i>Selling Price (Rs.) *</label><input class="fc" type="number" id="pSellingPrice" required min="0" step="0.01" placeholder="0.00"></div>
+                <div class="fg"><label><i class="fas fa-receipt"></i>Cost Price (Rs.) *</label><input class="fc" type="number" id="pCostPrice" required min="0" step="0.01" placeholder="0.00"></div>
+            </div>
+            <div class="fg" id="stockQtyField"><label><i class="fas fa-cubes"></i>Opening Stock Qty</label><input class="fc" type="number" id="pStockQty" min="0" step="0.1" placeholder="0" value="0"></div>
+            <div class="fg"><label><i class="fas fa-align-left"></i>Description</label><textarea class="fc" id="pDescription" placeholder="Optional notes about this product"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('productModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="productSubmitBtn">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ SALE MODAL ══════════ -->
+<div id="saleModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('saleModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-receipt"></i><span id="saleModalTitle">Record Sale</span></div>
+        <form id="saleForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Date *</label><input class="fc" type="text" id="sDate" required></div>
+                <div class="fg"><label><i class="fas fa-spray-can-sparkles"></i>Product *</label>
+                    <select class="fc" id="sProduct" required>
+                        <option value="">Select product</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-user"></i>Customer Name</label><input class="fc" type="text" id="sCustomer" placeholder="Walk-in / Customer name"></div>
+                <div class="fg"><label><i class="fas fa-credit-card"></i>Payment Method *</label>
+                    <select class="fc" id="sPayment" required>
+                        <option value="">Select</option>
+                        <option>Cash</option><option>Card</option>
+                        <option>UPI</option><option>Bank Transfer</option><option>Credit</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-cubes"></i>Quantity *</label><input class="fc" type="number" id="sQty" required min="0.1" step="0.1" placeholder="0"></div>
+                <div class="fg"><label><i class="fas fa-tag"></i>Unit Price (Rs.) *</label><input class="fc" type="number" id="sUnitPrice" required min="0" step="0.01" placeholder="Auto-filled"></div>
+            </div>
+            <div class="computed-total">
+                <span>Total Amount</span>
+                <strong id="saleTotalDisplay">Rs. 0.00</strong>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="sNotes" placeholder="Optional notes"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('saleModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Sale</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ PURCHASE MODAL ══════════ -->
+<div id="purchaseModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('purchaseModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-truck-ramp-box"></i><span id="purchModalTitle">Record Purchase</span></div>
+        <form id="purchaseForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Date *</label><input class="fc" type="text" id="puDate" required></div>
+                <div class="fg"><label><i class="fas fa-spray-can-sparkles"></i>Product *</label>
+                    <select class="fc" id="puProduct" required>
+                        <option value="">Select product</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-truck"></i>Supplier Name *</label><input class="fc" type="text" id="puSupplier" required placeholder="Supplier company"></div>
+                <div class="fg"><label><i class="fas fa-file-invoice"></i>Invoice Ref</label><input class="fc" type="text" id="puInvoice" placeholder="INV-2024-001"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-cubes"></i>Quantity *</label><input class="fc" type="number" id="puQty" required min="0.1" step="0.1" placeholder="0"></div>
+                <div class="fg"><label><i class="fas fa-tag"></i>Cost per Unit (Rs.) *</label><input class="fc" type="number" id="puCostPerUnit" required min="0" step="0.01" placeholder="0.00"></div>
+            </div>
+            <div class="computed-total">
+                <span>Total Cost</span>
+                <strong id="purchTotalDisplay">Rs. 0.00</strong>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="puNotes" placeholder="Optional notes"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('purchaseModal')">Cancel</button>
+                <button type="submit" class="btn btn-yellow">Save Purchase</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ DELETE CONFIRM MODAL ══════════ -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="del-icon"><i class="fas fa-trash"></i></div>
+        <h3>Confirm Delete</h3>
+        <p id="deleteMsg">Are you sure you want to delete this record? This action cannot be undone.</p>
+        <div class="form-actions">
+            <button class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const API = '/lubricants';
+
+    /* ── state ── */
+    let products     = [];
+    let editingId    = { product: null, sale: null, purchase: null };
+    let deleteTarget = { url: null, onSuccess: null };
+    let salesPage    = 1, salesTotal = 0;
+    let purchPage    = 1, purchTotal = 0;
+    const PER_PAGE   = 15;
+
+    /* ── flatpickr ── */
+    flatpickr('#sDate',    { dateFormat: 'Y-m-d', defaultDate: 'today' });
+    flatpickr('#puDate',   { dateFormat: 'Y-m-d', defaultDate: 'today' });
+    flatpickr('#salesStart', { dateFormat: 'Y-m-d' });
+    flatpickr('#salesEnd',   { dateFormat: 'Y-m-d' });
+    flatpickr('#purchStart', { dateFormat: 'Y-m-d' });
+    flatpickr('#purchEnd',   { dateFormat: 'Y-m-d' });
+
+    /* ════════════════════════════════
+       TAB SWITCHING
+    ════════════════════════════════ */
+    window.switchTab = function (tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        document.getElementById('panel-' + tab).classList.add('active');
+        if (tab === 'sales')     loadSales();
+        if (tab === 'purchases') loadPurchases();
+        if (tab === 'alerts')    buildAlertsGrid();
+    };
+
+    /* ════════════════════════════════
+       SUMMARY / KPIs
+    ════════════════════════════════ */
+    async function loadSummary() {
+        const data = await apiFetch(`${API}/summary`);
+        document.getElementById('kpiProducts').textContent  = data.total_products;
+        document.getElementById('kpiSales').textContent     = 'Rs.' + fmt(data.total_sales_revenue);
+        document.getElementById('kpiProfit').textContent    = 'Rs.' + fmt(data.gross_profit);
+        document.getElementById('kpiLowStock').textContent  = data.low_stock_count;
+
+        /* alert badge */
+        const n = data.low_stock_count;
+        document.getElementById('alertBadge').textContent = n;
+        if (n > 0) {
+            document.getElementById('lowStockBanner').classList.add('show');
+            document.getElementById('lowStockBannerText').textContent =
+                `${n} product${n > 1 ? 's are' : ' is'} running low on stock.`;
+            document.getElementById('headerAlertBadge').style.display = 'flex';
+            document.getElementById('headerAlertBadge').textContent = n;
+        }
+    }
+
+    /* ════════════════════════════════
+       PRODUCTS
+    ════════════════════════════════ */
+    async function loadProducts() {
+        const cat = document.getElementById('productCategoryFilter').value;
+        const url = cat ? `${API}/products?category=${encodeURIComponent(cat)}` : `${API}/products`;
+        products  = await apiFetch(url);
+        renderProducts(products);
+        populateProductDropdowns();
+    }
+
+    function renderProducts(list) {
+        const tbody = document.getElementById('productTableBody');
+        if (!list.length) { tbody.innerHTML = emptyRow(8, 'fa-boxes-stacked', 'No products found. Add your first lubricant product.'); return; }
+        tbody.innerHTML = list.map(p => {
+            const pct     = Math.min(100, (p.stock_qty / (p.low_stock_threshold * 3)) * 100);
+            const barColor = p.is_low_stock
+                ? (p.stock_qty === 0 ? 'var(--danger)' : 'var(--accent-dark)')
+                : 'var(--primary)';
+            const stockPill = p.stock_qty === 0
+                ? `<span class="pill pill-red">Out of Stock</span>`
+                : p.is_low_stock
+                ? `<span class="pill pill-orange">Low Stock</span>`
+                : `<span class="pill pill-green">In Stock</span>`;
+            return `<tr>
+                <td>
+                    <div style="font-weight:600;color:var(--text-dark);">${esc(p.name)}</div>
+                    <div style="font-size:0.75rem;color:var(--text-light);">${esc(p.brand)}</div>
+                </td>
+                <td><span class="pill pill-gray">${esc(p.category)}</span></td>
+                <td style="font-weight:500;">${esc(p.grade)}</td>
+                <td>${esc(p.unit_type)}</td>
+                <td>
+                    <div class="stock-bar-wrap">
+                        <div class="stock-bar"><div class="stock-bar-fill" style="width:${pct}%;background:${barColor};"></div></div>
+                        <span style="font-size:0.8rem;font-weight:600;white-space:nowrap;">${p.stock_qty} ${esc(p.unit_type)}</span>
+                    </div>
+                    <div style="margin-top:4px;">${stockPill}</div>
+                </td>
+                <td style="font-weight:600;color:var(--primary);">Rs.${fmt(p.selling_price)}</td>
+                <td style="color:var(--text-mid);">Rs.${fmt(p.cost_price)}</td>
+                <td>
+                    <div style="display:flex;gap:5px;">
+                        <button class="btn-icon" title="Edit" onclick="openEditProduct(${p.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon del" title="Delete" onclick="confirmDelete('${API}/products/delete/${p.id}','Delete product &quot;${esc(p.name)}&quot;? This will fail if it has transaction history.',loadProducts)"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    function populateProductDropdowns() {
+        const opts = `<option value="">Select product</option>` +
+            products.map(p => `<option value="${p.id}" data-price="${p.selling_price}" data-unit="${esc(p.unit_type)}">${esc(p.name)} (${esc(p.brand)}) — Stock: ${p.stock_qty} ${esc(p.unit_type)}</option>`).join('');
+        document.getElementById('sProduct').innerHTML  = opts;
+        document.getElementById('puProduct').innerHTML = opts;
+    }
+
+    /* product form */
+    document.getElementById('productCategoryFilter').addEventListener('change', loadProducts);
+
+    document.getElementById('addProductBtn').addEventListener('click', () => {
+        editingId.product = null;
+        document.getElementById('productModalTitle').textContent = 'Add Product';
+        document.getElementById('productSubmitBtn').textContent  = 'Save Product';
+        document.getElementById('productForm').reset();
+        document.getElementById('stockQtyField').style.display = 'block';
+        openModal('productModal');
+    });
+
+    window.openEditProduct = function (id) {
+        const p = products.find(x => x.id === id);
+        if (!p) return;
+        editingId.product = id;
+        document.getElementById('productModalTitle').textContent = 'Edit Product';
+        document.getElementById('productSubmitBtn').textContent  = 'Update Product';
+        document.getElementById('stockQtyField').style.display  = 'none'; // stock changes via sales/purchases
+        document.getElementById('pName').value        = p.name;
+        document.getElementById('pBrand').value       = p.brand;
+        document.getElementById('pGrade').value       = p.grade;
+        document.getElementById('pCategory').value    = p.category;
+        document.getElementById('pUnitType').value    = p.unit_type;
+        document.getElementById('pThreshold').value   = p.low_stock_threshold;
+        document.getElementById('pSellingPrice').value = p.selling_price;
+        document.getElementById('pCostPrice').value   = p.cost_price;
+        document.getElementById('pDescription').value = p.description || '';
+        openModal('productModal');
+    };
+
+    document.getElementById('productForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const body = {
+            name: document.getElementById('pName').value,
+            brand: document.getElementById('pBrand').value,
+            grade: document.getElementById('pGrade').value,
+            category: document.getElementById('pCategory').value,
+            unit_type: document.getElementById('pUnitType').value,
+            low_stock_threshold: document.getElementById('pThreshold').value,
+            selling_price: document.getElementById('pSellingPrice').value,
+            cost_price: document.getElementById('pCostPrice').value,
+            stock_qty: document.getElementById('pStockQty').value || 0,
+            description: document.getElementById('pDescription').value,
+        };
+        const url    = editingId.product ? `${API}/products/update/${editingId.product}` : `${API}/products/add`;
+        const method = editingId.product ? 'PUT' : 'POST';
+        await apiPost(url, body, method);
+        closeModal('productModal');
+        loadProducts();
+        loadSummary();
+    });
+
+    /* ════════════════════════════════
+       SALES
+    ════════════════════════════════ */
+    async function loadSales(page = 1) {
+        salesPage = page;
+        const start = document.getElementById('salesStart').value;
+        const end   = document.getElementById('salesEnd').value;
+        const p = new URLSearchParams();
+        if (start) p.append('start_date', start);
+        if (end)   p.append('end_date',   end);
+        const all = await apiFetch(`${API}/sales?${p}`);
+        salesTotal = all.length;
+        const slice = paginate(all, page, PER_PAGE);
+        renderSales(slice);
+        renderPagination('sales', salesTotal, page);
+    }
+
+    function renderSales(list) {
+        const tbody = document.getElementById('salesTableBody');
+        if (!list.length) { tbody.innerHTML = emptyRow(8, 'fa-receipt', 'No sales recorded yet.'); return; }
+        tbody.innerHTML = list.map(s => `<tr>
+            <td>${s.date}</td>
+            <td>
+                <div style="font-weight:600;">${esc(s.lubricant_name)}</div>
+                <div style="font-size:0.75rem;color:var(--text-light);">${esc(s.brand)}</div>
+            </td>
+            <td>${s.customer_name || '<span style="color:var(--text-light);">Walk-in</span>'}</td>
+            <td style="font-weight:600;">${s.quantity} ${esc(s.unit_type)}</td>
+            <td>Rs.${fmt(s.unit_price)}</td>
+            <td style="font-weight:700;color:var(--primary);">Rs.${fmt(s.total_amount)}</td>
+            <td><span class="pill pill-green">${esc(s.payment_method)}</span></td>
+            <td>
+                <div style="display:flex;gap:5px;">
+                    <button class="btn-icon" title="Edit" onclick="openEditSale(${JSON.stringify(s).replace(/"/g,'&quot;')})"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon del" title="Delete" onclick="confirmDelete('${API}/sales/delete/${s.id}','Delete this sale? Stock will be restored.',()=>loadSales(${salesPage}))"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>`).join('');
+    }
+
+    document.getElementById('addSaleBtn').addEventListener('click', () => {
+        editingId.sale = null;
+        document.getElementById('saleModalTitle').textContent = 'Record Sale';
+        document.getElementById('saleForm').reset();
+        document.getElementById('saleTotalDisplay').textContent = 'Rs. 0.00';
+        openModal('saleModal');
+    });
+
+    /* auto-fill unit price when product selected */
+    document.getElementById('sProduct').addEventListener('change', function () {
+        const opt = this.options[this.selectedIndex];
+        if (opt.dataset.price) document.getElementById('sUnitPrice').value = opt.dataset.price;
+        updateSaleTotal();
+    });
+    document.getElementById('sQty').addEventListener('input',       updateSaleTotal);
+    document.getElementById('sUnitPrice').addEventListener('input', updateSaleTotal);
+
+    function updateSaleTotal() {
+        const qty   = parseFloat(document.getElementById('sQty').value)       || 0;
+        const price = parseFloat(document.getElementById('sUnitPrice').value) || 0;
+        document.getElementById('saleTotalDisplay').textContent = 'Rs. ' + fmt(qty * price);
+    }
+
+    window.openEditSale = function (s) {
+        editingId.sale = s.id;
+        document.getElementById('saleModalTitle').textContent = 'Edit Sale';
+        document.getElementById('sDate').value      = s.date;
+        document.getElementById('sProduct').value   = s.lubricant_id;
+        document.getElementById('sCustomer').value  = s.customer_name || '';
+        document.getElementById('sPayment').value   = s.payment_method;
+        document.getElementById('sQty').value       = s.quantity;
+        document.getElementById('sUnitPrice').value = s.unit_price;
+        document.getElementById('sNotes').value     = s.notes || '';
+        updateSaleTotal();
+        openModal('saleModal');
+    };
+
+    document.getElementById('saleForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const body = {
+            date:           document.getElementById('sDate').value,
+            lubricant_id:   document.getElementById('sProduct').value,
+            customer_name:  document.getElementById('sCustomer').value,
+            payment_method: document.getElementById('sPayment').value,
+            quantity:       document.getElementById('sQty').value,
+            unit_price:     document.getElementById('sUnitPrice').value,
+            notes:          document.getElementById('sNotes').value,
+        };
+        const url    = editingId.sale ? `${API}/sales/update/${editingId.sale}` : `${API}/sales/add`;
+        const method = editingId.sale ? 'PUT' : 'POST';
+        const res    = await apiPost(url, body, method);
+        if (res) { closeModal('saleModal'); loadSales(salesPage); loadProducts(); loadSummary(); }
+    });
+
+    document.getElementById('salesFilterBtn').addEventListener('click', () => loadSales(1));
+
+    /* ════════════════════════════════
+       PURCHASES
+    ════════════════════════════════ */
+    async function loadPurchases(page = 1) {
+        purchPage = page;
+        const start = document.getElementById('purchStart').value;
+        const end   = document.getElementById('purchEnd').value;
+        const p = new URLSearchParams();
+        if (start) p.append('start_date', start);
+        if (end)   p.append('end_date',   end);
+        const all = await apiFetch(`${API}/purchases?${p}`);
+        purchTotal = all.length;
+        const slice = paginate(all, page, PER_PAGE);
+        renderPurchases(slice);
+        renderPagination('purch', purchTotal, page);
+    }
+
+    function renderPurchases(list) {
+        const tbody = document.getElementById('purchTableBody');
+        if (!list.length) { tbody.innerHTML = emptyRow(8, 'fa-truck-ramp-box', 'No purchases recorded yet.'); return; }
+        tbody.innerHTML = list.map(p => `<tr>
+            <td>${p.date}</td>
+            <td>
+                <div style="font-weight:600;">${esc(p.lubricant_name)}</div>
+                <div style="font-size:0.75rem;color:var(--text-light);">${esc(p.brand)}</div>
+            </td>
+            <td>${esc(p.supplier_name)}</td>
+            <td style="font-weight:600;">${p.quantity} ${esc(p.unit_type)}</td>
+            <td>Rs.${fmt(p.cost_per_unit)}</td>
+            <td style="font-weight:700;color:var(--warning);">Rs.${fmt(p.total_cost)}</td>
+            <td>${p.invoice_ref ? `<span style="font-size:0.78rem;color:var(--text-light);">${esc(p.invoice_ref)}</span>` : '—'}</td>
+            <td>
+                <div style="display:flex;gap:5px;">
+                    <button class="btn-icon" title="Edit" onclick="openEditPurchase(${JSON.stringify(p).replace(/"/g,'&quot;')})"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon del" title="Delete" onclick="confirmDelete('${API}/purchases/delete/${p.id}','Delete this purchase? Stock will be adjusted.',()=>loadPurchases(${purchPage}))"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>`).join('');
+    }
+
+    document.getElementById('addPurchaseBtn').addEventListener('click', () => {
+        editingId.purchase = null;
+        document.getElementById('purchModalTitle').textContent = 'Record Purchase';
+        document.getElementById('purchaseForm').reset();
+        document.getElementById('purchTotalDisplay').textContent = 'Rs. 0.00';
+        openModal('purchaseModal');
+    });
+
+    document.getElementById('puQty').addEventListener('input',        updatePurchTotal);
+    document.getElementById('puCostPerUnit').addEventListener('input', updatePurchTotal);
+
+    function updatePurchTotal() {
+        const qty  = parseFloat(document.getElementById('puQty').value)        || 0;
+        const cost = parseFloat(document.getElementById('puCostPerUnit').value) || 0;
+        document.getElementById('purchTotalDisplay').textContent = 'Rs. ' + fmt(qty * cost);
+    }
+
+    window.openEditPurchase = function (p) {
+        editingId.purchase = p.id;
+        document.getElementById('purchModalTitle').textContent = 'Edit Purchase';
+        document.getElementById('puDate').value       = p.date;
+        document.getElementById('puProduct').value    = p.lubricant_id;
+        document.getElementById('puSupplier').value   = p.supplier_name;
+        document.getElementById('puInvoice').value    = p.invoice_ref || '';
+        document.getElementById('puQty').value        = p.quantity;
+        document.getElementById('puCostPerUnit').value = p.cost_per_unit;
+        document.getElementById('puNotes').value      = p.notes || '';
+        updatePurchTotal();
+        openModal('purchaseModal');
+    };
+
+    document.getElementById('purchaseForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const body = {
+            date:          document.getElementById('puDate').value,
+            lubricant_id:  document.getElementById('puProduct').value,
+            supplier_name: document.getElementById('puSupplier').value,
+            invoice_ref:   document.getElementById('puInvoice').value,
+            quantity:      document.getElementById('puQty').value,
+            cost_per_unit: document.getElementById('puCostPerUnit').value,
+            notes:         document.getElementById('puNotes').value,
+        };
+        const url    = editingId.purchase ? `${API}/purchases/update/${editingId.purchase}` : `${API}/purchases/add`;
+        const method = editingId.purchase ? 'PUT' : 'POST';
+        const res    = await apiPost(url, body, method);
+        if (res) { closeModal('purchaseModal'); loadPurchases(purchPage); loadProducts(); loadSummary(); }
+    });
+
+    document.getElementById('purchFilterBtn').addEventListener('click', () => loadPurchases(1));
+
+    /* ════════════════════════════════
+       LOW STOCK ALERTS GRID
+    ════════════════════════════════ */
+    function buildAlertsGrid() {
+        const low   = products.filter(p => p.is_low_stock);
+        const grid  = document.getElementById('alertsGrid');
+        if (!low.length) {
+            grid.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle" style="color:var(--primary);"></i><p>No low stock items – all good!</p></div>`;
+            return;
+        }
+        grid.innerHTML = low.map(p => {
+            const pct      = Math.min(100, (p.stock_qty / p.low_stock_threshold) * 100);
+            const severity = p.stock_qty === 0 ? 'Out of Stock' : 'Low Stock';
+            const sevColor = p.stock_qty === 0 ? 'var(--danger)' : 'var(--accent-dark)';
+            return `<div style="background:#fff;border:1.5px solid ${sevColor};border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                    <div>
+                        <div style="font-weight:700;color:var(--text-dark);">${esc(p.name)}</div>
+                        <div style="font-size:0.75rem;color:var(--text-light);">${esc(p.brand)} · ${esc(p.grade)}</div>
+                    </div>
+                    <span class="pill" style="background:${p.stock_qty===0?'var(--danger-bg)':'var(--accent-bg)'};color:${sevColor};">${severity}</span>
+                </div>
+                <div style="margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-light);margin-bottom:4px;">
+                        <span>Stock: <strong style="color:var(--text-dark);">${p.stock_qty} ${esc(p.unit_type)}</strong></span>
+                        <span>Threshold: ${p.low_stock_threshold} ${esc(p.unit_type)}</span>
+                    </div>
+                    <div class="stock-bar" style="height:8px;">
+                        <div class="stock-bar-fill" style="width:${pct}%;background:${sevColor};"></div>
+                    </div>
+                </div>
+                <button class="btn btn-yellow" style="width:100%;justify-content:center;font-size:0.82rem;padding:7px;" onclick="quickRestock(${p.id})">
+                    <i class="fas fa-truck-ramp-box"></i> Quick Restock
+                </button>
+            </div>`;
+        }).join('');
+    }
+
+    window.quickRestock = function (id) {
+        document.getElementById('puProduct').value = id;
+        openModal('purchaseModal');
+        switchTab('purchases');
+    };
+
+    /* ════════════════════════════════
+       DELETE CONFIRM
+    ════════════════════════════════ */
+    window.confirmDelete = function (url, msg, onSuccess) {
+        document.getElementById('deleteMsg').innerHTML = msg;
+        deleteTarget = { url, onSuccess };
+        openModal('deleteModal');
+    };
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        const r = await fetch(deleteTarget.url, { method: 'DELETE' });
+        const d = await r.json();
+        if (!r.ok) { alert(d.message || 'Delete failed'); return; }
+        closeModal('deleteModal');
+        if (deleteTarget.onSuccess) deleteTarget.onSuccess();
+        loadSummary();
+    });
+
+    /* ════════════════════════════════
+       EXPORT (CSV)
+    ════════════════════════════════ */
+    document.getElementById('exportBtn').addEventListener('click', async () => {
+        const data = await apiFetch(`${API}/products`);
+        const rows = [['ID','Name','Brand','Grade','Category','Unit','Stock','Selling Price','Cost Price','Low Stock Threshold']];
+        data.forEach(p => rows.push([p.id, p.name, p.brand, p.grade, p.category, p.unit_type, p.stock_qty, p.selling_price, p.cost_price, p.low_stock_threshold]));
+        downloadCSV(rows, 'lubricants_products.csv');
+    });
+
+    function downloadCSV(rows, filename) {
+        const csv  = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a'); a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    /* ════════════════════════════════
+       PAGINATION
+    ════════════════════════════════ */
+    function renderPagination(prefix, total, current) {
+        const pages = Math.ceil(total / PER_PAGE);
+        const info  = document.getElementById(prefix + 'PagInfo');
+        const ctrls = document.getElementById(prefix + 'PagControls');
+        const from  = (current - 1) * PER_PAGE + 1;
+        const to    = Math.min(current * PER_PAGE, total);
+        info.textContent = total ? `Showing ${from}–${to} of ${total}` : 'No records';
+        ctrls.innerHTML  = '';
+        if (pages <= 1) return;
+        const loadFn = prefix === 'sales' ? loadSales : loadPurchases;
+        const addBtn = (label, pg, disabled, active) => {
+            const b = document.createElement('button');
+            b.className = 'page-btn' + (active ? ' active' : '');
+            b.innerHTML = label; b.disabled = disabled;
+            b.addEventListener('click', () => loadFn(pg));
+            ctrls.appendChild(b);
+        };
+        addBtn('<i class="fas fa-chevron-left"></i>', current - 1, current === 1, false);
+        for (let i = 1; i <= pages; i++) addBtn(i, i, false, i === current);
+        addBtn('<i class="fas fa-chevron-right"></i>', current + 1, current === pages, false);
+    }
+
+    function paginate(arr, page, perPage) {
+        return arr.slice((page - 1) * perPage, page * perPage);
+    }
+
+    /* ════════════════════════════════
+       MODAL HELPERS
+    ════════════════════════════════ */
+    window.openModal  = m => { document.getElementById(m).classList.add('show');    document.body.style.overflow = 'hidden'; };
+    window.closeModal = m => { document.getElementById(m).classList.remove('show'); document.body.style.overflow = 'auto'; };
+
+    window.addEventListener('click', e => {
+        ['productModal','saleModal','purchaseModal','deleteModal'].forEach(id => {
+            if (e.target === document.getElementById(id)) closeModal(id);
+        });
+    });
+
+    /* ════════════════════════════════
+       API HELPERS
+    ════════════════════════════════ */
+    async function apiFetch(url) {
+        try { const r = await fetch(url); return await r.json(); }
+        catch { return []; }
+    }
+
+    async function apiPost(url, body, method = 'POST') {
+        try {
+            const r = await fetch(url, {
+                method, headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const d = await r.json();
+            if (!r.ok) { alert(d.message || 'Operation failed'); return null; }
+            return d;
+        } catch { alert('Network error'); return null; }
+    }
+
+    /* ════════════════════════════════
+       UTILITY
+    ════════════════════════════════ */
+    function fmt(n)   { return parseFloat(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function esc(s)   { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function emptyRow(cols, icon, msg) {
+        return `<tr><td colspan="${cols}"><div class="empty-state"><i class="fas ${icon}"></i><p>${msg}</p></div></td></tr>`;
+    }
+
+    /* ════════════════════════════════
+       INIT
+    ════════════════════════════════ */
+    loadProducts();
+    loadSummary();
+});
+</script>
+</body>
+</html>

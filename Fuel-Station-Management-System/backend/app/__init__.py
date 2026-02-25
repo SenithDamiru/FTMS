@@ -25,6 +25,9 @@ def create_app():
     from .routes.ml_routes import ml_bp
     app.register_blueprint(ml_bp)
 
+    from .routes.lubricants_routes import lubricants_bp
+    app.register_blueprint(lubricants_bp)
+
     from flask import render_template
     @app.route('/')
     def index():
