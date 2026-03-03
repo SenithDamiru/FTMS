@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the code
+      # 1️⃣ Checkout the repo
       - uses: actions/checkout@v4
 
       # 2️⃣ Set up Python 3.11
@@ -20,14 +20,23 @@ jobs:
         with:
           python-version: "3.11"
 
-      # 3️⃣ Install dependencies
+      # 3️⃣ Cache pip packages
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('Fuel-Station-Management-System/backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # 4️⃣ Install dependencies
       - name: Install dependencies
+        working-directory: Fuel-Station-Management-System/backend
         run: |
-          cd Fuel-Station-Management-System/backend
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      # 4️⃣ Run the Flask app
-      - name: Run Flask app
+      # 5️⃣ Check Flask app loads (no server start)
+      - name: Check Flask app can load
         working-directory: Fuel-Station-Management-System/backend
-        run: python main.py
+        run: python -c "from main import app; print('Flask app loaded successfully')"
