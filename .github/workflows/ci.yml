@@ -14,8 +14,8 @@ jobs:
       # 1️⃣ Checkout the code
       - uses: actions/checkout@v4
 
-      # 2️⃣ Set up Python
-      - name: Set up Python 3.11
+      # 2️⃣ Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -29,4 +29,5 @@ jobs:
 
       # 4️⃣ Run the Flask app
       - name: Run Flask app
-        run: python Fuel-Station-Management-System/backend/main.py
+        working-directory: Fuel-Station-Management-System/backend
+        run: python main.py
