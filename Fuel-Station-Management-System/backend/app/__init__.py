@@ -28,6 +28,9 @@ def create_app():
     from .routes.lubricants_routes import lubricants_bp
     app.register_blueprint(lubricants_bp)
 
+    from .routes.suppliers_routes import suppliers_bp
+    app.register_blueprint(suppliers_bp)
+
     from flask import render_template
     @app.route('/')
     def index():

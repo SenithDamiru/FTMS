@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suppliers - FuelSys Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary:       #1a7a4a;
+            --primary-light: #22a862;
+            --primary-dark:  #145c38;
+            --primary-bg:    #e6f4ed;
+            --accent:        #f5c518;
+            --accent-dark:   #d4a800;
+            --accent-bg:     #fffbe6;
+            --danger:        #c62828;
+            --danger-bg:     #ffebee;
+            --warning:       #c17b00;
+            --warning-bg:    #fff8e1;
+            --info:          #1565c0;
+            --info-bg:       #e3f2fd;
+            --border:        #dee2e6;
+            --text-dark:     #0d1f15;
+            --text-mid:      #3d5a47;
+            --text-light:    #6b8070;
+            --card-bg:       #ffffff;
+            --page-bg:       #f2f7f4;
+            --shadow-sm:     0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md:     0 4px 16px rgba(0,0,0,0.1);
+            --radius:        10px;
+        }
+
+        /* ── KPI row ── */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px,1fr));
+            gap: 14px; margin-bottom: 22px;
+        }
+        .kpi-card {
+            background: var(--card-bg); border-radius: var(--radius);
+            padding: 16px 18px; border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex; align-items: center; gap: 13px;
+            animation: fadeUp 0.4s ease both;
+        }
+        .kpi-card:nth-child(2){animation-delay:.07s}
+        .kpi-card:nth-child(3){animation-delay:.14s}
+        .kpi-card:nth-child(4){animation-delay:.21s}
+        .kpi-card:nth-child(5){animation-delay:.28s}
+        .kpi-icon {
+            width:42px;height:42px;border-radius:9px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.05rem;flex-shrink:0;
+        }
+        .kpi-icon.green  {background:var(--primary-bg);color:var(--primary);}
+        .kpi-icon.yellow {background:var(--accent-bg); color:var(--accent-dark);}
+        .kpi-icon.red    {background:var(--danger-bg); color:var(--danger);}
+        .kpi-icon.orange {background:var(--warning-bg);color:var(--warning);}
+        .kpi-icon.blue   {background:var(--info-bg);   color:var(--info);}
+        .kpi-info .lbl {
+            font-size:0.72rem;color:var(--text-light);font-weight:500;
+            text-transform:uppercase;letter-spacing:0.4px;
+        }
+        .kpi-info .val {
+            font-size:1.25rem;font-weight:800;
+            color:var(--text-dark);line-height:1.2;margin-top:2px;
+        }
+
+        /* ── Overdue alert bar ── */
+        .overdue-bar {
+            display:none;align-items:center;gap:10px;
+            background:var(--danger-bg);border:1px solid #ffcdd2;
+            border-left:4px solid var(--danger);
+            border-radius:8px;padding:11px 16px;margin-bottom:18px;
+            font-size:0.86rem;font-weight:600;color:var(--danger);
+            animation:fadeUp 0.3s ease;
+        }
+        .overdue-bar.show{display:flex;}
+        .overdue-bar a{margin-left:auto;color:var(--danger);cursor:pointer;text-decoration:underline;font-size:0.8rem;}
+
+        /* ── Tab bar ── */
+        .tab-bar {
+            display:flex;gap:4px;
+            background:var(--card-bg);border:1px solid var(--border);
+            border-radius:var(--radius);padding:5px;
+            margin-bottom:20px;width:fit-content;
+            box-shadow:var(--shadow-sm);
+        }
+        .tab-btn {
+            padding:8px 18px;border-radius:7px;border:none;background:none;
+            font-size:0.875rem;font-weight:600;color:var(--text-light);
+            cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:7px;
+            font-family:inherit;
+        }
+        .tab-btn:hover {background:var(--primary-bg);color:var(--primary);}
+        .tab-btn.active{background:var(--primary);color:#fff;}
+        .tab-panel{display:none;}
+        .tab-panel.active{display:block;}
+
+        /* ── Section card ── */
+        .sc {
+            background:var(--card-bg);border-radius:var(--radius);
+            border:1px solid var(--border);box-shadow:var(--shadow-sm);overflow:hidden;
+        }
+        .sc-header {
+            display:flex;align-items:center;justify-content:space-between;
+            padding:15px 20px;border-bottom:1px solid var(--border);
+            background:linear-gradient(135deg,#f4faf7 0%,#fff 100%);
+            flex-wrap:wrap;gap:10px;
+        }
+        .sc-header-left{display:flex;align-items:center;gap:10px;}
+        .sc-icon {
+            width:34px;height:34px;background:var(--primary-bg);color:var(--primary);
+            border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.88rem;
+        }
+        .sc-icon.yellow{background:var(--accent-bg);color:var(--accent-dark);}
+        .sc-icon.red   {background:var(--danger-bg);color:var(--danger);}
+        .sc-title  {font-size:0.98rem;font-weight:700;color:var(--text-dark);}
+        .sc-sub    {font-size:0.75rem;color:var(--text-light);margin-top:1px;}
+        .sc-body   {padding:20px;}
+
+        /* ── Supplier cards grid (directory tab) ── */
+        .supplier-grid {
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+            gap:14px;
+        }
+        .sup-card {
+            background:var(--card-bg);border:1.5px solid var(--border);
+            border-radius:var(--radius);padding:18px;
+            transition:all 0.22s;animation:fadeUp 0.4s ease both;
+        }
+        .sup-card:hover{box-shadow:var(--shadow-md);border-color:var(--primary);transform:translateY(-2px);}
+        .sup-card.inactive{opacity:0.55;}
+        .sup-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+        .sup-avatar {
+            width:44px;height:44px;border-radius:10px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.1rem;font-weight:800;color:#fff;flex-shrink:0;
+            background:linear-gradient(135deg,var(--primary),var(--primary-light));
+        }
+        .sup-name  {font-size:0.95rem;font-weight:700;color:var(--text-dark);margin-bottom:2px;}
+        .sup-type  {font-size:0.72rem;}
+        .sup-meta  {display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+        .sup-meta-row{display:flex;align-items:center;gap:7px;font-size:0.8rem;color:var(--text-mid);}
+        .sup-meta-row i{color:var(--primary);width:14px;text-align:center;font-size:0.75rem;}
+        .sup-balance {
+            background:var(--page-bg);border-radius:7px;padding:10px 12px;
+            display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;
+        }
+        .sup-balance .bl-lbl{font-size:0.75rem;color:var(--text-light);font-weight:500;}
+        .sup-balance .bl-val{font-size:1rem;font-weight:800;}
+        .sup-balance .bl-val.owed {color:var(--danger);}
+        .sup-balance .bl-val.clear{color:var(--primary);}
+        .sup-actions{display:flex;gap:6px;}
+
+        /* ── Filters bar ── */
+        .f-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+        .f-lbl{font-size:0.82rem;color:var(--text-light);white-space:nowrap;}
+        .f-sel,.f-inp,.f-date{
+            padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;
+            font-size:0.85rem;color:var(--text-dark);background:#fff;
+            outline:none;transition:border-color 0.2s;font-family:inherit;
+        }
+        .f-sel:focus,.f-inp:focus,.f-date:focus{border-color:var(--primary);}
+        .f-date{width:130px;}
+
+        /* ── Data table ── */
+        .dt{width:100%;border-collapse:collapse;font-size:0.85rem;}
+        .dt th{
+            background:#f4faf7;color:var(--text-mid);font-weight:600;
+            padding:10px 13px;text-align:left;border-bottom:2px solid var(--border);
+            font-size:0.76rem;text-transform:uppercase;letter-spacing:0.4px;
+        }
+        .dt td{padding:11px 13px;border-bottom:1px solid #f0f0f0;color:var(--text-dark);vertical-align:middle;}
+        .dt tr:last-child td{border-bottom:none;}
+        .dt tr:hover td{background:#f8fcfa;}
+
+        /* ── Pill badges ── */
+        .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:600;}
+        .pill-green {background:var(--primary-bg);color:var(--primary);}
+        .pill-yellow{background:var(--accent-bg); color:var(--accent-dark);}
+        .pill-red   {background:var(--danger-bg); color:var(--danger);}
+        .pill-orange{background:var(--warning-bg);color:var(--warning);}
+        .pill-blue  {background:var(--info-bg);   color:var(--info);}
+        .pill-gray  {background:#f0f0f0;           color:#555;}
+
+        /* ── Buttons ── */
+        .btn{
+            padding:8px 16px;border-radius:7px;font-weight:600;
+            cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+            font-size:0.85rem;border:1.5px solid transparent;transition:all 0.2s;
+            font-family:inherit;
+        }
+        .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .btn-primary:hover{background:var(--primary-light);border-color:var(--primary-light);}
+        .btn-yellow{background:var(--accent);color:var(--text-dark);border-color:var(--accent);}
+        .btn-yellow:hover{background:var(--accent-dark);border-color:var(--accent-dark);}
+        .btn-outline{background:#fff;border-color:var(--border);color:var(--text-mid);}
+        .btn-outline:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-bg);}
+        .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger);}
+        .btn-sm{padding:5px 11px;font-size:0.78rem;}
+        .btn-icon{
+            width:30px;height:30px;border-radius:6px;
+            display:inline-flex;align-items:center;justify-content:center;
+            background:none;border:1.5px solid var(--border);color:var(--text-light);
+            cursor:pointer;transition:all 0.2s;font-size:0.78rem;
+        }
+        .btn-icon:hover    {background:var(--primary-bg);color:var(--primary);border-color:var(--primary);}
+        .btn-icon.del:hover{background:var(--danger-bg); color:var(--danger); border-color:var(--danger);}
+
+        /* ── Pagination ── */
+        .pag{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+        .pag-info{font-size:0.8rem;color:var(--text-light);}
+        .pag-ctrl{display:flex;gap:5px;}
+        .pag-btn{
+            width:30px;height:30px;border-radius:6px;
+            display:inline-flex;align-items:center;justify-content:center;
+            background:#fff;border:1.5px solid var(--border);color:var(--text-mid);
+            cursor:pointer;font-size:0.78rem;
+        }
+        .pag-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+        .pag-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+        /* ── Empty / loading ── */
+        .empty{text-align:center;padding:40px 20px;color:var(--text-light);}
+        .empty i{font-size:2.8rem;margin-bottom:12px;opacity:0.3;display:block;}
+        .empty p{font-size:0.88rem;}
+
+        /* ── Progress bar ── */
+        .prog-wrap{display:flex;align-items:center;gap:8px;}
+        .prog-bar{flex:1;height:6px;background:var(--border);border-radius:99px;overflow:hidden;min-width:60px;}
+        .prog-fill{height:100%;border-radius:99px;transition:width 0.5s ease;}
+
+        /* ═══════════════════════════════
+           LEDGER PANEL (side drawer style, shown inside page)
+        ═══════════════════════════════ */
+        .ledger-overlay{
+            display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:500;
+        }
+        .ledger-overlay.show{display:block;}
+        .ledger-drawer{
+            position:fixed;top:0;right:0;bottom:0;width:680px;max-width:96vw;
+            background:#fff;z-index:501;
+            box-shadow:-8px 0 30px rgba(0,0,0,0.15);
+            display:flex;flex-direction:column;
+            transform:translateX(100%);
+            transition:transform 0.3s ease;
+            overflow:hidden;
+        }
+        .ledger-drawer.open{transform:translateX(0);}
+        .ledger-head{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:18px 22px;border-bottom:1px solid var(--border);
+            background:linear-gradient(135deg,var(--primary),var(--primary-light));
+            color:#fff;flex-shrink:0;
+        }
+        .ledger-head h3{font-size:1.05rem;font-weight:800;margin:0;}
+        .ledger-head p {font-size:0.78rem;opacity:0.8;margin:2px 0 0;}
+        .ledger-close{background:none;border:none;color:#fff;font-size:1.6rem;cursor:pointer;line-height:1;}
+        .ledger-body{flex:1;overflow-y:auto;padding:20px;}
+
+        .ledger-kpi-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+        .ledger-kpi{
+            background:var(--page-bg);border:1px solid var(--border);
+            border-radius:8px;padding:13px;text-align:center;
+        }
+        .ledger-kpi .lk-lbl{font-size:0.7rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.3px;}
+        .ledger-kpi .lk-val{font-size:1.1rem;font-weight:800;color:var(--text-dark);margin-top:3px;}
+        .ledger-section-title{
+            font-size:0.88rem;font-weight:700;color:var(--text-dark);
+            margin:20px 0 10px;display:flex;align-items:center;gap:7px;
+        }
+        .ledger-section-title i{color:var(--primary);}
+
+        /* ═══════════════════════════════
+           MODALS
+        ═══════════════════════════════ */
+        .modal{
+            display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);
+            justify-content:center;align-items:center;z-index:600;padding:12px;overflow-y:auto;
+        }
+        .modal.show{display:flex;}
+
+        @keyframes slideDown{
+            from{opacity:0;transform:translateY(-16px);}
+            to  {opacity:1;transform:translateY(0);}
+        }
+
+        .mc{
+            background:#fff;border-radius:12px;
+            width:500px;max-width:96vw;padding:26px 28px;
+            box-shadow:0 12px 40px rgba(0,0,0,0.2);
+            position:relative;animation:slideDown 0.28s ease forwards;
+        }
+        .mc.wide{width:600px;}
+        .mc.narrow{width:400px;}
+
+        .m-title{font-size:1.05rem;font-weight:800;color:var(--text-dark);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+        .m-title i{color:var(--primary);}
+        .m-close{position:absolute;top:13px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#999;transition:color 0.2s;line-height:1;}
+        .m-close:hover{color:#333;}
+
+        .fg{margin-bottom:15px;}
+        .fg label{display:block;font-size:0.82rem;font-weight:600;color:var(--text-mid);margin-bottom:5px;}
+        .fg label i{color:var(--primary);margin-right:4px;font-size:0.76rem;}
+        .fg .fc{
+            width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;
+            font-size:0.88rem;color:var(--text-dark);font-family:inherit;outline:none;
+            transition:border-color 0.2s,box-shadow 0.2s;
+        }
+        .fg .fc:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,122,74,0.12);}
+        .fg textarea.fc{resize:vertical;min-height:70px;}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .form-actions{margin-top:20px;display:flex;justify-content:flex-end;gap:10px;}
+        .form-actions .btn{min-width:100px;justify-content:center;}
+
+        /* invoice allocation checkboxes inside payment modal */
+        .inv-alloc-list{max-height:200px;overflow-y:auto;border:1.5px solid var(--border);border-radius:7px;padding:8px;}
+        .inv-alloc-item{
+            display:flex;align-items:center;gap:10px;
+            padding:8px 10px;border-radius:6px;margin-bottom:4px;
+            background:var(--page-bg);font-size:0.83rem;
+        }
+        .inv-alloc-item input[type=checkbox]{accent-color:var(--primary);width:15px;height:15px;}
+        .inv-alloc-item .alloc-ref{font-weight:600;color:var(--text-dark);flex:1;}
+        .inv-alloc-item .alloc-bal{color:var(--danger);font-weight:600;white-space:nowrap;}
+
+        /* delete confirm */
+        #deleteModal .mc{width:360px;text-align:center;padding:28px;}
+        .del-icon{width:52px;height:52px;background:var(--danger-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem;color:var(--danger);}
+        #deleteModal h3{font-size:1rem;color:var(--text-dark);margin-bottom:6px;}
+        #deleteModal p {font-size:0.83rem;color:var(--text-light);margin-bottom:20px;}
+        #deleteModal .form-actions{justify-content:center;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+        @media(max-width:768px){
+            .kpi-row{grid-template-columns:1fr 1fr;}
+            .supplier-grid{grid-template-columns:1fr;}
+            .form-row{grid-template-columns:1fr;}
+            .ledger-kpi-row{grid-template-columns:1fr 1fr;}
+            .tab-bar{flex-wrap:wrap;}
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-gas-pump"></i><h2><span>FuelSys Pro</span></h2></div>
+        <nav><ul>
+            <li><a href="index.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+            <li><a href="sales.html"><i class="fas fa-cash-register"></i><span>Sales &amp; Billing</span></a></li>
+            <li><a href="inventory.html"><i class="fas fa-oil-can"></i><span>Fuel Inventory</span></a></li>
+            <li><a href="/ml/"><i class="fas fa-chart-line"></i><span>Tank Prediction</span></a></li>
+            <li><a href="pumps.html"><i class="fas fa-gas-pump"></i><span>Pumps</span></a></li>
+            <li><a href="/staff/page"><i class="fas fa-users"></i><span>Staff</span></a></li>
+            <li><a href="/shifts/page"><i class="fa fa-calendar"></i><span>Shifts</span></a></li>
+            <li><a href="/lubricants/page"><i class="fa-solid fa-spray-can-sparkles"></i><span>Lubricants</span></a></li>
+            <li><a href="reports.html"><i class="fas fa-chart-bar"></i><span>Reports</span></a></li>
+            <li class="active"><a href="/suppliers/page"><i class="fas fa-truck"></i><span>Suppliers</span></a></li>
+            <li><a href="/expenses/page"><i class="fas fa-money-bill-wave"></i><span>Expenses</span></a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+        </ul></nav>
+        <div class="sidebar-toggle"><i class="fas fa-angle-left"></i></div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="main-content">
+        <header>
+            <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Search suppliers..."></div>
+            <div class="user-actions">
+                <div class="notifications"><i class="fas fa-bell"></i><span class="badge" id="headerBadge" style="display:none;"></span></div>
+                <div class="user-profile">
+                    <img src="https://via.placeholder.com/40" alt="User">
+                    <span>Admin</span><i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Page header -->
+            <div class="page-header">
+                <div>
+                    <h1>Suppliers</h1>
+                    <div style="font-size:0.78rem;color:var(--text-light);margin-top:3px;">
+                        Dashboard / <span style="color:var(--primary);font-weight:600;">Suppliers</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-outline" id="exportBtn"><i class="fas fa-download"></i> Export</button>
+                    <button class="btn btn-yellow"  id="addInvoiceTopBtn"><i class="fas fa-file-invoice"></i> New Invoice</button>
+                    <button class="btn btn-primary" id="addSupplierBtn"><i class="fas fa-plus"></i> Add Supplier</button>
+                </div>
+            </div>
+
+            <!-- Overdue alert -->
+            <div class="overdue-bar" id="overdueBar">
+                <i class="fas fa-circle-exclamation"></i>
+                <span id="overdueBarText">You have overdue invoices.</span>
+                <a onclick="switchTab('invoices');filterByStatus('Unpaid')">View Invoices →</a>
+            </div>
+
+            <!-- KPI Row -->
+            <div class="kpi-row">
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fas fa-truck"></i></div><div class="kpi-info"><div class="lbl">Total Suppliers</div><div class="val" id="kpiSuppliers">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon yellow"><i class="fas fa-file-invoice-dollar"></i></div><div class="kpi-info"><div class="lbl">Total Invoiced</div><div class="val" id="kpiInvoiced">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fas fa-circle-check"></i></div><div class="kpi-info"><div class="lbl">Total Paid</div><div class="val" id="kpiPaid">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon red"><i class="fas fa-hourglass-half"></i></div><div class="kpi-info"><div class="lbl">Balance Due</div><div class="val" id="kpiBalance">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon orange"><i class="fas fa-triangle-exclamation"></i></div><div class="kpi-info"><div class="lbl">Overdue</div><div class="val" id="kpiOverdue">–</div></div></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('directory')" id="tab-directory"><i class="fas fa-address-book"></i> Directory</button>
+                <button class="tab-btn"        onclick="switchTab('invoices')"  id="tab-invoices"><i class="fas fa-file-invoice"></i> Invoices</button>
+                <button class="tab-btn"        onclick="switchTab('payments')"  id="tab-payments"><i class="fas fa-money-bill-transfer"></i> Payments</button>
+            </div>
+
+            <!-- ═══ DIRECTORY ═══ -->
+            <div class="tab-panel active" id="panel-directory">
+                <div class="sc">
+                    <div class="sc-header">
+                        <div class="sc-header-left">
+                            <div class="sc-icon"><i class="fas fa-address-book"></i></div>
+                            <div><div class="sc-title">Supplier Directory</div><div class="sc-sub">Manage your fuel &amp; lubricant vendors</div></div>
+                        </div>
+                        <div class="f-bar" style="margin-bottom:0;">
+                            <label class="f-lbl">Type:</label>
+                            <select class="f-sel" id="dirTypeFilter">
+                                <option value="">All Types</option>
+                                <option>Fuel</option><option>Lubricant</option><option>Both</option>
+                            </select>
+                            <select class="f-sel" id="dirActiveFilter">
+                                <option value="">All Status</option>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="sc-body">
+                        <div class="supplier-grid" id="supplierGrid">
+                            <div class="empty"><i class="fas fa-spinner fa-spin"></i><p>Loading suppliers…</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ INVOICES ═══ -->
+            <div class="tab-panel" id="panel-invoices">
+                <div class="sc">
+                    <div class="sc-header">
+                        <div class="sc-header-left">
+                            <div class="sc-icon yellow"><i class="fas fa-file-invoice"></i></div>
+                            <div><div class="sc-title">Purchase Orders &amp; Invoices</div><div class="sc-sub">Track all supplier invoices and their payment status</div></div>
+                        </div>
+                        <button class="btn btn-yellow" id="addInvoiceBtn"><i class="fas fa-plus"></i> Add Invoice</button>
+                    </div>
+                    <div class="sc-body">
+                        <div class="f-bar">
+                            <label class="f-lbl">Supplier:</label>
+                            <select class="f-sel" id="invSupFilter"><option value="">All Suppliers</option></select>
+                            <label class="f-lbl">Status:</label>
+                            <select class="f-sel" id="invStatusFilter">
+                                <option value="">All</option>
+                                <option>Unpaid</option><option>Partial</option><option>Paid</option>
+                            </select>
+                            <label class="f-lbl">From:</label>
+                            <input type="text" class="f-date" id="invStart" placeholder="Start">
+                            <label class="f-lbl">To:</label>
+                            <input type="text" class="f-date" id="invEnd" placeholder="End">
+                            <button class="btn btn-outline" id="invFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="dt">
+                                <thead><tr>
+                                    <th>Date</th><th>Invoice Ref</th><th>Supplier</th>
+                                    <th>Category</th><th>Amount</th><th>Paid</th>
+                                    <th>Balance</th><th>Due Date</th><th>Status</th><th>Actions</th>
+                                </tr></thead>
+                                <tbody id="invTableBody"><tr><td colspan="10"><div class="empty"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody>
+                            </table>
+                        </div>
+                        <div class="pag"><div class="pag-info" id="invPagInfo">–</div><div class="pag-ctrl" id="invPagCtrl"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ PAYMENTS ═══ -->
+            <div class="tab-panel" id="panel-payments">
+                <div class="sc">
+                    <div class="sc-header">
+                        <div class="sc-header-left">
+                            <div class="sc-icon"><i class="fas fa-money-bill-transfer"></i></div>
+                            <div><div class="sc-title">Payment Records</div><div class="sc-sub">All payments made to suppliers</div></div>
+                        </div>
+                        <button class="btn btn-primary" id="addPaymentBtn"><i class="fas fa-plus"></i> Record Payment</button>
+                    </div>
+                    <div class="sc-body">
+                        <div class="f-bar">
+                            <label class="f-lbl">Supplier:</label>
+                            <select class="f-sel" id="paySupFilter"><option value="">All Suppliers</option></select>
+                            <label class="f-lbl">From:</label>
+                            <input type="text" class="f-date" id="payStart" placeholder="Start">
+                            <label class="f-lbl">To:</label>
+                            <input type="text" class="f-date" id="payEnd" placeholder="End">
+                            <button class="btn btn-outline" id="payFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="dt">
+                                <thead><tr>
+                                    <th>Date</th><th>Supplier</th><th>Amount</th>
+                                    <th>Method</th><th>Reference</th><th>Linked Invoices</th><th>Actions</th>
+                                </tr></thead>
+                                <tbody id="payTableBody"><tr><td colspan="7"><div class="empty"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody>
+                            </table>
+                        </div>
+                        <div class="pag"><div class="pag-info" id="payPagInfo">–</div><div class="pag-ctrl" id="payPagCtrl"></div></div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+    </main>
+</div>
+
+<!-- ══════════ LEDGER DRAWER ══════════ -->
+<div class="ledger-overlay" id="ledgerOverlay" onclick="closeLedger()"></div>
+<div class="ledger-drawer" id="ledgerDrawer">
+    <div class="ledger-head">
+        <div>
+            <h3 id="ledgerSupName">Supplier Ledger</h3>
+            <p id="ledgerSupType">–</p>
+        </div>
+        <button class="ledger-close" onclick="closeLedger()">&times;</button>
+    </div>
+    <div class="ledger-body">
+        <div class="ledger-kpi-row">
+            <div class="ledger-kpi"><div class="lk-lbl">Total Invoiced</div><div class="lk-val" id="ldgInvoiced">–</div></div>
+            <div class="ledger-kpi"><div class="lk-lbl">Total Paid</div>    <div class="lk-val" id="ldgPaid">–</div></div>
+            <div class="ledger-kpi"><div class="lk-lbl">Balance Due</div>   <div class="lk-val" id="ldgBalance" style="color:var(--danger)">–</div></div>
+        </div>
+        <div class="ledger-section-title"><i class="fas fa-file-invoice"></i> Invoices</div>
+        <table class="dt" id="ldgInvTable">
+            <thead><tr><th>Date</th><th>Ref</th><th>Category</th><th>Amount</th><th>Paid</th><th>Status</th></tr></thead>
+            <tbody id="ldgInvBody"></tbody>
+        </table>
+        <div class="ledger-section-title"><i class="fas fa-money-bill-transfer"></i> Payments</div>
+        <table class="dt" id="ldgPayTable">
+            <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Reference</th></tr></thead>
+            <tbody id="ldgPayBody"></tbody>
+        </table>
+        <div style="margin-top:20px;display:flex;gap:8px;">
+            <button class="btn btn-yellow btn-sm" onclick="openPaymentForSupplier(currentLedgerSupId)"><i class="fas fa-plus"></i> Record Payment</button>
+            <button class="btn btn-outline btn-sm" onclick="openInvoiceForSupplier(currentLedgerSupId)"><i class="fas fa-file-invoice"></i> Add Invoice</button>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ SUPPLIER MODAL ══════════ -->
+<div id="supplierModal" class="modal">
+    <div class="mc wide">
+        <button class="m-close" onclick="closeModal('supplierModal')">&times;</button>
+        <div class="m-title"><i class="fas fa-truck"></i><span id="supModalTitle">Add Supplier</span></div>
+        <form id="supplierForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-building"></i>Company Name *</label><input class="fc" type="text" id="sName" required placeholder="e.g. Ceylon Petroleum Corp."></div>
+                <div class="fg"><label><i class="fas fa-tag"></i>Supplier Type *</label>
+                    <select class="fc" id="sType" required>
+                        <option value="">Select type</option>
+                        <option>Fuel</option><option>Lubricant</option><option>Both</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-user"></i>Contact Person</label><input class="fc" type="text" id="sContact" placeholder="Name"></div>
+                <div class="fg"><label><i class="fas fa-phone"></i>Phone</label><input class="fc" type="text" id="sPhone" placeholder="+94 11 ..."></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-envelope"></i>Email</label><input class="fc" type="email" id="sEmail" placeholder="email@company.com"></div>
+                <div class="fg"><label><i class="fas fa-clock"></i>Credit Days</label><input class="fc" type="number" id="sCreditDays" min="0" value="30" placeholder="30"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-location-dot"></i>Address</label><textarea class="fc" id="sAddress" placeholder="Full address"></textarea></div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-id-card"></i>Tax ID / VAT</label><input class="fc" type="text" id="sTaxId" placeholder="VAT-..."></div>
+                <div class="fg"><label><i class="fas fa-building-columns"></i>Bank Details</label><input class="fc" type="text" id="sBankDetails" placeholder="Bank, Acc No."></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="sNotes" placeholder="Optional notes"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('supplierModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="supSubmitBtn">Save Supplier</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ INVOICE MODAL ══════════ -->
+<div id="invoiceModal" class="modal">
+    <div class="mc">
+        <button class="m-close" onclick="closeModal('invoiceModal')">&times;</button>
+        <div class="m-title"><i class="fas fa-file-invoice"></i><span id="invModalTitle">Add Invoice</span></div>
+        <form id="invoiceForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Invoice Date *</label><input class="fc" type="text" id="iDate" required></div>
+                <div class="fg"><label><i class="fas fa-calendar-check"></i>Due Date</label><input class="fc" type="text" id="iDueDate"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-truck"></i>Supplier *</label>
+                <select class="fc" id="iSupplier" required><option value="">Select supplier</option></select>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-hashtag"></i>Invoice Ref *</label><input class="fc" type="text" id="iRef" required placeholder="INV-2024-001"></div>
+                <div class="fg"><label><i class="fas fa-list"></i>Category *</label>
+                    <select class="fc" id="iCategory" required>
+                        <option value="">Select</option>
+                        <option>Fuel</option><option>Lubricant</option><option>Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Amount (Rs.) *</label><input class="fc" type="number" id="iAmount" required min="0" step="0.01" placeholder="0.00"></div>
+            <div class="fg"><label><i class="fas fa-align-left"></i>Description</label><textarea class="fc" id="iDesc" placeholder="What this invoice covers"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('invoiceModal')">Cancel</button>
+                <button type="submit" class="btn btn-yellow" id="invSubmitBtn">Save Invoice</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ PAYMENT MODAL ══════════ -->
+<div id="paymentModal" class="modal">
+    <div class="mc">
+        <button class="m-close" onclick="closeModal('paymentModal')">&times;</button>
+        <div class="m-title"><i class="fas fa-money-bill-transfer"></i><span id="payModalTitle">Record Payment</span></div>
+        <form id="paymentForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Payment Date *</label><input class="fc" type="text" id="pDate" required></div>
+                <div class="fg"><label><i class="fas fa-truck"></i>Supplier *</label>
+                    <select class="fc" id="pSupplier" required onchange="loadUnpaidInvoices(this.value)">
+                        <option value="">Select supplier</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-coins"></i>Amount (Rs.) *</label><input class="fc" type="number" id="pAmount" required min="0" step="0.01" placeholder="0.00"></div>
+                <div class="fg"><label><i class="fas fa-credit-card"></i>Payment Method *</label>
+                    <select class="fc" id="pMethod" required>
+                        <option value="">Select</option>
+                        <option>Cash</option><option>Cheque</option>
+                        <option>Bank Transfer</option><option>Online</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg"><label><i class="fas fa-hashtag"></i>Reference (Cheque/TXN No.)</label><input class="fc" type="text" id="pRef" placeholder="Optional"></div>
+
+            <div class="fg">
+                <label><i class="fas fa-link"></i>Allocate to Invoices <span style="font-size:0.74rem;color:var(--text-light);font-weight:400;">(optional — tick invoices this settles)</span></label>
+                <div class="inv-alloc-list" id="unpaidInvList">
+                    <div style="text-align:center;color:var(--text-light);font-size:0.82rem;padding:10px;">Select a supplier first</div>
+                </div>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="pNotes" placeholder="Optional"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('paymentModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ══════════ DELETE CONFIRM ══════════ -->
+<div id="deleteModal" class="modal">
+    <div class="mc narrow" style="text-align:center;padding:28px;">
+        <div class="del-icon"><i class="fas fa-trash"></i></div>
+        <h3>Confirm Delete</h3>
+        <p id="deleteMsg">This action cannot be undone.</p>
+        <div class="form-actions" style="justify-content:center;">
+            <button class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
+            <button class="btn btn-danger" id="confirmDelBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const API = '/suppliers';
+    const PER = 15;
+
+    let suppliers        = [];
+    let editingSup       = null;
+    let editingInv       = null;
+    let deleteTarget     = { url: null, cb: null };
+    let invPage = 1, invTotal = 0;
+    let payPage = 1, payTotal = 0;
+    let currentLedgerSupId = null;
+
+    /* expose for inline handlers */
+    window.currentLedgerSupId = null;
+
+    /* ── flatpickr ── */
+    flatpickr('#iDate',    { dateFormat: 'Y-m-d', defaultDate: 'today' });
+    flatpickr('#iDueDate', { dateFormat: 'Y-m-d' });
+    flatpickr('#pDate',    { dateFormat: 'Y-m-d', defaultDate: 'today' });
+    flatpickr('#invStart', { dateFormat: 'Y-m-d' });
+    flatpickr('#invEnd',   { dateFormat: 'Y-m-d' });
+    flatpickr('#payStart', { dateFormat: 'Y-m-d' });
+    flatpickr('#payEnd',   { dateFormat: 'Y-m-d' });
+
+    /* ════════════════════════════
+       INIT
+    ════════════════════════════ */
+    loadSuppliers();
+    loadSummary();
+
+    /* ════════════════════════════
+       TAB SWITCHING
+    ════════════════════════════ */
+    window.switchTab = function (tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        document.getElementById('panel-' + tab).classList.add('active');
+        if (tab === 'invoices') loadInvoices();
+        if (tab === 'payments') loadPayments();
+    };
+
+    window.filterByStatus = function (st) {
+        document.getElementById('invStatusFilter').value = st;
+        loadInvoices();
+    };
+
+    /* ════════════════════════════
+       SUMMARY / KPIs
+    ════════════════════════════ */
+    async function loadSummary() {
+        const d = await get(`${API}/summary`);
+        document.getElementById('kpiSuppliers').textContent = d.total_suppliers;
+        document.getElementById('kpiInvoiced').textContent  = 'Rs.' + fmt(d.total_invoiced);
+        document.getElementById('kpiPaid').textContent      = 'Rs.' + fmt(d.total_paid);
+        document.getElementById('kpiBalance').textContent   = 'Rs.' + fmt(d.balance_due);
+        document.getElementById('kpiOverdue').textContent   = d.overdue_count;
+        if (d.overdue_count > 0) {
+            document.getElementById('overdueBar').classList.add('show');
+            document.getElementById('overdueBarText').textContent =
+                `${d.overdue_count} overdue invoice${d.overdue_count > 1 ? 's' : ''} — total Rs.${fmt(d.overdue_invoices.reduce((s,i)=>s+i.balance,0))} outstanding.`;
+            document.getElementById('headerBadge').style.display = 'flex';
+            document.getElementById('headerBadge').textContent   = d.overdue_count;
+        }
+    }
+
+    /* ════════════════════════════
+       SUPPLIERS DIRECTORY
+    ════════════════════════════ */
+    async function loadSuppliers() {
+        const type   = document.getElementById('dirTypeFilter').value;
+        const active = document.getElementById('dirActiveFilter').value;
+        const p = new URLSearchParams();
+        if (type)   p.append('type',   type);
+        if (active) p.append('active', active);
+        suppliers = await get(`${API}/?${p}`);
+        renderSupplierGrid(suppliers);
+        populateSupplierDropdowns(suppliers);
+    }
+
+    function renderSupplierGrid(list) {
+        const grid = document.getElementById('supplierGrid');
+        if (!list.length) {
+            grid.innerHTML = `<div class="empty"><i class="fas fa-truck"></i><p>No suppliers found. Add your first supplier.</p></div>`;
+            return;
+        }
+        grid.innerHTML = list.map((s, idx) => {
+            const initials = s.name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
+            const typeColor = s.type === 'Fuel' ? 'pill-yellow' : s.type === 'Lubricant' ? 'pill-green' : 'pill-blue';
+            const balClass  = s.balance_due > 0 ? 'owed' : 'clear';
+            const balText   = s.balance_due > 0 ? `Rs.${fmt(s.balance_due)}` : 'Settled';
+            return `<div class="sup-card ${s.is_active ? '' : 'inactive'}" style="animation-delay:${idx*0.05}s">
+                <div class="sup-card-top">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="sup-avatar">${initials}</div>
+                        <div>
+                            <div class="sup-name">${esc(s.name)}</div>
+                            <span class="pill ${typeColor} sup-type">${esc(s.type)}</span>
+                            ${!s.is_active ? '<span class="pill pill-gray" style="margin-left:4px;">Inactive</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="sup-meta">
+                    ${s.contact_person ? `<div class="sup-meta-row"><i class="fas fa-user"></i>${esc(s.contact_person)}</div>` : ''}
+                    ${s.phone  ? `<div class="sup-meta-row"><i class="fas fa-phone"></i>${esc(s.phone)}</div>`  : ''}
+                    ${s.email  ? `<div class="sup-meta-row"><i class="fas fa-envelope"></i>${esc(s.email)}</div>` : ''}
+                    ${s.credit_days ? `<div class="sup-meta-row"><i class="fas fa-clock"></i>${s.credit_days}-day credit terms</div>` : ''}
+                </div>
+                <div class="sup-balance">
+                    <div>
+                        <div class="bl-lbl">Balance Due</div>
+                        <div class="bl-val ${balClass}">${balText}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="bl-lbl">Total Invoiced</div>
+                        <div style="font-size:0.88rem;font-weight:600;color:var(--text-mid);">Rs.${fmt(s.total_invoiced)}</div>
+                    </div>
+                </div>
+                <div class="sup-actions">
+                    <button class="btn btn-outline btn-sm" style="flex:1;" onclick="openLedger(${s.id})"><i class="fas fa-book-open"></i> Ledger</button>
+                    <button class="btn-icon" title="Edit" onclick="openEditSupplier(${s.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn-icon" title="${s.is_active ? 'Deactivate' : 'Activate'}" onclick="toggleActive(${s.id})">
+                        <i class="fas ${s.is_active ? 'fa-toggle-on' : 'fa-toggle-off'}" style="color:${s.is_active ? 'var(--primary)' : 'var(--text-light)'}"></i>
+                    </button>
+                    <button class="btn-icon del" title="Delete" onclick="confirmDelete('${API}/delete/${s.id}','Delete supplier &quot;${esc(s.name)}&quot;? All invoices and payments will also be deleted.',loadSuppliers)"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function populateSupplierDropdowns(list) {
+        const opts = `<option value="">All Suppliers</option>` + list.map(s =>
+            `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+        const reqOpts = `<option value="">Select supplier</option>` + list.map(s =>
+            `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+        document.getElementById('invSupFilter').innerHTML = opts;
+        document.getElementById('paySupFilter').innerHTML = opts;
+        document.getElementById('iSupplier').innerHTML   = reqOpts;
+        document.getElementById('pSupplier').innerHTML   = reqOpts;
+    }
+
+    document.getElementById('dirTypeFilter').addEventListener('change', loadSuppliers);
+    document.getElementById('dirActiveFilter').addEventListener('change', loadSuppliers);
+
+    /* add / edit supplier */
+    document.getElementById('addSupplierBtn').addEventListener('click', () => {
+        editingSup = null;
+        document.getElementById('supModalTitle').textContent = 'Add Supplier';
+        document.getElementById('supSubmitBtn').textContent  = 'Save Supplier';
+        document.getElementById('supplierForm').reset();
+        openModal('supplierModal');
+    });
+
+    window.openEditSupplier = function (id) {
+        const s = suppliers.find(x => x.id === id);
+        if (!s) return;
+        editingSup = id;
+        document.getElementById('supModalTitle').textContent = 'Edit Supplier';
+        document.getElementById('supSubmitBtn').textContent  = 'Update Supplier';
+        document.getElementById('sName').value        = s.name;
+        document.getElementById('sType').value        = s.type;
+        document.getElementById('sContact').value     = s.contact_person || '';
+        document.getElementById('sPhone').value       = s.phone || '';
+        document.getElementById('sEmail').value       = s.email || '';
+        document.getElementById('sCreditDays').value  = s.credit_days || 30;
+        document.getElementById('sAddress').value     = s.address || '';
+        document.getElementById('sTaxId').value       = s.tax_id || '';
+        document.getElementById('sBankDetails').value = s.bank_details || '';
+        document.getElementById('sNotes').value       = s.notes || '';
+        openModal('supplierModal');
+    };
+
+    document.getElementById('supplierForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const body = {
+            name:          document.getElementById('sName').value,
+            type:          document.getElementById('sType').value,
+            contact_person:document.getElementById('sContact').value,
+            phone:         document.getElementById('sPhone').value,
+            email:         document.getElementById('sEmail').value,
+            credit_days:   document.getElementById('sCreditDays').value,
+            address:       document.getElementById('sAddress').value,
+            tax_id:        document.getElementById('sTaxId').value,
+            bank_details:  document.getElementById('sBankDetails').value,
+            notes:         document.getElementById('sNotes').value,
+            is_active:     true,
+        };
+        const url    = editingSup ? `${API}/update/${editingSup}` : `${API}/add`;
+        const method = editingSup ? 'PUT' : 'POST';
+        const r = await post(url, body, method);
+        if (r) { closeModal('supplierModal'); loadSuppliers(); loadSummary(); }
+    });
+
+    window.toggleActive = async function (id) {
+        await fetch(`${API}/toggle-active/${id}`, { method: 'PATCH' });
+        loadSuppliers(); loadSummary();
+    };
+
+    /* ════════════════════════════
+       LEDGER DRAWER
+    ════════════════════════════ */
+    window.openLedger = async function (id) {
+        currentLedgerSupId = id;
+        window.currentLedgerSupId = id;
+        const data = await get(`${API}/${id}/ledger`);
+        const s    = data.supplier;
+        document.getElementById('ledgerSupName').textContent = s.name;
+        document.getElementById('ledgerSupType').textContent = s.type + ' Supplier · ' + (s.is_active ? 'Active' : 'Inactive');
+        document.getElementById('ldgInvoiced').textContent   = 'Rs.' + fmt(data.total_invoiced);
+        document.getElementById('ldgPaid').textContent       = 'Rs.' + fmt(data.total_paid);
+        document.getElementById('ldgBalance').textContent    = 'Rs.' + fmt(data.balance_due);
+
+        /* invoices */
+        const ib = document.getElementById('ldgInvBody');
+        ib.innerHTML = data.invoices.length
+            ? data.invoices.map(i => `<tr>
+                <td>${i.invoice_date}</td>
+                <td style="font-weight:600;">${esc(i.invoice_ref)}</td>
+                <td>${esc(i.category)}</td>
+                <td>Rs.${fmt(i.amount)}</td>
+                <td style="color:var(--primary);">Rs.${fmt(i.amount_paid)}</td>
+                <td>${statusPill(i.status)}</td>
+              </tr>`).join('')
+            : `<tr><td colspan="6" class="empty" style="padding:16px;"><p>No invoices yet.</p></td></tr>`;
+
+        /* payments */
+        const pb = document.getElementById('ldgPayBody');
+        pb.innerHTML = data.payments.length
+            ? data.payments.map(p => `<tr>
+                <td>${p.date}</td>
+                <td style="font-weight:700;color:var(--primary);">Rs.${fmt(p.amount)}</td>
+                <td>${esc(p.payment_method)}</td>
+                <td style="color:var(--text-light);">${p.reference || '—'}</td>
+              </tr>`).join('')
+            : `<tr><td colspan="4" class="empty" style="padding:16px;"><p>No payments yet.</p></td></tr>`;
+
+        document.getElementById('ledgerOverlay').classList.add('show');
+        document.getElementById('ledgerDrawer').classList.add('open');
+    };
+
+    window.closeLedger = function () {
+        document.getElementById('ledgerOverlay').classList.remove('show');
+        document.getElementById('ledgerDrawer').classList.remove('open');
+    };
+
+    window.openPaymentForSupplier = function (id) {
+        closeLedger();
+        document.getElementById('pSupplier').value = id;
+        loadUnpaidInvoices(id);
+        openModal('paymentModal');
+        switchTab('payments');
+    };
+
+    window.openInvoiceForSupplier = function (id) {
+        closeLedger();
+        editingInv = null;
+        document.getElementById('invModalTitle').textContent = 'Add Invoice';
+        document.getElementById('invSubmitBtn').textContent  = 'Save Invoice';
+        document.getElementById('invoiceForm').reset();
+        document.getElementById('iSupplier').value = id;
+        openModal('invoiceModal');
+        switchTab('invoices');
+    };
+
+    /* ════════════════════════════
+       INVOICES
+    ════════════════════════════ */
+    async function loadInvoices(page = 1) {
+        invPage = page;
+        const p = buildInvParams();
+        const all = await get(`${API}/invoices?${p}`);
+        invTotal = all.length;
+        renderInvoices(paginate(all, page, PER));
+        renderPag('inv', invTotal, page, loadInvoices);
+    }
+
+    function buildInvParams() {
+        const p = new URLSearchParams();
+        const s = document.getElementById('invSupFilter').value;
+        const st= document.getElementById('invStatusFilter').value;
+        const sd= document.getElementById('invStart').value;
+        const ed= document.getElementById('invEnd').value;
+        if (s)  p.append('supplier_id', s);
+        if (st) p.append('status',      st);
+        if (sd) p.append('start_date',  sd);
+        if (ed) p.append('end_date',    ed);
+        return p;
+    }
+
+    function renderInvoices(list) {
+        const tb = document.getElementById('invTableBody');
+        if (!list.length) { tb.innerHTML = `<tr><td colspan="10"><div class="empty"><i class="fas fa-file-invoice"></i><p>No invoices found.</p></div></td></tr>`; return; }
+        const today = new Date(); today.setHours(0,0,0,0);
+        tb.innerHTML = list.map(i => {
+            const isOverdue = i.status !== 'Paid' && i.due_date && new Date(i.due_date) < today;
+            const paidPct   = i.amount > 0 ? Math.min(100, (i.amount_paid / i.amount) * 100) : 0;
+            return `<tr ${isOverdue ? 'style="background:#fff8f8;"' : ''}>
+                <td>${i.invoice_date}</td>
+                <td style="font-weight:600;">${esc(i.invoice_ref)}${isOverdue ? ' <span class="pill pill-red" style="font-size:0.65rem;">OVERDUE</span>' : ''}</td>
+                <td>${esc(i.supplier_name)}</td>
+                <td><span class="pill ${i.category==='Fuel'?'pill-yellow':'pill-green'}">${esc(i.category)}</span></td>
+                <td style="font-weight:600;">Rs.${fmt(i.amount)}</td>
+                <td>
+                    <div class="prog-wrap">
+                        <div class="prog-bar"><div class="prog-fill" style="width:${paidPct}%;background:var(--primary);"></div></div>
+                        <span style="font-size:0.78rem;white-space:nowrap;">Rs.${fmt(i.amount_paid)}</span>
+                    </div>
+                </td>
+                <td style="font-weight:700;color:${i.balance>0?'var(--danger)':'var(--primary)'};">Rs.${fmt(i.balance)}</td>
+                <td style="color:${isOverdue?'var(--danger)':'var(--text-mid)'};">${i.due_date || '—'}</td>
+                <td>${statusPill(i.status)}</td>
+                <td>
+                    <div style="display:flex;gap:4px;">
+                        <button class="btn-icon" title="Edit" onclick="openEditInvoice(${JSON.stringify(i).replace(/"/g,'&quot;')})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon" title="Pay" onclick="quickPayInvoice(${i.supplier_id},${i.id})"><i class="fas fa-money-bill-transfer"></i></button>
+                        <button class="btn-icon del" title="Delete" onclick="confirmDelete('${API}/invoices/delete/${i.id}','Delete invoice ${esc(i.invoice_ref)}?',()=>{ loadInvoices(invPage); loadSummary(); })"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    document.getElementById('addInvoiceBtn').addEventListener('click',    openNewInvoice);
+    document.getElementById('addInvoiceTopBtn').addEventListener('click', openNewInvoice);
+
+    function openNewInvoice() {
+        editingInv = null;
+        document.getElementById('invModalTitle').textContent = 'Add Invoice';
+        document.getElementById('invSubmitBtn').textContent  = 'Save Invoice';
+        document.getElementById('invoiceForm').reset();
+        openModal('invoiceModal');
+    }
+
+    window.openEditInvoice = function (inv) {
+        editingInv = inv.id;
+        document.getElementById('invModalTitle').textContent = 'Edit Invoice';
+        document.getElementById('invSubmitBtn').textContent  = 'Update Invoice';
+        document.getElementById('iDate').value     = inv.invoice_date;
+        document.getElementById('iDueDate').value  = inv.due_date || '';
+        document.getElementById('iSupplier').value = inv.supplier_id;
+        document.getElementById('iRef').value      = inv.invoice_ref;
+        document.getElementById('iCategory').value = inv.category;
+        document.getElementById('iAmount').value   = inv.amount;
+        document.getElementById('iDesc').value     = inv.description || '';
+        openModal('invoiceModal');
+    };
+
+    window.quickPayInvoice = function (supId, invId) {
+        document.getElementById('pSupplier').value = supId;
+        loadUnpaidInvoices(supId, invId);
+        openModal('paymentModal');
+    };
+
+    document.getElementById('invoiceForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const body = {
+            supplier_id:  document.getElementById('iSupplier').value,
+            invoice_ref:  document.getElementById('iRef').value,
+            category:     document.getElementById('iCategory').value,
+            description:  document.getElementById('iDesc').value,
+            amount:       document.getElementById('iAmount').value,
+            invoice_date: document.getElementById('iDate').value,
+            due_date:     document.getElementById('iDueDate').value || null,
+        };
+        const url    = editingInv ? `${API}/invoices/update/${editingInv}` : `${API}/invoices/add`;
+        const method = editingInv ? 'PUT' : 'POST';
+        const r = await post(url, body, method);
+        if (r) { closeModal('invoiceModal'); loadInvoices(invPage); loadSummary(); loadSuppliers(); }
+    });
+
+    document.getElementById('invFilterBtn').addEventListener('click', () => loadInvoices(1));
+
+    /* ════════════════════════════
+       PAYMENTS
+    ════════════════════════════ */
+    async function loadPayments(page = 1) {
+        payPage = page;
+        const p = new URLSearchParams();
+        const s  = document.getElementById('paySupFilter').value;
+        const sd = document.getElementById('payStart').value;
+        const ed = document.getElementById('payEnd').value;
+        if (s)  p.append('supplier_id', s);
+        if (sd) p.append('start_date',  sd);
+        if (ed) p.append('end_date',    ed);
+        const all = await get(`${API}/payments?${p}`);
+        payTotal = all.length;
+        renderPayments(paginate(all, page, PER));
+        renderPag('pay', payTotal, page, loadPayments);
+    }
+
+    function renderPayments(list) {
+        const tb = document.getElementById('payTableBody');
+        if (!list.length) { tb.innerHTML = `<tr><td colspan="7"><div class="empty"><i class="fas fa-money-bill-transfer"></i><p>No payments recorded yet.</p></div></td></tr>`; return; }
+        tb.innerHTML = list.map(p => `<tr>
+            <td>${p.date}</td>
+            <td style="font-weight:600;">${esc(p.supplier_name)}</td>
+            <td style="font-weight:700;color:var(--primary);">Rs.${fmt(p.amount)}</td>
+            <td><span class="pill pill-green">${esc(p.payment_method)}</span></td>
+            <td style="color:var(--text-light);">${p.reference || '—'}</td>
+            <td style="font-size:0.78rem;color:var(--text-mid);">${p.linked_invoices.length ? p.linked_invoices.join(', ') : '—'}</td>
+            <td>
+                <button class="btn-icon del" title="Delete" onclick="confirmDelete('${API}/payments/delete/${p.id}','Delete this payment? Invoice statuses will be updated.',()=>{ loadPayments(payPage); loadSummary(); loadSuppliers(); })">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>`).join('');
+    }
+
+    document.getElementById('addPaymentBtn').addEventListener('click', () => {
+        document.getElementById('paymentForm').reset();
+        document.getElementById('unpaidInvList').innerHTML = '<div style="text-align:center;color:var(--text-light);font-size:0.82rem;padding:10px;">Select a supplier first</div>';
+        openModal('paymentModal');
+    });
+
+    window.loadUnpaidInvoices = async function (supId, preCheckId) {
+        const box = document.getElementById('unpaidInvList');
+        if (!supId) { box.innerHTML = '<div style="text-align:center;color:var(--text-light);font-size:0.82rem;padding:10px;">Select a supplier first</div>'; return; }
+        const all = await get(`${API}/invoices?supplier_id=${supId}&status=Unpaid`);
+        const partial = await get(`${API}/invoices?supplier_id=${supId}&status=Partial`);
+        const unpaid = [...all, ...partial];
+        if (!unpaid.length) { box.innerHTML = '<div style="text-align:center;color:var(--primary);font-size:0.82rem;padding:10px;"><i class="fas fa-check-circle"></i> No outstanding invoices for this supplier.</div>'; return; }
+        box.innerHTML = unpaid.map(i => `
+            <div class="inv-alloc-item">
+                <input type="checkbox" class="inv-alloc-check" data-id="${i.id}" data-balance="${i.balance}" ${preCheckId == i.id ? 'checked' : ''}>
+                <span class="alloc-ref">${esc(i.invoice_ref)} <span style="font-weight:400;color:var(--text-light);">(${i.invoice_date})</span></span>
+                <span class="alloc-bal">Rs.${fmt(i.balance)}</span>
+            </div>`).join('');
+    };
+
+    document.getElementById('paymentForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const allocations = [];
+        document.querySelectorAll('.inv-alloc-check:checked').forEach(cb => {
+            allocations.push({ invoice_id: cb.dataset.id, allocated_amount: parseFloat(cb.dataset.balance) });
+        });
+        const body = {
+            supplier_id:          document.getElementById('pSupplier').value,
+            amount:               document.getElementById('pAmount').value,
+            payment_method:       document.getElementById('pMethod').value,
+            reference:            document.getElementById('pRef').value,
+            notes:                document.getElementById('pNotes').value,
+            date:                 document.getElementById('pDate').value,
+            invoice_allocations:  allocations,
+        };
+        const r = await post(`${API}/payments/add`, body, 'POST');
+        if (r) { closeModal('paymentModal'); loadPayments(payPage); loadInvoices(invPage); loadSummary(); loadSuppliers(); }
+    });
+
+    document.getElementById('payFilterBtn').addEventListener('click', () => loadPayments(1));
+
+    /* ════════════════════════════
+       DELETE CONFIRM
+    ════════════════════════════ */
+    window.confirmDelete = function (url, msg, cb) {
+        document.getElementById('deleteMsg').innerHTML = msg;
+        deleteTarget = { url, cb };
+        openModal('deleteModal');
+    };
+
+    document.getElementById('confirmDelBtn').addEventListener('click', async () => {
+        const r = await fetch(deleteTarget.url, { method: 'DELETE' });
+        const d = await r.json();
+        if (!r.ok) { alert(d.message || 'Delete failed'); return; }
+        closeModal('deleteModal');
+        if (deleteTarget.cb) deleteTarget.cb();
+    });
+
+    /* ════════════════════════════
+       EXPORT (CSV)
+    ════════════════════════════ */
+    document.getElementById('exportBtn').addEventListener('click', async () => {
+        const data = await get(`${API}/`);
+        const rows = [['ID','Name','Type','Contact','Phone','Email','Credit Days','Total Invoiced','Total Paid','Balance Due','Active']];
+        data.forEach(s => rows.push([s.id, s.name, s.type, s.contact_person, s.phone, s.email, s.credit_days, s.total_invoiced, s.total_paid, s.balance_due, s.is_active]));
+        const csv  = rows.map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a'); a.href = url; a.download = `suppliers_${tod()}.csv`; a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    /* ════════════════════════════
+       MODAL HELPERS
+    ════════════════════════════ */
+    window.openModal  = id => { document.getElementById(id).classList.add('show');    document.body.style.overflow='hidden'; };
+    window.closeModal = id => { document.getElementById(id).classList.remove('show'); document.body.style.overflow='auto'; };
+    window.addEventListener('click', e => {
+        ['supplierModal','invoiceModal','paymentModal','deleteModal'].forEach(id => {
+            if (e.target === document.getElementById(id)) closeModal(id);
+        });
+    });
+
+    /* ════════════════════════════
+       UTILITY
+    ════════════════════════════ */
+    function statusPill(st) {
+        const map = { Paid: 'pill-green', Partial: 'pill-orange', Unpaid: 'pill-red' };
+        return `<span class="pill ${map[st]||'pill-gray'}">${st}</span>`;
+    }
+    function paginate(arr, pg, per) { return arr.slice((pg-1)*per, pg*per); }
+    function renderPag(pre, total, cur, fn) {
+        const pages = Math.ceil(total / PER);
+        const info  = document.getElementById(pre+'PagInfo');
+        const ctrl  = document.getElementById(pre+'PagCtrl');
+        const from  = (cur-1)*PER+1, to = Math.min(cur*PER, total);
+        info.textContent = total ? `Showing ${from}–${to} of ${total}` : 'No records';
+        ctrl.innerHTML   = '';
+        if (pages <= 1) return;
+        const mk = (lbl, pg, dis, act) => {
+            const b = document.createElement('button');
+            b.className = 'pag-btn' + (act ? ' active' : '');
+            b.innerHTML = lbl; b.disabled = dis;
+            b.addEventListener('click', () => fn(pg));
+            ctrl.appendChild(b);
+        };
+        mk('<i class="fas fa-chevron-left"></i>', cur-1, cur===1, false);
+        for (let i=1;i<=pages;i++) mk(i, i, false, i===cur);
+        mk('<i class="fas fa-chevron-right"></i>', cur+1, cur===pages, false);
+    }
+    async function get(url)              { try { return await (await fetch(url)).json(); } catch { return []; } }
+    async function post(url, body, meth) {
+        try {
+            const r = await fetch(url, { method: meth, headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+            const d = await r.json();
+            if (!r.ok) { alert(d.message || 'Operation failed'); return null; }
+            return d;
+        } catch { alert('Network error'); return null; }
+    }
+    function fmt(n)  { return parseFloat(n||0).toLocaleString('en-IN', {minimumFractionDigits:2,maximumFractionDigits:2}); }
+    function esc(s)  { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function tod()   { return new Date().toISOString().split('T')[0]; }
+});
+</script>
+</body>
+</html>
