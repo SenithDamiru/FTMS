@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, app
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 
@@ -30,6 +30,9 @@ def create_app():
 
     from .routes.suppliers_routes import suppliers_bp
     app.register_blueprint(suppliers_bp)
+
+    from .routes.pumps_routes import pumps_bp
+    app.register_blueprint(pumps_bp)
 
     from flask import render_template
     @app.route('/')

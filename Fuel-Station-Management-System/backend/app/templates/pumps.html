@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pumps - FuelSys Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary:#1a7a4a;--primary-light:#22a862;--primary-bg:#e6f4ed;
+            --accent:#f5c518;--accent-dark:#d4a800;--accent-bg:#fffbe6;
+            --danger:#c62828;--danger-bg:#ffebee;--warning:#c17b00;--warning-bg:#fff8e1;
+            --border:#dee2e6;--text-dark:#0d1f15;--text-mid:#3d5a47;--text-light:#6b8070;
+            --card-bg:#ffffff;--page-bg:#f2f7f4;
+        }
+        .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px;}
+        .kpi-card{background:var(--card-bg);border-radius:10px;padding:16px 18px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:13px;animation:fadeUp 0.4s ease both;}
+        .kpi-card:nth-child(2){animation-delay:.07s}.kpi-card:nth-child(3){animation-delay:.14s}.kpi-card:nth-child(4){animation-delay:.21s}.kpi-card:nth-child(5){animation-delay:.28s}.kpi-card:nth-child(6){animation-delay:.35s}
+        .kpi-icon{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+        .kpi-icon.green{background:var(--primary-bg);color:var(--primary);}
+        .kpi-icon.yellow{background:var(--accent-bg);color:var(--accent-dark);}
+        .kpi-icon.red{background:var(--danger-bg);color:var(--danger);}
+        .kpi-icon.orange{background:var(--warning-bg);color:var(--warning);}
+        .kpi-icon.blue{background:#e3f2fd;color:#1565c0;}
+        .kpi-info .lbl{font-size:0.72rem;color:var(--text-light);font-weight:500;text-transform:uppercase;letter-spacing:0.4px;}
+        .kpi-info .val{font-size:1.3rem;font-weight:800;color:var(--text-dark);line-height:1.2;margin-top:2px;}
+
+        .alert-banner{border-radius:8px;padding:11px 15px;margin-bottom:14px;display:none;align-items:center;gap:10px;font-size:0.86rem;font-weight:600;animation:fadeUp 0.3s ease;}
+        .alert-banner.show{display:flex;}
+        .alert-banner i{font-size:1.1rem;flex-shrink:0;}
+        .alert-banner a{margin-left:auto;font-size:0.8rem;cursor:pointer;text-decoration:underline;}
+        .alert-banner.warning{background:var(--warning-bg);border:1px solid #ffe082;border-left:4px solid var(--accent-dark);color:var(--warning);}
+        .alert-banner.warning a{color:var(--primary);}
+        .alert-banner.danger{background:var(--danger-bg);border:1px solid #ffcdd2;border-left:4px solid var(--danger);color:var(--danger);}
+        .alert-banner.danger a{color:var(--danger);}
+
+        .tab-bar{display:flex;gap:4px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:5px;margin-bottom:20px;width:fit-content;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+        .tab-btn{padding:8px 18px;border-radius:7px;border:none;background:none;font-size:0.875rem;font-weight:600;color:var(--text-light);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:7px;font-family:inherit;}
+        .tab-btn:hover{background:var(--primary-bg);color:var(--primary);}
+        .tab-btn.active{background:var(--primary);color:#fff;}
+        .tab-btn .badge-count{background:var(--danger);color:#fff;font-size:0.65rem;font-weight:700;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+        .tab-btn.active .badge-count{background:rgba(255,255,255,0.3);}
+        .tab-panel{display:none;}.tab-panel.active{display:block;}
+
+        .section-card{background:var(--card-bg);border-radius:10px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;}
+        .section-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#f4faf7 0%,#fff 100%);flex-wrap:wrap;gap:10px;}
+        .section-header-left{display:flex;align-items:center;gap:10px;}
+        .section-header-icon{width:34px;height:34px;background:var(--primary-bg);color:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.88rem;}
+        .section-header h2{font-size:0.98rem;font-weight:700;color:var(--text-dark);}
+        .section-subtitle{font-size:0.75rem;color:var(--text-light);margin-top:1px;}
+        .section-body{padding:20px;}
+
+        /* PUMP CARDS — 4 per row, responsive */
+        .pumps-grid{
+            display:grid;
+            grid-template-columns:repeat(4,1fr);
+            gap:16px;
+        }
+        @media(max-width:1200px){.pumps-grid{grid-template-columns:repeat(3,1fr);}}
+        @media(max-width:900px){.pumps-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:500px){.pumps-grid{grid-template-columns:1fr;}}
+
+        .pump-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow 0.22s,transform 0.22s,border-color 0.22s;animation:fadeUp 0.4s ease both;position:relative;}
+        .pump-card:hover{box-shadow:0 8px 24px rgba(0,0,0,0.1);transform:translateY(-3px);}
+        .pump-card.status-active{border-color:#b6dcc7;}
+        .pump-card.status-maintenance{border-color:var(--accent-dark);}
+        .pump-card.status-inactive{opacity:0.72;}
+        .pump-card-accent{height:4px;width:100%;}
+        .pump-card-header{padding:14px 16px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+        .pump-card-number{font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:2px;}
+        .pump-card-name{font-size:0.95rem;font-weight:700;color:var(--text-dark);line-height:1.2;}
+
+        .pump-status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:0.7rem;font-weight:700;white-space:nowrap;}
+        .pump-status-pill .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+        .status-pill-active{background:var(--primary-bg);color:var(--primary);}
+        .status-pill-active .dot{background:var(--primary);animation:pulse-dot 1.8s ease-in-out infinite;}
+        .status-pill-inactive{background:#f0f0f0;color:#666;}
+        .status-pill-inactive .dot{background:#999;}
+        .status-pill-maintenance{background:var(--accent-bg);color:var(--accent-dark);}
+        .status-pill-maintenance .dot{background:var(--accent-dark);animation:pulse-dot 1s ease-in-out infinite;}
+        @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(1.5);}}
+
+        .pump-img-area{display:flex;justify-content:center;align-items:flex-end;padding:12px 24px 4px;height:150px;position:relative;}
+        .pump-img-area::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:90px;height:12px;background:radial-gradient(ellipse,rgba(26,122,74,0.15) 0%,transparent 70%);border-radius:50%;}
+        .pump-img{height:136px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.1));transition:filter 0.3s,transform 0.3s;position:relative;z-index:1;}
+        .pump-card.status-active .pump-img{filter:drop-shadow(0 4px 10px rgba(0,0,0,0.1)) drop-shadow(0 0 8px rgba(26,122,74,0.2));}
+        .pump-card.status-inactive .pump-img{filter:grayscale(0.65) drop-shadow(0 4px 8px rgba(0,0,0,0.08));}
+        .pump-card.status-maintenance .pump-img{filter:drop-shadow(0 4px 10px rgba(0,0,0,0.1)) drop-shadow(0 0 8px rgba(245,197,24,0.3));animation:maint-bob 2.2s ease-in-out infinite;}
+        @keyframes maint-bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+        .fuel-type-badge{position:absolute;top:12px;right:14px;font-size:0.68rem;font-weight:800;letter-spacing:0.8px;text-transform:uppercase;padding:3px 8px;border-radius:5px;color:#fff;z-index:2;}
+
+        .pump-card-body{padding:11px 16px;}
+        .dispensed-meter{background:var(--page-bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+        .dispensed-lbl{font-size:0.68rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+        .dispensed-val{font-size:1.2rem;font-weight:800;color:var(--primary);margin-top:2px;}
+        .dispensed-unit{font-size:0.7rem;color:var(--text-light);margin-top:1px;}
+        .dispensed-edit-btn{background:none;border:1.5px solid var(--border);border-radius:6px;color:var(--text-light);cursor:pointer;font-size:0.75rem;width:28px;height:28px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;}
+        .dispensed-edit-btn:hover{background:var(--primary-bg);color:var(--primary);border-color:var(--primary);}
+
+        .pump-info-row{display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-mid);margin-bottom:6px;}
+        .pump-info-row i{width:14px;text-align:center;color:var(--primary);font-size:0.75rem;flex-shrink:0;}
+        .pump-info-row .info-val{font-weight:600;color:var(--text-dark);}
+
+        .maint-strip{border-radius:7px;padding:8px 10px;margin:8px 0 0;display:flex;align-items:center;gap:7px;font-size:0.78rem;font-weight:600;}
+        .maint-ok{background:var(--primary-bg);color:var(--primary);}
+        .maint-warning{background:var(--accent-bg);color:var(--accent-dark);}
+        .maint-overdue{background:var(--danger-bg);color:var(--danger);animation:strip-flash 1.6s ease-in-out infinite;}
+        .maint-none{background:#f5f5f5;color:var(--text-light);}
+        @keyframes strip-flash{0%,100%{opacity:1;}50%{opacity:0.55;}}
+
+        .pump-card-footer{padding:0 16px 14px;display:flex;gap:7px;}
+        .pump-action-btn{flex:1;padding:7px 6px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.2s;border:1.5px solid transparent;font-family:inherit;}
+        .pump-action-maint{background:var(--primary-bg);color:var(--primary);border-color:#b6dcc7;}
+        .pump-action-maint:hover{background:var(--primary);color:#fff;}
+        .pump-action-fault{background:var(--danger-bg);color:var(--danger);border-color:#ffcdd2;}
+        .pump-action-fault:hover{background:var(--danger);color:#fff;}
+        .pump-action-edit{flex:0;padding:7px 10px;background:none;border-color:var(--border);color:var(--text-light);}
+        .pump-action-edit:hover{background:var(--primary-bg);color:var(--primary);border-color:var(--primary);}
+
+        /* TOGGLE SWITCH */
+        .toggle-switch{position:relative;width:42px;height:22px;display:block;cursor:pointer;}
+        .toggle-switch input{opacity:0;width:0;height:0;}
+        .toggle-slider{position:absolute;cursor:pointer;inset:0;background:#dde;border-radius:22px;transition:0.25s;border:1px solid var(--border);}
+        .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:2px;bottom:2px;background:#aaa;border-radius:50%;transition:0.25s ease;}
+        .toggle-switch input:checked + .toggle-slider{background:var(--primary);border-color:var(--primary);}
+        .toggle-switch input:checked + .toggle-slider::before{transform:translateX(20px);background:#fff;}
+        .toggle-slider.bounce{animation:tbounce 0.3s ease;}
+        @keyframes tbounce{0%{transform:scale(1);}40%{transform:scale(1.1);}70%{transform:scale(0.96);}100%{transform:scale(1);}}
+
+        /* fuel group */
+        .fuel-group-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+        .fuel-group-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+        .fuel-group-label{font-size:1rem;font-weight:800;color:var(--text-dark);text-transform:uppercase;letter-spacing:0.8px;}
+        .fuel-group-count{font-size:0.75rem;color:var(--text-light);}
+
+        .filters-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+        .filter-lbl{font-size:0.82rem;color:var(--text-light);white-space:nowrap;}
+        .form-select,.form-ctrl,.date-inp{padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:0.85rem;color:var(--text-dark);background:#fff;outline:none;transition:border-color 0.2s;font-family:inherit;}
+        .form-select:focus,.form-ctrl:focus,.date-inp:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,122,74,0.1);}
+        .date-inp{width:135px;}
+
+        .data-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+        .data-table th{background:#f4faf7;color:var(--text-mid);font-weight:600;padding:10px 13px;text-align:left;border-bottom:2px solid var(--border);font-size:0.76rem;text-transform:uppercase;letter-spacing:0.4px;}
+        .data-table td{padding:11px 13px;border-bottom:1px solid #f0f0f0;color:var(--text-dark);vertical-align:middle;}
+        .data-table tr:last-child td{border-bottom:none;}
+        .data-table tr:hover td{background:#f8fcfa;}
+
+        .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:600;}
+        .pill-green{background:var(--primary-bg);color:var(--primary);}
+        .pill-yellow{background:var(--accent-bg);color:var(--accent-dark);}
+        .pill-red{background:var(--danger-bg);color:var(--danger);}
+        .pill-orange{background:var(--warning-bg);color:var(--warning);}
+        .pill-gray{background:#f0f0f0;color:#555;}
+        .sev-low{background:#e8f5e9;color:#2e7d32;display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:600;}
+        .sev-medium{background:var(--warning-bg);color:var(--warning);display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:600;}
+        .sev-high{background:var(--danger-bg);color:var(--danger);display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:600;}
+        .sev-critical{background:#880000;color:#fff;display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:600;}
+
+        .btn-icon{width:30px;height:30px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:none;border:1.5px solid var(--border);color:var(--text-light);cursor:pointer;transition:all 0.2s;font-size:0.78rem;}
+        .btn-icon:hover{background:var(--primary-bg);color:var(--primary);border-color:var(--primary);}
+        .btn-icon.del:hover{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);}
+
+        .btn{padding:8px 16px;border-radius:7px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;border:1.5px solid transparent;transition:all 0.2s;font-family:inherit;}
+        .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .btn-primary:hover{background:var(--primary-light);border-color:var(--primary-light);}
+        .btn-outline{background:#fff;border-color:var(--border);color:var(--text-mid);}
+        .btn-outline:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-bg);}
+        .btn-yellow{background:var(--accent);color:var(--text-dark);border-color:var(--accent);}
+        .btn-yellow:hover{background:var(--accent-dark);border-color:var(--accent-dark);}
+        .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger);}
+
+        .schedule-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+        .schedule-card{border-radius:9px;padding:13px 14px;border:1.5px solid var(--border);background:var(--card-bg);}
+        .schedule-card.overdue{border-color:var(--danger);}
+        .schedule-card.warning{border-color:var(--accent-dark);}
+        .schedule-card.ok{border-color:#b6dcc7;}
+
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);justify-content:center;align-items:center;z-index:1000;padding:12px;overflow-y:auto;}
+        .modal.show{display:flex;}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-18px);}to{opacity:1;transform:translateY(0);}}
+        .modal-content{background:#fff;border-radius:12px;width:480px;max-width:96vw;padding:26px 28px;box-shadow:0 12px 40px rgba(0,0,0,0.2);position:relative;animation:slideDown 0.28s ease forwards;}
+        .modal-content.wide{width:560px;}
+        .modal-title{font-size:1.1rem;font-weight:800;color:var(--text-dark);margin-bottom:20px;display:flex;align-items:center;gap:9px;}
+        .modal-title i{color:var(--primary);}
+        .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.6rem;cursor:pointer;color:#999;transition:color 0.2s;line-height:1;}
+        .modal-close:hover{color:#333;}
+        .fg{margin-bottom:16px;}
+        .fg label{display:block;font-size:0.82rem;font-weight:600;color:var(--text-mid);margin-bottom:5px;}
+        .fg label i{color:var(--primary);margin-right:4px;font-size:0.76rem;}
+        .fg .fc{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:0.88rem;color:var(--text-dark);font-family:inherit;outline:none;transition:border-color 0.2s,box-shadow 0.2s;box-sizing:border-box;}
+        .fg .fc:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,122,74,0.12);}
+        .fg textarea.fc{resize:vertical;min-height:72px;}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .form-actions{margin-top:22px;display:flex;justify-content:flex-end;gap:10px;}
+        .form-actions .btn{min-width:100px;justify-content:center;}
+        .fc-large{font-size:1.6rem;font-weight:800;text-align:center;color:var(--primary);border:2px solid var(--primary);border-radius:10px;padding:10px;}
+        #deleteModal .modal-content{width:380px;text-align:center;padding:30px;}
+        .del-icon{width:56px;height:56px;background:var(--danger-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.4rem;color:var(--danger);}
+        #deleteModal h3{font-size:1.1rem;color:var(--text-dark);margin-bottom:8px;}
+        #deleteModal p{font-size:0.85rem;color:var(--text-light);margin-bottom:22px;}
+        #deleteModal .form-actions{justify-content:center;}
+
+        .empty-state{text-align:center;padding:42px 20px;color:var(--text-light);}
+        .empty-state i{font-size:2.8rem;margin-bottom:12px;opacity:0.35;display:block;}
+        .empty-state p{font-size:0.88rem;}
+
+        @keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .pump-card:nth-child(1){animation-delay:.04s}.pump-card:nth-child(2){animation-delay:.08s}.pump-card:nth-child(3){animation-delay:.12s}.pump-card:nth-child(4){animation-delay:.16s}
+        @keyframes flash-on{0%,100%{box-shadow:none;}50%{box-shadow:0 0 0 4px rgba(26,122,74,0.22);}}
+        @keyframes flash-off{0%,100%{box-shadow:none;}50%{box-shadow:0 0 0 4px rgba(100,100,100,0.18);}}
+        .flash-on{animation:flash-on 0.5s ease;}.flash-off{animation:flash-off 0.5s ease;}
+
+        @media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr;}.tab-bar{flex-wrap:wrap;}.form-row{grid-template-columns:1fr;}.filters-bar{flex-direction:column;align-items:flex-start;}}
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-gas-pump"></i><h2><span>FuelSys Pro</span></h2></div>
+        <nav><ul>
+            <li><a href="index.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+            <li><a href="sales.html"><i class="fas fa-cash-register"></i><span>Sales &amp; Billing</span></a></li>
+            <li><a href="inventory.html"><i class="fas fa-oil-can"></i><span>Fuel Inventory</span></a></li>
+            <li class="active"><a href="/pumps/page"><i class="fas fa-gas-pump"></i><span>Pumps</span></a></li>
+            <li><a href="/staff/page"><i class="fas fa-users"></i><span>Staff</span></a></li>
+            <li><a href="/shifts/page"><i class="fa fa-calendar"></i><span>Shifts</span></a></li>
+            <li><a href="/lubricants/page"><i class="fa-solid fa-spray-can-sparkles"></i><span>Lubricants</span></a></li>
+            <li><a href="reports.html"><i class="fas fa-chart-bar"></i><span>Reports</span></a></li>
+            <li><a href="/suppliers/page"><i class="fas fa-truck"></i><span>Suppliers</span></a></li>
+            <li><a href="/expenses/page"><i class="fas fa-money-bill-wave"></i><span>Expenses</span></a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+        </ul></nav>
+        <div class="sidebar-toggle"><i class="fas fa-angle-left"></i></div>
+    </aside>
+    <main class="main-content">
+        <header>
+            <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Search pumps..."></div>
+            <div class="user-actions">
+                <div class="notifications"><i class="fas fa-bell"></i><span class="badge" id="headerAlertBadge" style="display:none;"></span></div>
+                <div class="user-profile"><img src="https://via.placeholder.com/40" alt="User"><span>Admin</span><i class="fas fa-chevron-down"></i></div>
+            </div>
+        </header>
+        <div class="content">
+            <div class="page-header">
+                <div>
+                    <h1>Pumps</h1>
+                    <div style="font-size:0.78rem;color:var(--text-light);margin-top:3px;">Dashboard / <span style="color:var(--primary);font-weight:600;">Pumps</span></div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-primary" id="addPumpBtn"><i class="fas fa-plus"></i> Add Pump</button>
+                </div>
+            </div>
+
+            <div class="alert-banner danger" id="overdueAlertBar">
+                <i class="fas fa-circle-exclamation"></i>
+                <span id="overdueAlertText">Some pumps have overdue maintenance.</span>
+                <a onclick="switchTab('maintenance')">View Maintenance →</a>
+            </div>
+            <div class="alert-banner warning" id="warningAlertBar">
+                <i class="fas fa-triangle-exclamation"></i>
+                <span id="warningAlertText">Some pumps have maintenance due soon.</span>
+                <a onclick="switchTab('maintenance')">View Schedule →</a>
+            </div>
+
+            <div class="kpi-row">
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fas fa-gas-pump"></i></div><div class="kpi-info"><div class="lbl">Total Pumps</div><div class="val" id="kpiTotal">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fas fa-circle-check"></i></div><div class="kpi-info"><div class="lbl">Active</div><div class="val" id="kpiActive">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon yellow"><i class="fas fa-wrench"></i></div><div class="kpi-info"><div class="lbl">Under Maintenance</div><div class="val" id="kpiMaint">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon red"><i class="fas fa-power-off"></i></div><div class="kpi-info"><div class="lbl">Inactive</div><div class="val" id="kpiInactive">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon blue"><i class="fas fa-droplet"></i></div><div class="kpi-info"><div class="lbl">Total Dispensed</div><div class="val" id="kpiDispensed">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon orange"><i class="fas fa-triangle-exclamation"></i></div><div class="kpi-info"><div class="lbl">Open Faults</div><div class="val" id="kpiFaults">–</div></div></div>
+            </div>
+
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('pumps')" id="tab-pumps"><i class="fas fa-gas-pump"></i> Pumps</button>
+                <button class="tab-btn" onclick="switchTab('maintenance')" id="tab-maintenance"><i class="fas fa-wrench"></i> Maintenance</button>
+                <button class="tab-btn" onclick="switchTab('faults')" id="tab-faults"><i class="fas fa-triangle-exclamation"></i> Faults <span class="badge-count" id="faultBadge" style="display:none;">0</span></button>
+            </div>
+
+            <!-- TAB: PUMPS -->
+            <div class="tab-panel active" id="panel-pumps">
+                <div id="pumpsZone" style="display:flex;flex-direction:column;gap:24px;">
+                    <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading pumps…</p></div>
+                </div>
+            </div>
+
+            <!-- TAB: MAINTENANCE -->
+            <div class="tab-panel" id="panel-maintenance">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon"><i class="fas fa-wrench"></i></div>
+                            <div><h2>Maintenance Log</h2><div class="section-subtitle">All service records for all pumps</div></div>
+                        </div>
+                        <button class="btn btn-primary" id="addMaintBtn"><i class="fas fa-plus"></i> Log Maintenance</button>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar">
+                            <label class="filter-lbl">Pump:</label>
+                            <select class="form-select" id="maintPumpFilter"><option value="">All Pumps</option></select>
+                            <label class="filter-lbl">From:</label>
+                            <input type="text" class="date-inp" id="maintStart" placeholder="Start date">
+                            <label class="filter-lbl">To:</label>
+                            <input type="text" class="date-inp" id="maintEnd" placeholder="End date">
+                            <button class="btn btn-outline" id="maintFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Pump</th><th>Technician</th><th>Work Done</th><th>Cost</th><th>Next Scheduled</th><th>Actions</th></tr></thead>
+                                <tbody id="maintTableBody"><tr><td colspan="7"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-card" style="margin-top:20px;">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-calendar-check"></i></div>
+                            <div><h2>Upcoming Schedule</h2><div class="section-subtitle">Next maintenance due per pump</div></div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="schedule-grid" id="scheduleGrid">
+                            <div class="empty-state"><i class="fas fa-calendar-xmark"></i><p>No upcoming maintenance scheduled.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: FAULTS -->
+            <div class="tab-panel" id="panel-faults">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="fas fa-triangle-exclamation"></i></div>
+                            <div><h2>Fault Reports</h2><div class="section-subtitle">Breakdowns and issues reported by staff</div></div>
+                        </div>
+                        <button class="btn btn-danger" id="addFaultBtn"><i class="fas fa-plus"></i> Report Fault</button>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar">
+                            <label class="filter-lbl">Pump:</label>
+                            <select class="form-select" id="faultPumpFilter"><option value="">All Pumps</option></select>
+                            <label class="filter-lbl">Status:</label>
+                            <select class="form-select" id="faultStatusFilter">
+                                <option value="">All</option><option>Open</option><option>In Progress</option><option>Resolved</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Pump</th><th>Reported By</th><th>Description</th><th>Severity</th><th>Status</th><th>Actions</th></tr></thead>
+                                <tbody id="faultTableBody"><tr><td colspan="7"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- PUMP MODAL -->
+<div id="pumpModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('pumpModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-gas-pump"></i><span id="pumpModalTitle">Add Pump</span></div>
+        <form id="pumpForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-hashtag"></i>Pump Number *</label><input class="fc" type="text" id="pNum" required placeholder="P-01"></div>
+                <div class="fg"><label><i class="fas fa-tag"></i>Pump Name *</label><input class="fc" type="text" id="pName" required placeholder="Pump 1 — Island A"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-droplet"></i>Fuel Type *</label>
+                    <select class="fc" id="pFuel" required><option value="">Select fuel type</option><option>92 Octane</option><option>95 Octane</option><option>Auto Diesel</option><option>Super Diesel</option></select>
+                </div>
+                <div class="fg"><label><i class="fas fa-circle-half-stroke"></i>Status</label>
+                    <select class="fc" id="pStatus"><option>Active</option><option>Inactive</option><option>Under Maintenance</option></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Last Maintenance Date</label><input class="fc" type="text" id="pLastMaint" placeholder="YYYY-MM-DD"></div>
+                <div class="fg"><label><i class="fas fa-calendar-plus"></i>Next Maintenance Date</label><input class="fc" type="text" id="pNextMaint" placeholder="YYYY-MM-DD"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-user"></i>Operator</label><select class="fc" id="pOperator"><option value="">Unassigned</option></select></div>
+                <div class="fg"><label><i class="fas fa-droplet"></i>Total Dispensed (L)</label><input class="fc" type="number" id="pDispensed" min="0" step="0.1" value="0"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="pNotes" placeholder="Optional notes"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('pumpModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="pumpSubmitBtn">Save Pump</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DISPENSED MODAL -->
+<div id="dispensedModal" class="modal">
+    <div class="modal-content" style="width:340px;">
+        <button class="modal-close" onclick="closeModal('dispensedModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-droplet"></i>Update Total Dispensed</div>
+        <div class="fg" style="margin-bottom:6px;"><label id="dispensedPumpLabel" style="font-size:0.78rem;color:var(--text-light);font-weight:400;">Pump</label></div>
+        <div class="fg"><input class="fc fc-large" type="number" id="dispensedVal" min="0" step="0.1" placeholder="0"></div>
+        <div style="font-size:0.78rem;color:var(--text-light);margin-bottom:16px;">Enter new lifetime total in Liters</div>
+        <div class="form-actions">
+            <button class="btn btn-outline" onclick="closeModal('dispensedModal')">Cancel</button>
+            <button class="btn btn-primary" id="dispensedSaveBtn">Update</button>
+        </div>
+    </div>
+</div>
+
+<!-- MAINTENANCE MODAL -->
+<div id="maintModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('maintModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-wrench"></i><span id="maintModalTitle">Log Maintenance</span></div>
+        <form id="maintForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Date *</label><input class="fc" type="text" id="mDate" required></div>
+                <div class="fg"><label><i class="fas fa-gas-pump"></i>Pump *</label><select class="fc" id="mPump" required><option value="">Select pump</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-user-gear"></i>Technician *</label><input class="fc" type="text" id="mTech" required placeholder="Name / company"></div>
+                <div class="fg"><label><i class="fas fa-coins"></i>Cost (Rs.)</label><input class="fc" type="number" id="mCost" min="0" step="0.01" placeholder="0.00"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-list-check"></i>Work Done *</label><textarea class="fc" id="mWork" required placeholder="Describe what was serviced / repaired"></textarea></div>
+            <div class="fg"><label><i class="fas fa-calendar-plus"></i>Next Scheduled Date <span style="font-size:0.74rem;color:var(--text-light);font-weight:400;">(auto-updates pump)</span></label><input class="fc" type="text" id="mNext" placeholder="YYYY-MM-DD"></div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="mNotes" placeholder="Optional notes"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('maintModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="maintSubmitBtn">Save Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FAULT MODAL -->
+<div id="faultModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('faultModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-triangle-exclamation" style="color:var(--danger);"></i><span id="faultModalTitle">Report Fault</span></div>
+        <form id="faultForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Date *</label><input class="fc" type="text" id="fDate" required></div>
+                <div class="fg"><label><i class="fas fa-gas-pump"></i>Pump *</label><select class="fc" id="fPump" required><option value="">Select pump</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-user"></i>Reported By *</label><input class="fc" type="text" id="fReporter" required placeholder="Staff name"></div>
+                <div class="fg"><label><i class="fas fa-gauge-high"></i>Severity</label>
+                    <select class="fc" id="fSeverity"><option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option></select>
+                </div>
+            </div>
+            <div class="fg"><label><i class="fas fa-align-left"></i>Description *</label><textarea class="fc" id="fDesc" required placeholder="Describe the fault or issue"></textarea></div>
+            <div class="form-row" id="faultResolveRow" style="display:none;">
+                <div class="fg"><label><i class="fas fa-circle-check"></i>Status</label>
+                    <select class="fc" id="fStatus"><option>Open</option><option>In Progress</option><option>Resolved</option></select>
+                </div>
+                <div class="fg"><label><i class="fas fa-calendar-check"></i>Resolved Date</label><input class="fc" type="text" id="fResolved" placeholder="YYYY-MM-DD"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="fNotes" placeholder="Optional"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('faultModal')">Cancel</button>
+                <button type="submit" class="btn btn-danger" id="faultSubmitBtn">Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="del-icon"><i class="fas fa-trash"></i></div>
+        <h3>Confirm Delete</h3>
+        <p id="deleteMsg">This action cannot be undone.</p>
+        <div class="form-actions">
+            <button class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const API = '/pumps';
+    const IMG = "{{ url_for('static', filename='images/pump1.png') }}";
+    const FUEL_COLORS = {'92 Octane':'#3b82f6','95 Octane':'#8b5cf6','Auto Diesel':'#f59e0b','Super Diesel':'#ef4444'};
+    const FUEL_LABELS = {'92 Octane':'92 OCT','95 Octane':'95 OCT','Auto Diesel':'AUTO','Super Diesel':'SUPER'};
+
+    let pumps=[], operators=[], editPumpId=null, editMaintId=null, editFaultId=null, dispensePumpId=null;
+    let deleteTarget={url:null,cbName:null};
+
+    flatpickr('#pLastMaint',{dateFormat:'Y-m-d'});flatpickr('#pNextMaint',{dateFormat:'Y-m-d'});
+    flatpickr('#mDate',{dateFormat:'Y-m-d',defaultDate:'today'});flatpickr('#mNext',{dateFormat:'Y-m-d'});
+    flatpickr('#fDate',{dateFormat:'Y-m-d',defaultDate:'today'});flatpickr('#fResolved',{dateFormat:'Y-m-d'});
+    flatpickr('#maintStart',{dateFormat:'Y-m-d'});flatpickr('#maintEnd',{dateFormat:'Y-m-d'});
+
+    loadAll();
+
+    async function loadAll(){
+        [pumps,operators]=await Promise.all([apiFetch(API+'/'),apiFetch(API+'/operators')]);
+        renderPumpZone();loadSummary();populateDropdowns();
+    }
+
+    // ── TAB SWITCHING ────────────────────────────────────────────
+    window.switchTab=function(tab){
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        document.getElementById('tab-'+tab).classList.add('active');
+        document.getElementById('panel-'+tab).classList.add('active');
+        if(tab==='maintenance'){loadMaintenance();buildScheduleGrid();}
+        if(tab==='faults')loadFaults();
+    };
+
+    // ── KPI SUMMARY ──────────────────────────────────────────────
+    async function loadSummary(){
+        const d=await apiFetch(API+'/summary');
+        document.getElementById('kpiTotal').textContent=d.total_pumps;
+        document.getElementById('kpiActive').textContent=d.active;
+        document.getElementById('kpiMaint').textContent=d.under_maintenance;
+        document.getElementById('kpiInactive').textContent=d.inactive;
+        document.getElementById('kpiDispensed').textContent=fmtL(d.total_dispensed_all);
+        document.getElementById('kpiFaults').textContent=d.open_faults;
+        const overdue=(d.alerts||[]).filter(p=>p.maintenance_alert==='overdue');
+        const warning=(d.alerts||[]).filter(p=>p.maintenance_alert==='warning');
+        if(overdue.length){
+            document.getElementById('overdueAlertBar').classList.add('show');
+            document.getElementById('overdueAlertText').textContent=`${overdue.length} pump${overdue.length>1?'s have':' has'} overdue maintenance: ${overdue.map(p=>p.pump_number).join(', ')}`;
+            document.getElementById('headerAlertBadge').style.display='flex';
+            document.getElementById('headerAlertBadge').textContent=overdue.length;
+        }
+        if(warning.length){
+            document.getElementById('warningAlertBar').classList.add('show');
+            document.getElementById('warningAlertText').textContent=`${warning.length} pump${warning.length>1?'s have':' has'} maintenance due within 7 days: ${warning.map(p=>p.pump_number).join(', ')}`;
+        }
+        if(d.open_faults>0){const b=document.getElementById('faultBadge');b.style.display='flex';b.textContent=d.open_faults;}
+    }
+
+    // ── PUMP CARDS ───────────────────────────────────────────────
+    function renderPumpZone(){
+        const zone=document.getElementById('pumpsZone');
+        if(!pumps.length){zone.innerHTML='<div class="empty-state"><i class="fas fa-gas-pump"></i><p>No pumps found. Add your first pump.</p></div>';return;}
+        const ORDER=['92 Octane','95 Octane','Auto Diesel','Super Diesel'];
+        const groups={};
+        pumps.forEach(p=>{if(!groups[p.fuel_type])groups[p.fuel_type]=[];groups[p.fuel_type].push(p);});
+        zone.innerHTML=ORDER.filter(ft=>groups[ft]).map(ft=>`
+            <div>
+                <div class="fuel-group-header">
+                    <div class="fuel-group-dot" style="background:${FUEL_COLORS[ft]};border-radius:50%;"></div>
+                    <span class="fuel-group-label">${ft}</span>
+                    <span class="fuel-group-count">${groups[ft].length} pump${groups[ft].length>1?'s':''}</span>
+                </div>
+                <div class="pumps-grid">${groups[ft].map(p=>buildPumpCard(p)).join('')}</div>
+            </div>`).join('');
+    }
+
+    function buildPumpCard(p){
+        const color=FUEL_COLORS[p.fuel_type]||'#1a7a4a';
+        const label=FUEL_LABELS[p.fuel_type]||p.fuel_type;
+        const stClass=p.status==='Active'?'status-active':p.status==='Inactive'?'status-inactive':'status-maintenance';
+        const stPillClass=p.status==='Active'?'status-pill-active':p.status==='Inactive'?'status-pill-inactive':'status-pill-maintenance';
+        const isActive=p.status==='Active';
+        let maintStrip='';
+        if(p.maintenance_alert==='overdue') maintStrip=`<div class="maint-strip maint-overdue"><i class="fas fa-circle-exclamation"></i>Maintenance OVERDUE — ${Math.abs(p.days_until_maintenance)}d past due</div>`;
+        else if(p.maintenance_alert==='warning') maintStrip=`<div class="maint-strip maint-warning"><i class="fas fa-triangle-exclamation"></i>Due in ${p.days_until_maintenance} day${p.days_until_maintenance!==1?'s':''}</div>`;
+        else if(p.next_maintenance_date) maintStrip=`<div class="maint-strip maint-ok"><i class="fas fa-circle-check"></i>Next service: ${p.next_maintenance_date}</div>`;
+        else maintStrip=`<div class="maint-strip maint-none"><i class="fas fa-calendar-xmark"></i>No maintenance scheduled</div>`;
+        const operatorLine=p.operator_name?`<div class="pump-info-row"><i class="fas fa-user"></i><span class="info-val">${esc(p.operator_name)}</span></div>`:'';
+        const lastMaintLine=p.last_maintenance_date?`<div class="pump-info-row"><i class="fas fa-wrench"></i>Last service: <span class="info-val">${p.last_maintenance_date}</span></div>`:'';
+        return `<div class="pump-card ${stClass}" id="pump-card-${p.id}">
+            <div class="pump-card-accent" style="background:${color};"></div>
+            <div class="pump-card-header">
+                <div><div class="pump-card-number">${esc(p.pump_number)}</div><div class="pump-card-name">${esc(p.pump_name)}</div></div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+                    <span class="pump-status-pill ${stPillClass}"><span class="dot"></span>${p.status}</span>
+                    <label class="toggle-switch" title="${isActive?'Deactivate':'Activate'} pump">
+                        <input type="checkbox" ${isActive?'checked':''} onchange="togglePumpStatus(${p.id},this)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="pump-img-area">
+                <span class="fuel-type-badge" style="background:${color};">${label}</span>
+                <img class="pump-img" src="${IMG}" alt="Pump" onerror="this.src='https://via.placeholder.com/70x130/1a7a4a/ffffff?text=PUMP'">
+            </div>
+            <div class="pump-card-body">
+                <div class="dispensed-meter">
+                    <div><div class="dispensed-lbl">Total Dispensed</div><div class="dispensed-val">${fmtL(p.total_dispensed_l)}</div><div class="dispensed-unit">Liters lifetime</div></div>
+                    <button class="dispensed-edit-btn" title="Update reading" onclick="openDispensedEdit(${p.id},'${esc(p.pump_name)}',${p.total_dispensed_l})"><i class="fas fa-pen"></i></button>
+                </div>
+                ${operatorLine}${lastMaintLine}${maintStrip}
+            </div>
+            <div class="pump-card-footer">
+                <button class="pump-action-btn pump-action-maint" onclick="openMaintForPump(${p.id});switchTab('maintenance')"><i class="fas fa-wrench"></i> Maintenance</button>
+                <button class="pump-action-btn pump-action-fault" onclick="openFaultForPump(${p.id});switchTab('faults')"><i class="fas fa-triangle-exclamation"></i> Fault</button>
+                <button class="pump-action-btn pump-action-edit" title="Edit pump" onclick="openEditPump(${p.id})"><i class="fas fa-pen"></i></button>
+            </div>
+        </div>`;
+    }
+
+    // ── TOGGLE PUMP STATUS ───────────────────────────────────────
+    window.togglePumpStatus=async function(id,checkbox){
+        const newStatus=checkbox.checked?'Active':'Inactive';
+        const slider=checkbox.nextElementSibling;
+        slider.classList.add('bounce');setTimeout(()=>slider.classList.remove('bounce'),350);
+        const r=await fetch(API+'/status/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:newStatus})});
+        if(!r.ok){checkbox.checked=!checkbox.checked;return;}
+        const card=document.getElementById('pump-card-'+id);
+        if(card){card.classList.add(newStatus==='Active'?'flash-on':'flash-off');setTimeout(()=>{card.classList.remove('flash-on','flash-off');},600);}
+        const pump=pumps.find(p=>p.id===id);
+        if(pump){pump.status=newStatus;renderPumpZone();}
+        loadSummary();
+    };
+
+    // ── DISPENSED EDIT ───────────────────────────────────────────
+    window.openDispensedEdit=function(id,name,current){
+        dispensePumpId=id;
+        document.getElementById('dispensedPumpLabel').textContent=name;
+        document.getElementById('dispensedVal').value=current;
+        openModal('dispensedModal');
+    };
+    document.getElementById('dispensedSaveBtn').addEventListener('click',async()=>{
+        const val=parseFloat(document.getElementById('dispensedVal').value);
+        if(isNaN(val))return;
+        await fetch(API+'/dispensed/'+dispensePumpId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({total_dispensed_l:val})});
+        closeModal('dispensedModal');
+        const p=pumps.find(x=>x.id===dispensePumpId);
+        if(p){p.total_dispensed_l=val;renderPumpZone();}
+        loadSummary();
+    });
+
+    // ── ADD / EDIT PUMP ──────────────────────────────────────────
+    document.getElementById('addPumpBtn').addEventListener('click',()=>{
+        editPumpId=null;
+        document.getElementById('pumpModalTitle').textContent='Add Pump';
+        document.getElementById('pumpSubmitBtn').textContent='Save Pump';
+        document.getElementById('pumpForm').reset();
+        openModal('pumpModal');
+    });
+    window.openEditPump=function(id){
+        const p=pumps.find(x=>x.id===id);if(!p)return;
+        editPumpId=id;
+        document.getElementById('pumpModalTitle').textContent='Edit Pump';
+        document.getElementById('pumpSubmitBtn').textContent='Update Pump';
+        document.getElementById('pNum').value=p.pump_number;document.getElementById('pName').value=p.pump_name;
+        document.getElementById('pFuel').value=p.fuel_type;document.getElementById('pStatus').value=p.status;
+        document.getElementById('pLastMaint').value=p.last_maintenance_date||'';document.getElementById('pNextMaint').value=p.next_maintenance_date||'';
+        document.getElementById('pOperator').value=p.operator_id||'';document.getElementById('pDispensed').value=p.total_dispensed_l;
+        document.getElementById('pNotes').value=p.notes||'';
+        openModal('pumpModal');
+    };
+    document.getElementById('pumpForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const body={pump_number:document.getElementById('pNum').value,pump_name:document.getElementById('pName').value,fuel_type:document.getElementById('pFuel').value,status:document.getElementById('pStatus').value,last_maintenance_date:document.getElementById('pLastMaint').value||null,next_maintenance_date:document.getElementById('pNextMaint').value||null,operator_id:document.getElementById('pOperator').value||null,total_dispensed_l:document.getElementById('pDispensed').value,notes:document.getElementById('pNotes').value};
+        const url=editPumpId?API+'/update/'+editPumpId:API+'/add';
+        const method=editPumpId?'PUT':'POST';
+        const r=await apiPost(url,body,method);
+        if(r){closeModal('pumpModal');await loadAll();}
+    });
+
+    // ── MAINTENANCE ──────────────────────────────────────────────
+    // FIX: exposed as window.loadMaintenance so delete callbacks work
+    window.loadMaintenance = async function(){
+        const pid=document.getElementById('maintPumpFilter').value;
+        const sd=document.getElementById('maintStart').value;
+        const ed=document.getElementById('maintEnd').value;
+        const p=new URLSearchParams();
+        if(pid)p.append('pump_id',pid);if(sd)p.append('start_date',sd);if(ed)p.append('end_date',ed);
+        const data=await apiFetch(API+'/maintenance?'+p);
+        const tb=document.getElementById('maintTableBody');
+        if(!data.length){tb.innerHTML=emptyRow(7,'fa-wrench','No maintenance records found.');return;}
+        tb.innerHTML=data.map(m=>`<tr>
+            <td>${m.maintenance_date}</td>
+            <td><div style="font-weight:600;">${esc(m.pump_number)}</div><div style="font-size:0.75rem;color:var(--text-light);">${esc(m.pump_name)}</div></td>
+            <td>${esc(m.technician)}</td>
+            <td style="max-width:200px;">${esc(m.work_done)}</td>
+            <td style="font-weight:600;color:var(--primary);">Rs.${fmt(m.cost)}</td>
+            <td>${m.next_scheduled?`<span class="pill pill-yellow">${m.next_scheduled}</span>`:'—'}</td>
+            <td><div style="display:flex;gap:5px;">
+                <button class="btn-icon" onclick="openEditMaint(${m.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon del" onclick="confirmDelete('${API}/maintenance/delete/${m.id}','Delete this maintenance record?','loadMaintenance')"><i class="fas fa-trash"></i></button>
+            </div></td></tr>`).join('');
+        // Store maint data for edit lookups
+        window._maintData = data;
+    };
+
+    function buildScheduleGrid(){
+        const grid=document.getElementById('scheduleGrid');
+        const withDates=pumps.filter(p=>p.next_maintenance_date).sort((a,b)=>new Date(a.next_maintenance_date)-new Date(b.next_maintenance_date));
+        if(!withDates.length){grid.innerHTML='<div class="empty-state"><i class="fas fa-calendar-xmark"></i><p>No maintenance scheduled yet.</p></div>';return;}
+        grid.innerHTML=withDates.map(p=>{
+            const alert=p.maintenance_alert;const days=p.days_until_maintenance;
+            const cls=alert==='overdue'?'overdue':alert==='warning'?'warning':'ok';
+            const dayTxt=days===null?'':days<0?Math.abs(days)+'d overdue':days===0?'Due TODAY':'In '+days+'d';
+            const dayClr=alert==='overdue'?'var(--danger)':alert==='warning'?'var(--accent-dark)':'var(--primary)';
+            return `<div class="schedule-card ${cls}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+                    <div><div style="font-weight:700;font-size:0.9rem;">${esc(p.pump_number)}</div><div style="font-size:0.75rem;color:var(--text-light);">${esc(p.pump_name)}</div></div>
+                    <span style="font-size:0.72rem;font-weight:700;color:${dayClr};">${dayTxt}</span>
+                </div>
+                <div style="font-size:0.82rem;color:var(--text-mid);"><i class="fas fa-calendar" style="color:${dayClr};margin-right:5px;"></i>${p.next_maintenance_date}</div>
+            </div>`;
+        }).join('');
+    }
+
+    document.getElementById('addMaintBtn').addEventListener('click',()=>{
+        editMaintId=null;document.getElementById('maintModalTitle').textContent='Log Maintenance';document.getElementById('maintSubmitBtn').textContent='Save Record';
+        document.getElementById('maintForm').reset();openModal('maintModal');
+    });
+    window.openMaintForPump=function(id){
+        editMaintId=null;document.getElementById('maintModalTitle').textContent='Log Maintenance';document.getElementById('maintSubmitBtn').textContent='Save Record';
+        document.getElementById('maintForm').reset();document.getElementById('mPump').value=id;openModal('maintModal');
+    };
+
+    // FIX: edit by ID lookup from stored data instead of inline JSON (avoids HTML encoding issues)
+    window.openEditMaint=function(id){
+        const m=(window._maintData||[]).find(x=>x.id===id);
+        if(!m)return;
+        editMaintId=m.id;document.getElementById('maintModalTitle').textContent='Edit Maintenance Record';document.getElementById('maintSubmitBtn').textContent='Update Record';
+        document.getElementById('mDate').value=m.maintenance_date;document.getElementById('mPump').value=m.pump_id;
+        document.getElementById('mTech').value=m.technician;document.getElementById('mCost').value=m.cost;
+        document.getElementById('mWork').value=m.work_done;document.getElementById('mNext').value=m.next_scheduled||'';
+        document.getElementById('mNotes').value=m.notes||'';openModal('maintModal');
+    };
+
+    document.getElementById('maintForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const pumpId = document.getElementById('mPump').value;
+        const body={pump_id:pumpId,maintenance_date:document.getElementById('mDate').value,technician:document.getElementById('mTech').value,work_done:document.getElementById('mWork').value,cost:document.getElementById('mCost').value||0,next_scheduled:document.getElementById('mNext').value||null,notes:document.getElementById('mNotes').value};
+        const url=editMaintId?API+'/maintenance/update/'+editMaintId:API+'/maintenance/add';
+        const method=editMaintId?'PUT':'POST';
+        const r=await apiPost(url,body,method);
+        if(r){
+            closeModal('maintModal');
+            // FIX: When logging maintenance, set pump status to "Under Maintenance"
+            if(!editMaintId && pumpId){
+                await fetch(API+'/status/'+pumpId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'Under Maintenance'})});
+            }
+            loadMaintenance();
+            await loadAll();
+        }
+    });
+    document.getElementById('maintFilterBtn').addEventListener('click',loadMaintenance);
+
+    // ── FAULTS ───────────────────────────────────────────────────
+    // FIX: exposed as window.loadFaults so delete callbacks and filter changes work
+    window.loadFaults = async function(){
+        const pid=document.getElementById('faultPumpFilter').value;
+        const st=document.getElementById('faultStatusFilter').value;
+        const p=new URLSearchParams();if(pid)p.append('pump_id',pid);if(st)p.append('status',st);
+        const data=await apiFetch(API+'/faults?'+p);
+        const tb=document.getElementById('faultTableBody');
+        if(!data.length){tb.innerHTML=emptyRow(7,'fa-triangle-exclamation','No fault reports found.');return;}
+        const sevClass={Low:'sev-low',Medium:'sev-medium',High:'sev-high',Critical:'sev-critical'};
+        const stClass={Open:'pill-red','In Progress':'pill-orange',Resolved:'pill-green'};
+        tb.innerHTML=data.map(f=>`<tr>
+            <td>${f.fault_date}</td>
+            <td><div style="font-weight:600;">${esc(f.pump_number)}</div><div style="font-size:0.75rem;color:var(--text-light);">${esc(f.pump_name)}</div></td>
+            <td>${esc(f.reported_by)}</td>
+            <td style="max-width:200px;">${esc(f.description)}</td>
+            <td><span class="${sevClass[f.severity]||'pill-gray'}">${f.severity}</span></td>
+            <td><span class="pill ${stClass[f.status]||'pill-gray'}">${f.status}</span></td>
+            <td><div style="display:flex;gap:5px;">
+                <button class="btn-icon" onclick="openEditFault(${f.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon del" onclick="confirmDelete('${API}/faults/delete/${f.id}','Delete this fault report?','loadFaults')"><i class="fas fa-trash"></i></button>
+            </div></td></tr>`).join('');
+        // Store fault data for edit lookups
+        window._faultData = data;
+    };
+
+    document.getElementById('addFaultBtn').addEventListener('click',()=>{
+        editFaultId=null;document.getElementById('faultModalTitle').textContent='Report Fault';document.getElementById('faultSubmitBtn').textContent='Submit Report';
+        document.getElementById('faultForm').reset();document.getElementById('faultResolveRow').style.display='none';openModal('faultModal');
+    });
+    window.openFaultForPump=function(id){
+        editFaultId=null;document.getElementById('faultModalTitle').textContent='Report Fault';document.getElementById('faultSubmitBtn').textContent='Submit Report';
+        document.getElementById('faultForm').reset();document.getElementById('faultResolveRow').style.display='none';document.getElementById('fPump').value=id;openModal('faultModal');
+    };
+
+    // FIX: edit by ID lookup from stored data
+    window.openEditFault=function(id){
+        const f=(window._faultData||[]).find(x=>x.id===id);
+        if(!f)return;
+        editFaultId=f.id;document.getElementById('faultModalTitle').textContent='Edit Fault Report';document.getElementById('faultSubmitBtn').textContent='Update Report';
+        document.getElementById('faultResolveRow').style.display='grid';
+        document.getElementById('fDate').value=f.fault_date;document.getElementById('fPump').value=f.pump_id;
+        document.getElementById('fReporter').value=f.reported_by;document.getElementById('fSeverity').value=f.severity;
+        document.getElementById('fDesc').value=f.description;document.getElementById('fStatus').value=f.status;
+        document.getElementById('fResolved').value=f.resolved_date||'';document.getElementById('fNotes').value=f.notes||'';
+        openModal('faultModal');
+    };
+
+    document.getElementById('faultForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const pumpId = document.getElementById('fPump').value;
+        const faultStatus = document.getElementById('fStatus')?.value || 'Open';
+        const body={pump_id:pumpId,fault_date:document.getElementById('fDate').value,reported_by:document.getElementById('fReporter').value,description:document.getElementById('fDesc').value,severity:document.getElementById('fSeverity').value,status:faultStatus,resolved_date:document.getElementById('fResolved')?.value||null,notes:document.getElementById('fNotes').value};
+        const url=editFaultId?API+'/faults/update/'+editFaultId:API+'/faults/add';
+        const method=editFaultId?'PUT':'POST';
+        const r=await apiPost(url,body,method);
+        if(r){
+            closeModal('faultModal');
+            // FIX: Auto-update pump status based on fault status
+            if(pumpId){
+                let newPumpStatus = null;
+                if(!editFaultId){
+                    // New fault: set pump to Inactive (fault just reported)
+                    newPumpStatus = 'Inactive';
+                } else {
+                    // Editing: if resolved, restore to Active; if open/in-progress, keep Inactive
+                    if(faultStatus === 'Resolved'){
+                        newPumpStatus = 'Active';
+                    } else {
+                        newPumpStatus = 'Inactive';
+                    }
+                }
+                if(newPumpStatus){
+                    await fetch(API+'/status/'+pumpId,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:newPumpStatus})});
+                }
+            }
+            loadFaults();
+            loadSummary();
+            await loadAll(); // refresh pump cards
+        }
+    });
+
+    document.getElementById('faultPumpFilter').addEventListener('change', window.loadFaults);
+    document.getElementById('faultStatusFilter').addEventListener('change', window.loadFaults);
+
+    // ── DROPDOWNS ────────────────────────────────────────────────
+    function populateDropdowns(){
+        const pumpOpts='<option value="">Select pump</option>'+pumps.map(p=>`<option value="${p.id}">${esc(p.pump_number)} — ${esc(p.pump_name)}</option>`).join('');
+        const filterOpts='<option value="">All Pumps</option>'+pumps.map(p=>`<option value="${p.id}">${esc(p.pump_number)} — ${esc(p.pump_name)}</option>`).join('');
+        const operOpts='<option value="">Unassigned</option>'+operators.map(o=>`<option value="${o.id}">${esc(o.name)} (${esc(o.role)})</option>`).join('');
+        ['mPump','fPump'].forEach(id=>document.getElementById(id).innerHTML=pumpOpts);
+        ['maintPumpFilter','faultPumpFilter'].forEach(id=>document.getElementById(id).innerHTML=filterOpts);
+        document.getElementById('pOperator').innerHTML=operOpts;
+    }
+
+    // ── DELETE — FIX: callback stored as string name, called via window[] ──
+    window.confirmDelete=function(url,msg,cbName){
+        document.getElementById('deleteMsg').textContent=msg;
+        deleteTarget={url,cbName};
+        openModal('deleteModal');
+    };
+    document.getElementById('confirmDeleteBtn').addEventListener('click',async()=>{
+        const r=await fetch(deleteTarget.url,{method:'DELETE'});
+        const d=await r.json();
+        if(!r.ok){alert(d.message||'Delete failed');return;}
+        closeModal('deleteModal');
+        // Execute callback by name from window scope
+        if(deleteTarget.cbName && typeof window[deleteTarget.cbName]==='function'){
+            window[deleteTarget.cbName]();
+        }
+        // Refresh pump list and summary after any delete
+        await loadAll();
+    });
+
+    // ── MODAL HELPERS ────────────────────────────────────────────
+    window.openModal=m=>{document.getElementById(m).classList.add('show');document.body.style.overflow='hidden';};
+    window.closeModal=m=>{document.getElementById(m).classList.remove('show');document.body.style.overflow='auto';};
+    window.addEventListener('click',e=>{
+        ['pumpModal','maintModal','faultModal','deleteModal','dispensedModal'].forEach(id=>{
+            if(e.target===document.getElementById(id))closeModal(id);
+        });
+    });
+
+    // ── UTILS ────────────────────────────────────────────────────
+    async function apiFetch(url){try{const r=await fetch(url);return await r.json();}catch{return [];}}
+    async function apiPost(url,body,method='POST'){
+        try{const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok){alert(d.message||'Operation failed');return null;}return d;}
+        catch{alert('Network error');return null;}
+    }
+    function fmt(n){return parseFloat(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+    function fmtL(n){const v=parseFloat(n||0);if(v>=1000000)return(v/1000000).toFixed(2)+'M L';if(v>=1000)return(v/1000).toFixed(1)+'K L';return v.toFixed(0)+' L';}
+    function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    function emptyRow(cols,icon,msg){return `<tr><td colspan="${cols}"><div class="empty-state"><i class="fas ${icon}"></i><p>${msg}</p></div></td></tr>`;}
+});
+</script>
+</body>
+</html>
