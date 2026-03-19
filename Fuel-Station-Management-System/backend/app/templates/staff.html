@@ -29,6 +29,8 @@
             transition: transform 0.3s ease;
         }
 
+       
+
         .staff-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -76,13 +78,22 @@
             margin-right: 0.5rem;
         }
 
-        .staff-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
+        /* NEW */
+.staff-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+    gap: 0.5rem;
+}
+
+.staff-actions > div {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
 
         .status-badge {
             padding: 0.3rem 0.8rem;
@@ -107,25 +118,65 @@
         }
 
         .action-btn {
-            padding: 0.4rem 0.8rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 34px;
+    height: 34px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
 
-        .btn-edit {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
+.btn-edit {
+    background-color: #e8f4fd;
+    color: #1976d2;
+    border: 1px solid #bbdefb;
+    width: 55px;
+}
 
-        .btn-delete {
-            background-color: #ffebee;
-            color: #d32f2f;
-        }
+.btn-edit:hover {
+    background-color: #1976d2;
+    color: white;
+    border-color: #1976d2;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(25,118,210,0.3);
+    
+}
+
+.btn-reset-pw {
+    background-color: #fff8e1;
+    color: #f57f17;
+    border: 1px solid #ffe082;
+}
+
+.btn-reset-pw:hover {
+    background-color: #f57f17;
+    color: white;
+    border-color: #f57f17;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(245,127,23,0.3);
+}
+
+.btn-delete {
+    background-color: #fef0f0;
+    color: #d32f2f;
+    border: 1px solid #ffcdd2;
+}
+
+.btn-delete:hover {
+    background-color: #d32f2f;
+    color: white;
+    border-color: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(211,47,47,0.3);
+}
 
         .page-header {
             display: flex;
@@ -206,6 +257,69 @@
     pointer-events: auto;
 }
 
+
+
+
+/* Reset Password Modal sizing */
+#resetPwModal .custom-modal-content {
+    max-width: 480px;
+    min-width: 420px;
+}
+
+#resetPwModal h2 {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+}
+
+#resetPwModal #resetPwName {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 20px;
+    margin-top: -8px;
+}
+
+#resetPwModal .form-group {
+    margin-bottom: 1rem;
+}
+
+#resetPwModal #resetPwError {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+}
+
+/* Add these new rules */
+.staff-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    object-fit: cover;
+    border: 2px solid #f0f0f0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.staff-info h3 {
+    margin: 0 0 3px 0;
+    color: #1a1a2e;
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.staff-role {
+    color: #888;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.staff-contact i {
+    width: 16px;
+    color: #1a7a4a;
+    margin-right: 8px;
+    font-size: 0.8rem;
+}
 
     </style>
 </head>
@@ -337,8 +451,11 @@
                         <div class="staff-actions">
                             <span class="status-badge status-active">Active</span>
                             <div>
-                                <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
-                                <button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
+               <button class="action-btn btn-edit"><i class="fas fa-edit"></i> Edit</button>
+<button class="action-btn btn-reset-pw" data-id="${staff.user_id}" title="Reset Password">
+  <i class="fas fa-key"></i>
+</button>
+<button class="action-btn btn-delete"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
                     </div>
@@ -397,10 +514,9 @@
           <span class="error-message" id="staffName-error"></span>
         </div>
 
-
-        <div class="form-group">
-          <label for="staffPassword">Password *</label>
-          <div class="password-input-wrapper">
+<div class="form-group" id="passwordGroup">
+  <label for="staffPassword">Password *</label>
+  <div class="password-input-wrapper">
             <input type="password" id="staffPassword" name="staffPassword" placeholder="Enter secure password" required minlength="8">
             <button type="button" class="password-toggle" id="togglePassword">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -484,6 +600,37 @@
   </div>
 </div>
 
+
+
+<div id="resetPwModal" class="custom-modal">
+  <div class="custom-modal-content">
+    <span class="close-btn" id="closeResetPw">&times;</span>
+    <h2>Reset Password</h2> <br>
+    <p id="resetPwName" style="color:#666; margin-bottom:20px; font-size:14px;"></p>
+    <form id="resetPwForm">
+      <input type="hidden" id="resetPwUserId">
+      <div class="form-group">
+        <label>New Password *</label>
+        <div class="password-input-wrapper">
+          <input type="password" id="newPassword" placeholder="Enter new password" required minlength="8">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px;">
+        <label>Confirm Password *</label>
+        <div class="password-input-wrapper">
+          <input type="password" id="confirmPassword" placeholder="Confirm new password" required>
+        </div>
+      </div>
+      <p id="resetPwError" style="color:#e74c3c; font-size:13px; margin-top:8px; display:none;"></p>
+      <div class="form-actions" style="margin-top:20px;">
+        <button type="button" id="cancelResetPw" class="custom-btn cancel-btn">Cancel</button>
+        <button type="submit" class="custom-btn primary-btn">Reset Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
                          <!-- CHANGE 4: auth.js FIRST before any other scripts -->
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 
@@ -512,6 +659,7 @@
     const staffGrid = document.querySelector('.staff-grid');
     const passwordInput = document.getElementById('staffPassword');
     const passwordToggle = document.getElementById('togglePassword');
+    const passwordGroup     = document.getElementById('passwordGroup');
 
 
         document.getElementById('searchInput').addEventListener('input', renderFilteredStaff);
@@ -594,6 +742,11 @@
         showError(fieldName, `${fieldName.replace('staff', '')} is required`);
         return false;
       }
+
+      if (!value || value.trim() === '') {
+    hideError(fieldName);
+    return true;
+}
 
       if (rule.minLength && value.length < rule.minLength) {
         showError(fieldName, rule.message || `Minimum ${rule.minLength} characters required`);
@@ -717,10 +870,13 @@
               <div class="staff-actions">
                   <span class="status-badge ${staff.status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive'}">${staff.status}</span>
                   <div>
-                    <button class="action-btn btn-edit" data-id="${staff.user_id}">
-                      <i class="fas fa-edit"></i> Edit
-                    </button> 
-                    <button class="action-btn btn-delete" data-id="${staff.user_id}">
+                   <button class="action-btn btn-edit" data-id="${staff.user_id}">
+  <i class="fas fa-edit"></i> Edit
+</button>
+<button class="action-btn btn-reset-pw" data-id="${staff.user_id}" title="Reset Password">
+  <i class="fas fa-key"></i>
+</button>
+<button class="action-btn btn-delete" data-id="${staff.user_id}">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
@@ -731,7 +887,8 @@
 
           // Attach event listeners
           card.querySelector('.btn-edit').addEventListener('click', () => openEditModal(staff.user_id));
-          card.querySelector('.btn-delete').addEventListener('click', () => deleteStaff(staff.user_id));
+card.querySelector('.btn-reset-pw').addEventListener('click', () => openResetPwModal(staff.user_id, staff.full_name));
+card.querySelector('.btn-delete').addEventListener('click', () => deleteStaff(staff.user_id));
         });
       } catch (error) {
         console.error('Failed to load staff:', error);
@@ -792,17 +949,21 @@ async function renderFilteredStaff() {
           <span class="status-badge ${staff.status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive'}">${staff.status}</span>
           <div>
             <button class="action-btn btn-edit" data-id="${staff.user_id}">
-              <i class="fas fa-edit"></i> Edit
-            </button> 
-            <button class="action-btn btn-delete" data-id="${staff.user_id}">
+  <i class="fas fa-edit"></i> Edit
+</button>
+<button class="action-btn btn-reset-pw" data-id="${staff.user_id}" title="Reset Password">
+  <i class="fas fa-key"></i>
+</button>
+<button class="action-btn btn-delete" data-id="${staff.user_id}">
               <i class="fas fa-trash"></i>
             </button>
           </div>
       </div>
     `;
 
-    card.querySelector('.btn-edit').addEventListener('click', () => openEditModal(staff.user_id));
-    card.querySelector('.btn-delete').addEventListener('click', () => deleteStaff(staff.user_id));
+   card.querySelector('.btn-edit').addEventListener('click', () => openEditModal(staff.user_id));
+card.querySelector('.btn-reset-pw').addEventListener('click', () => openResetPwModal(staff.user_id, staff.full_name));
+card.querySelector('.btn-delete').addEventListener('click', () => deleteStaff(staff.user_id));
 
     staffGrid.appendChild(card);
   });
@@ -827,6 +988,7 @@ async function renderFilteredStaff() {
         modal.classList.add('show');
       });
       // Password field should be required in add mode
+      passwordGroup.style.display = 'block';
       passwordInput.required = true;
     };
 
@@ -976,7 +1138,8 @@ async function renderFilteredStaff() {
 
       // Validate all fields
       for (const fieldName of Object.keys(validationRules)) {
-        const field = document.getElementById(fieldName);
+        if (isEditMode && fieldName === 'staffPassword') continue;
+    const field = document.getElementById(fieldName);
         if (field) {
           if (!validateField(fieldName, field.value)) {
             isValid = false;
@@ -1066,6 +1229,7 @@ async function renderFilteredStaff() {
         document.getElementById('staffStatus').value = data.status || '';
 
         // Password field is not required in edit mode
+        passwordGroup.style.display = 'none';
         passwordInput.value = '';
         passwordInput.required = false;
         resetPasswordStrength();
@@ -1116,10 +1280,77 @@ async function renderFilteredStaff() {
       }
     }
 
+
+    
+    // ── Reset Password modal ──
+    function openResetPwModal(userId, name) {
+      document.getElementById('resetPwUserId').value        = userId;
+      document.getElementById('resetPwName').textContent    = `Resetting password for: ${name}`;
+      document.getElementById('newPassword').value          = '';
+      document.getElementById('confirmPassword').value      = '';
+      document.getElementById('resetPwError').style.display = 'none';
+      const rm = document.getElementById('resetPwModal');
+rm.style.display = 'flex';
+requestAnimationFrame(() => rm.classList.add('show'));
+
+    }
+
+    document.getElementById('closeResetPw').addEventListener('click', () => {
+  const rm = document.getElementById('resetPwModal');
+  rm.classList.remove('show');
+  setTimeout(() => { rm.style.display = 'none'; }, 300);
+});
+document.getElementById('cancelResetPw').addEventListener('click', () => {
+  const rm = document.getElementById('resetPwModal');
+  rm.classList.remove('show');
+  setTimeout(() => { rm.style.display = 'none'; }, 300);
+});
+
+    document.getElementById('resetPwForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const userId    = document.getElementById('resetPwUserId').value;
+      const newPw     = document.getElementById('newPassword').value;
+      const confirmPw = document.getElementById('confirmPassword').value;
+      const errEl     = document.getElementById('resetPwError');
+
+      if (newPw !== confirmPw) {
+        errEl.textContent = 'Passwords do not match.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if (newPw.length < 8) {
+        errEl.textContent = 'Password must be at least 8 characters.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res    = await fetch(`/staff/reset-password/${userId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: newPw })
+        });
+        const result = await res.json();
+        if (res.ok) {
+          const rm = document.getElementById('resetPwModal');
+rm.classList.remove('show');
+setTimeout(() => { rm.style.display = 'none'; }, 300);
+          showSuccessMessage('Password reset successfully!');
+        } else {
+          errEl.textContent = result.message || 'Failed to reset password.';
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = 'Network error. Please try again.';
+        errEl.style.display = 'block';
+      }
+    });
+
+
     // Initialize the page
     loadRoles();
    loadStaff();
-    renderFilteredStaff()
+    
   });
 </script>
 
