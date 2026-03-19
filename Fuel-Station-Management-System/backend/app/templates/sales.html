@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales & Billing - FuelSys Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary:#1a7a4a;--primary-light:#22a862;--primary-bg:#e6f4ed;
+            --accent:#f5c518;--accent-dark:#d4a800;--accent-bg:#fffbe6;
+            --danger:#c62828;--danger-bg:#ffebee;--warning:#c17b00;--warning-bg:#fff8e1;
+            --border:#dee2e6;--text-dark:#0d1f15;--text-mid:#3d5a47;--text-light:#6b8070;
+            --card-bg:#ffffff;--page-bg:#f2f7f4;
+        }
+
+        /* KPI */
+        .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:14px;margin-bottom:22px;}
+        .kpi-card{background:var(--card-bg);border-radius:10px;padding:16px 18px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.06);display:flex;align-items:center;gap:13px;animation:fadeUp 0.4s ease both;}
+        .kpi-card:nth-child(2){animation-delay:.06s}.kpi-card:nth-child(3){animation-delay:.12s}.kpi-card:nth-child(4){animation-delay:.18s}.kpi-card:nth-child(5){animation-delay:.24s}.kpi-card:nth-child(6){animation-delay:.30s}
+        .kpi-icon{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
+        .kpi-icon.green{background:var(--primary-bg);color:var(--primary);}
+        .kpi-icon.yellow{background:var(--accent-bg);color:var(--accent-dark);}
+        .kpi-icon.red{background:var(--danger-bg);color:var(--danger);}
+        .kpi-icon.blue{background:#e3f2fd;color:#1565c0;}
+        .kpi-icon.purple{background:#f3e5f5;color:#7b1fa2;}
+        .kpi-icon.orange{background:var(--warning-bg);color:var(--warning);}
+        .kpi-info .lbl{font-size:0.7rem;color:var(--text-light);font-weight:500;text-transform:uppercase;letter-spacing:0.4px;}
+        .kpi-info .val{font-size:1.25rem;font-weight:800;color:var(--text-dark);line-height:1.2;margin-top:2px;}
+        .kpi-info .sub{font-size:0.7rem;color:var(--text-light);margin-top:2px;}
+
+        /* REVENUE CHART BAR */
+        .trend-bar-wrap{background:var(--card-bg);border-radius:10px;border:1px solid var(--border);padding:18px 20px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+        .trend-bar-title{font-size:0.88rem;font-weight:700;color:var(--text-dark);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+        .trend-chart{display:flex;align-items:flex-end;gap:8px;height:80px;}
+        .trend-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+        .trend-bars{display:flex;gap:2px;align-items:flex-end;width:100%;height:64px;}
+        .trend-bar{flex:1;border-radius:3px 3px 0 0;min-height:2px;transition:height 0.4s ease;}
+        .trend-bar.cash{background:var(--primary);}
+        .trend-bar.credit{background:var(--accent-dark);opacity:0.8;}
+        .trend-label{font-size:0.6rem;color:var(--text-light);white-space:nowrap;}
+
+        /* TABS */
+        .tab-bar{display:flex;gap:4px;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:5px;margin-bottom:20px;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+        .tab-btn{padding:8px 16px;border-radius:7px;border:none;background:none;font-size:0.85rem;font-weight:600;color:var(--text-light);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap;}
+        .tab-btn:hover{background:var(--primary-bg);color:var(--primary);}
+        .tab-btn.active{background:var(--primary);color:#fff;}
+        .tab-panel{display:none;}.tab-panel.active{display:block;}
+
+        /* SECTION CARDS */
+        .section-card{background:var(--card-bg);border-radius:10px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;margin-bottom:20px;}
+        .section-header{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#f4faf7 0%,#fff 100%);flex-wrap:wrap;gap:10px;}
+        .section-header-left{display:flex;align-items:center;gap:10px;}
+        .section-header-icon{width:32px;height:32px;background:var(--primary-bg);color:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;}
+        .section-header h2{font-size:0.95rem;font-weight:700;color:var(--text-dark);}
+        .section-subtitle{font-size:0.73rem;color:var(--text-light);margin-top:1px;}
+        .section-body{padding:18px 20px;}
+
+        /* FILTERS */
+        .filters-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+        .filter-lbl{font-size:0.8rem;color:var(--text-light);white-space:nowrap;}
+        .form-select,.date-inp,.form-ctrl{padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.84rem;color:var(--text-dark);background:#fff;outline:none;transition:border-color 0.2s;font-family:inherit;}
+        .form-select:focus,.date-inp:focus,.form-ctrl:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,122,74,0.1);}
+        .date-inp{width:130px;}
+
+        /* TABLES */
+        .data-table{width:100%;border-collapse:collapse;font-size:0.84rem;}
+        .data-table th{background:#f4faf7;color:var(--text-mid);font-weight:600;padding:9px 12px;text-align:left;border-bottom:2px solid var(--border);font-size:0.74rem;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;}
+        .data-table td{padding:10px 12px;border-bottom:1px solid #f0f0f0;color:var(--text-dark);vertical-align:middle;}
+        .data-table tr:last-child td{border-bottom:none;}
+        .data-table tr:hover td{background:#f8fcfa;}
+        .table-responsive{overflow-x:auto;}
+
+        /* PILLS */
+        .pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:0.71rem;font-weight:600;}
+        .pill-green{background:var(--primary-bg);color:var(--primary);}
+        .pill-yellow{background:var(--accent-bg);color:var(--accent-dark);}
+        .pill-red{background:var(--danger-bg);color:var(--danger);}
+        .pill-blue{background:#e3f2fd;color:#1565c0;}
+        .pill-purple{background:#f3e5f5;color:#7b1fa2;}
+        .pill-orange{background:var(--warning-bg);color:var(--warning);}
+        .pill-gray{background:#f0f0f0;color:#555;}
+
+        /* CREDIT ACCOUNT CARDS */
+        .accounts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+        .account-card{background:var(--card-bg);border:1.5px solid var(--border);border-radius:10px;padding:16px;transition:box-shadow 0.2s,transform 0.2s;animation:fadeUp 0.4s ease both;cursor:pointer;}
+        .account-card:hover{box-shadow:0 6px 20px rgba(0,0,0,0.1);transform:translateY(-2px);}
+        .account-card.suspended{opacity:0.65;border-color:var(--danger);}
+        .account-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+        .account-name{font-size:0.92rem;font-weight:700;color:var(--text-dark);line-height:1.3;}
+        .account-contact{font-size:0.75rem;color:var(--text-light);margin-top:2px;}
+        .credit-bar-wrap{margin:10px 0 6px;}
+        .credit-bar-track{height:7px;background:#f0f0f0;border-radius:99px;overflow:hidden;}
+        .credit-bar-fill{height:100%;border-radius:99px;transition:width 0.5s ease;}
+        .credit-bar-ok{background:var(--primary);}
+        .credit-bar-warn{background:var(--accent-dark);}
+        .credit-bar-over{background:var(--danger);}
+        .credit-bar-labels{display:flex;justify-content:space-between;font-size:0.69rem;color:var(--text-light);margin-top:4px;}
+        .account-amounts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+        .amount-box{background:var(--page-bg);border-radius:7px;padding:8px 10px;}
+        .amount-box .albl{font-size:0.66rem;color:var(--text-light);font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+        .amount-box .aval{font-size:0.95rem;font-weight:800;color:var(--text-dark);margin-top:2px;}
+        .amount-box.outstanding .aval{color:var(--danger);}
+        .account-card-footer{display:flex;gap:6px;margin-top:12px;}
+
+        /* DELIVERY CARDS */
+        .delivery-summary{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:18px;}
+        .fuel-stock-card{background:var(--card-bg);border-radius:9px;padding:14px;border:1.5px solid var(--border);}
+        .fuel-stock-card .ft-name{font-size:0.78rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.5px;}
+        .fuel-stock-card .ft-litres{font-size:1.4rem;font-weight:800;color:var(--primary);margin:4px 0 2px;}
+        .fuel-stock-card .ft-sub{font-size:0.7rem;color:var(--text-light);}
+        .fuel-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+
+        /* PRICE TABLE */
+        .price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px;}
+        .price-card{background:var(--card-bg);border-radius:9px;padding:14px 16px;border:1.5px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+        .price-card-left .ft{font-size:0.8rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;}
+        .price-card-left .eff{font-size:0.7rem;color:var(--text-light);margin-top:2px;}
+        .price-card-right .price{font-size:1.3rem;font-weight:800;color:var(--primary);}
+        .price-card-right .unit{font-size:0.68rem;color:var(--text-light);}
+
+        /* BUTTONS */
+        .btn{padding:7px 14px;border-radius:7px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:0.83rem;border:1.5px solid transparent;transition:all 0.2s;font-family:inherit;}
+        .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+        .btn-primary:hover{background:var(--primary-light);}
+        .btn-outline{background:#fff;border-color:var(--border);color:var(--text-mid);}
+        .btn-outline:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-bg);}
+        .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger);}
+        .btn-yellow{background:var(--accent);color:var(--text-dark);border-color:var(--accent);}
+        .btn-yellow:hover{background:var(--accent-dark);border-color:var(--accent-dark);}
+        .btn-sm{padding:5px 10px;font-size:0.76rem;}
+        .btn-icon{width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;background:none;border:1.5px solid var(--border);color:var(--text-light);cursor:pointer;transition:all 0.2s;font-size:0.76rem;}
+        .btn-icon:hover{background:var(--primary-bg);color:var(--primary);border-color:var(--primary);}
+        .btn-icon.del:hover{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);}
+
+        /* MODALS */
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);justify-content:center;align-items:flex-start;z-index:1000;padding:20px;overflow-y:auto;}
+        .modal.show{display:flex;}
+        @keyframes slideDown{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
+        .modal-content{background:#fff;border-radius:12px;width:500px;max-width:96vw;padding:24px 26px;box-shadow:0 12px 40px rgba(0,0,0,0.2);position:relative;animation:slideDown 0.26s ease forwards;margin:auto;}
+        .modal-content.wide{width:600px;}
+        .modal-content.narrow{width:400px;}
+        .modal-title{font-size:1.05rem;font-weight:800;color:var(--text-dark);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+        .modal-title i{color:var(--primary);}
+        .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#999;line-height:1;}
+        .modal-close:hover{color:#333;}
+        .fg{margin-bottom:14px;}
+        .fg label{display:block;font-size:0.8rem;font-weight:600;color:var(--text-mid);margin-bottom:4px;}
+        .fg label i{color:var(--primary);margin-right:4px;font-size:0.74rem;}
+        .fg .fc{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:7px;font-size:0.86rem;color:var(--text-dark);font-family:inherit;outline:none;transition:border-color 0.2s;box-sizing:border-box;}
+        .fg .fc:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,122,74,0.1);}
+        .fg textarea.fc{resize:vertical;min-height:60px;}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+        .form-actions{margin-top:18px;display:flex;justify-content:flex-end;gap:10px;}
+        .form-actions .btn{min-width:90px;justify-content:center;}
+        .record-type-toggle{display:flex;gap:6px;margin-bottom:14px;}
+        .rtt-btn{flex:1;padding:8px;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:0.82rem;font-weight:600;color:var(--text-light);cursor:pointer;text-align:center;transition:all 0.2s;font-family:inherit;}
+        .rtt-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+        /* DELETE CONFIRM */
+        #deleteModal .modal-content{width:360px;text-align:center;padding:28px;}
+        .del-icon{width:52px;height:52px;background:var(--danger-bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.3rem;color:var(--danger);}
+        #deleteModal h3{font-size:1rem;color:var(--text-dark);margin-bottom:7px;}
+        #deleteModal p{font-size:0.83rem;color:var(--text-light);margin-bottom:20px;}
+        #deleteModal .form-actions{justify-content:center;}
+
+        /* STATEMENT MODAL */
+        #statementModal .modal-content{width:700px;}
+        .statement-table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+        .statement-table th{background:#f4faf7;padding:8px 10px;text-align:left;border-bottom:2px solid var(--border);font-size:0.72rem;text-transform:uppercase;color:var(--text-mid);}
+        .statement-table td{padding:8px 10px;border-bottom:1px solid #f5f5f5;}
+        .statement-table tr.sale td{color:var(--danger);}
+        .statement-table tr.payment td{color:var(--primary);}
+
+        /* REPORT SECTION */
+        .report-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;}
+        .report-summary-box{background:var(--page-bg);border-radius:9px;padding:14px;border:1px solid var(--border);text-align:center;}
+        .report-summary-box .rs-lbl{font-size:0.7rem;color:var(--text-light);font-weight:600;text-transform:uppercase;}
+        .report-summary-box .rs-val{font-size:1.2rem;font-weight:800;color:var(--text-dark);margin-top:4px;}
+
+        /* MISC */
+        .empty-state{text-align:center;padding:40px 20px;color:var(--text-light);}
+        .empty-state i{font-size:2.5rem;margin-bottom:10px;opacity:0.3;display:block;}
+        .empty-state p{font-size:0.86rem;}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+        .amount-positive{color:var(--primary);font-weight:700;}
+        .amount-negative{color:var(--danger);font-weight:700;}
+        .text-right{text-align:right;}
+
+        @media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr;}.form-row,.form-row-3{grid-template-columns:1fr;}.filters-bar{flex-direction:column;align-items:flex-start;}.accounts-grid{grid-template-columns:1fr;}}
+    </style>
+</head>
+<body>
+<div class="dashboard">
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-gas-pump"></i><h2><span>FuelSys Pro</span></h2></div>
+        <nav><ul>
+            <li><a href="index.html"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+            <li class="active"><a href="/sales/page"><i class="fas fa-cash-register"></i><span>Sales &amp; Billing</span></a></li>
+            <li><a href="inventory.html"><i class="fas fa-oil-can"></i><span>Fuel Inventory</span></a></li>
+            <li><a href="/pumps/page"><i class="fas fa-gas-pump"></i><span>Pumps</span></a></li>
+            <li><a href="/staff/page"><i class="fas fa-users"></i><span>Staff</span></a></li>
+            <li><a href="/shifts/page"><i class="fa fa-calendar"></i><span>Shifts</span></a></li>
+            <li><a href="/lubricants/page"><i class="fa-solid fa-spray-can-sparkles"></i><span>Lubricants</span></a></li>
+            <li><a href="reports.html"><i class="fas fa-chart-bar"></i><span>Reports</span></a></li>
+            <li><a href="/suppliers/page"><i class="fas fa-truck"></i><span>Suppliers</span></a></li>
+            <li><a href="/expenses/page"><i class="fas fa-money-bill-wave"></i><span>Expenses</span></a></li>
+            <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+        </ul></nav>
+        <div class="sidebar-toggle"><i class="fas fa-angle-left"></i></div>
+    </aside>
+    <main class="main-content">
+        <header>
+            <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Search sales..."></div>
+            <div class="user-actions">
+                <div class="notifications"><i class="fas fa-bell"></i></div>
+                <div class="user-profile"><img src="https://via.placeholder.com/40" alt="User"><span>Admin</span><i class="fas fa-chevron-down"></i></div>
+            </div>
+        </header>
+        <div class="content">
+            <div class="page-header">
+                <div>
+                    <h1>Sales &amp; Billing</h1>
+                    <div style="font-size:0.78rem;color:var(--text-light);margin-top:3px;">Dashboard / <span style="color:var(--primary);font-weight:600;">Sales &amp; Billing</span></div>
+                </div>
+            </div>
+
+            <!-- KPI ROW -->
+            <div class="kpi-row">
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fas fa-coins"></i></div><div class="kpi-info"><div class="lbl">Today Cash Revenue</div><div class="val" id="kpiTodayCash">–</div><div class="sub" id="kpiTodayLitres">– L sold</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon blue"><i class="fas fa-file-invoice"></i></div><div class="kpi-info"><div class="lbl">Today Credit</div><div class="val" id="kpiTodayCredit">–</div><div class="sub" id="kpiTodayCreditLitres">– L on credit</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon green"><i class="fas fa-circle-check"></i></div><div class="kpi-info"><div class="lbl">Today Total</div><div class="val" id="kpiTodayTotal">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon purple"><i class="fas fa-calendar-days"></i></div><div class="kpi-info"><div class="lbl">Month Revenue</div><div class="val" id="kpiMonthTotal">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon orange"><i class="fas fa-clock"></i></div><div class="kpi-info"><div class="lbl">Outstanding Credit</div><div class="val" id="kpiOutstanding">–</div></div></div>
+                <div class="kpi-card"><div class="kpi-icon yellow"><i class="fas fa-droplet"></i></div><div class="kpi-info"><div class="lbl">Today Litres</div><div class="val" id="kpiTodayTotalLitres">–</div></div></div>
+            </div>
+
+            <!-- 7-DAY TREND -->
+            <div class="trend-bar-wrap">
+                <div class="trend-bar-title"><i class="fas fa-chart-bar" style="color:var(--primary);"></i> 7-Day Revenue Trend
+                    <span style="margin-left:auto;display:flex;gap:12px;font-size:0.72rem;font-weight:500;color:var(--text-light);">
+                        <span><span style="display:inline-block;width:10px;height:10px;background:var(--primary);border-radius:2px;margin-right:4px;"></span>Cash</span>
+                        <span><span style="display:inline-block;width:10px;height:10px;background:var(--accent-dark);border-radius:2px;margin-right:4px;opacity:0.8;"></span>Credit</span>
+                    </span>
+                </div>
+                <div class="trend-chart" id="trendChart"></div>
+            </div>
+
+            <!-- FUEL PRICES STRIP -->
+            <div class="price-grid" id="priceGrid"></div>
+
+            <!-- TABS -->
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('sales')" id="tab-sales"><i class="fas fa-cash-register"></i> Daily Sales</button>
+                <button class="tab-btn" onclick="switchTab('credit')" id="tab-credit"><i class="fas fa-file-invoice-dollar"></i> Credit Sales</button>
+                <button class="tab-btn" onclick="switchTab('deliveries')" id="tab-deliveries"><i class="fas fa-truck"></i> Deliveries</button>
+
+                <button class="tab-btn" onclick="switchTab('reports')" id="tab-reports"><i class="fas fa-chart-pie"></i> Reports</button>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- TAB: DAILY SALES                                -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="tab-panel active" id="panel-sales">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon"><i class="fas fa-cash-register"></i></div>
+                            <div><h2>Daily Sales Records</h2><div class="section-subtitle">Shift summaries &amp; individual transactions</div></div>
+                        </div>
+                        <button class="btn btn-primary" id="addSaleBtn"><i class="fas fa-plus"></i> Record Sale</button>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar">
+                            <label class="filter-lbl">Date:</label>
+                            <input type="text" class="date-inp" id="salesDateFilter" placeholder="Filter by date">
+                            <label class="filter-lbl">Pump:</label>
+                            <select class="form-select" id="salesPumpFilter"><option value="">All Pumps</option></select>
+                            <label class="filter-lbl">Shift:</label>
+                            <select class="form-select" id="salesShiftFilter">
+                                <option value="">All Shifts</option><option>Morning</option><option>Evening</option><option>Night</option>
+                            </select>
+                            <label class="filter-lbl">Payment:</label>
+                            <select class="form-select" id="salesPayFilter">
+                                <option value="">All</option><option>Cash</option><option>Card</option><option>Mobile</option>
+                            </select>
+                            <button class="btn btn-outline" id="salesFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Pump</th><th>Type</th><th>Shift</th><th>Litres</th><th>Price/L</th><th>Amount</th><th>Payment</th><th>By</th><th>Actions</th></tr></thead>
+                                <tbody id="salesTableBody"><tr><td colspan="10"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody>
+                            </table>
+                        </div>
+                        <div id="salesTotals" style="margin-top:12px;display:none;background:var(--primary-bg);border-radius:8px;padding:10px 14px;display:flex;gap:24px;font-size:0.83rem;flex-wrap:wrap;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- TAB: CREDIT SALES                               -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="tab-panel" id="panel-credit">
+                <!-- Accounts Grid -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon" style="background:#e3f2fd;color:#1565c0;"><i class="fas fa-building-columns"></i></div>
+                            <div><h2>Credit Accounts</h2><div class="section-subtitle">Government &amp; authority accounts</div></div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-outline btn-sm" id="addCreditSaleBtn"><i class="fas fa-plus"></i> Record Credit Sale</button>
+                            <button class="btn btn-primary btn-sm" id="addAccountBtn"><i class="fas fa-plus"></i> New Account</button>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="accounts-grid" id="accountsGrid">
+                            <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credit Sales Table -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-file-invoice-dollar"></i></div>
+                            <div><h2>Credit Transactions</h2><div class="section-subtitle">All fuel dispensed on credit</div></div>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar">
+                            <label class="filter-lbl">Account:</label>
+                            <select class="form-select" id="creditAccFilter"><option value="">All Accounts</option></select>
+                            <label class="filter-lbl">From:</label>
+                            <input type="text" class="date-inp" id="creditStartFilter" placeholder="Start">
+                            <label class="filter-lbl">To:</label>
+                            <input type="text" class="date-inp" id="creditEndFilter" placeholder="End">
+                            <button class="btn btn-outline" id="creditFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Account</th><th>Pump</th><th>Vehicle</th><th>Fuel</th><th>Litres</th><th>Price/L</th><th>Amount</th><th>Ref</th><th>Actions</th></tr></thead>
+                                <tbody id="creditSalesTableBody"><tr><td colspan="10"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- TAB: DELIVERIES                                 -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="tab-panel" id="panel-deliveries">
+                <div class="delivery-summary" id="deliverySummary"></div>
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon" style="background:var(--warning-bg);color:var(--warning);"><i class="fas fa-truck"></i></div>
+                            <div><h2>Fuel Deliveries</h2><div class="section-subtitle">Stock received — auto-updates inventory</div></div>
+                        </div>
+                        <button class="btn btn-primary" id="addDeliveryBtn"><i class="fas fa-plus"></i> Log Delivery</button>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar">
+                            <label class="filter-lbl">Supplier:</label>
+                            <select class="form-select" id="delivSupplierFilter"><option value="">All Suppliers</option></select>
+                            <label class="filter-lbl">Fuel:</label>
+                            <select class="form-select" id="delivFuelFilter">
+                                <option value="">All Types</option>
+                                <option>92 Octane</option><option>95 Octane</option><option>Auto Diesel</option><option>Super Diesel</option>
+                            </select>
+                            <label class="filter-lbl">From:</label>
+                            <input type="text" class="date-inp" id="delivStartFilter" placeholder="Start">
+                            <label class="filter-lbl">To:</label>
+                            <input type="text" class="date-inp" id="delivEndFilter" placeholder="End">
+                            <button class="btn btn-outline" id="delivFilterBtn"><i class="fas fa-filter"></i> Apply</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead><tr><th>Date</th><th>Supplier</th><th>Invoice</th><th>Fuel Type</th><th>Litres</th><th>Price/L</th><th>Total Cost</th><th>Vehicle</th><th>Driver</th><th>Actions</th></tr></thead>
+                                <tbody id="delivTableBody"><tr><td colspan="10"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></td></tr></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- TAB: REPORTS                                    -->
+            <!-- ═══════════════════════════════════════════════ -->
+            <div class="tab-panel" id="panel-reports">
+                <div class="section-card">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-header-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-chart-pie"></i></div>
+                            <div><h2>Revenue Reports</h2><div class="section-subtitle">Cash &amp; credit sales analysis</div></div>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-outline btn-sm" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Export Excel</button>
+                            <button class="btn btn-outline btn-sm" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="filters-bar" style="margin-bottom:18px;">
+                            <label class="filter-lbl">From:</label>
+                            <input type="text" class="date-inp" id="repStart" placeholder="Start date">
+                            <label class="filter-lbl">To:</label>
+                            <input type="text" class="date-inp" id="repEnd" placeholder="End date">
+                            <button class="btn btn-primary btn-sm" id="repRunBtn"><i class="fas fa-play"></i> Run Report</button>
+                        </div>
+                        <div class="report-summary-grid" id="repSummaryGrid" style="display:none;"></div>
+                        <div class="table-responsive" id="repTableWrap" style="display:none;">
+                            <table class="data-table" id="repTable">
+                                <thead><tr><th>Date</th><th>Cash Revenue</th><th>Cash Litres</th><th>Credit Revenue</th><th>Credit Litres</th><th>Total Revenue</th><th>Total Litres</th><th>Transactions</th></tr></thead>
+                                <tbody id="repTableBody"></tbody>
+                            </table>
+                        </div>
+                        <!-- Pump Breakdown -->
+                        <div id="repPumpWrap" style="display:none;margin-top:20px;">
+                            <div style="font-size:0.88rem;font-weight:700;color:var(--text-dark);margin-bottom:10px;"><i class="fas fa-gas-pump" style="color:var(--primary);margin-right:6px;"></i>Per Pump Breakdown</div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="repPumpTable">
+                                    <thead><tr><th>Pump</th><th>Fuel Type</th><th>Litres Sold</th><th>Revenue</th></tr></thead>
+                                    <tbody id="repPumpBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Credit Report -->
+                        <div id="repCreditWrap" style="display:none;margin-top:20px;">
+                            <div style="font-size:0.88rem;font-weight:700;color:var(--text-dark);margin-bottom:10px;"><i class="fas fa-building-columns" style="color:#1565c0;margin-right:6px;"></i>Credit Account Balances</div>
+                            <div class="table-responsive">
+                                <table class="data-table" id="repCreditTable">
+                                    <thead><tr><th>Account</th><th>Credit Limit</th><th>Total Sales</th><th>Total Paid</th><th>Outstanding</th><th>Utilisation</th><th>Status</th></tr></thead>
+                                    <tbody id="repCreditBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /content -->
+    </main>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!--  MODALS                                              -->
+<!-- ════════════════════════════════════════════════════ -->
+
+<!-- SALE MODAL -->
+<div id="saleModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('saleModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-cash-register"></i><span id="saleModalTitle">Record Sale</span></div>
+        <form id="saleForm">
+            <div class="record-type-toggle">
+                <button type="button" class="rtt-btn active" id="rttShift" onclick="setRecordType('shift')"><i class="fas fa-layer-group"></i> Shift Summary</button>
+                <button type="button" class="rtt-btn" id="rttTxn" onclick="setRecordType('transaction')"><i class="fas fa-bolt"></i> Single Transaction</button>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Date *</label><input class="fc" type="text" id="sSaleDate" required></div>
+                <div class="fg"><label><i class="fas fa-gas-pump"></i>Pump *</label><select class="fc" id="sPump" required onchange="autoFillPrice()"><option value="">Select pump</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-sun"></i>Shift Period *</label>
+                    <select class="fc" id="sShift" required><option>Morning</option><option>Evening</option><option>Night</option></select>
+                </div>
+                <div class="fg"><label><i class="fas fa-credit-card"></i>Payment Method *</label>
+                    <select class="fc" id="sPayment" required><option>Cash</option><option>Card</option><option>Mobile</option></select>
+                </div>
+            </div>
+            <!-- Meter fields (shift mode) -->
+            <div id="meterFields">
+                <div class="form-row">
+                    <div class="fg"><label><i class="fas fa-gauge"></i>Opening Meter *</label><input class="fc" type="number" id="sOpening" step="0.01" placeholder="0.00" oninput="calcLitres()"></div>
+                    <div class="fg"><label><i class="fas fa-gauge-high"></i>Closing Meter *</label><input class="fc" type="number" id="sClosing" step="0.01" placeholder="0.00" oninput="calcLitres()"></div>
+                </div>
+            </div>
+            <!-- Direct litres (transaction mode) -->
+            <div id="litresField" style="display:none;">
+                <div class="fg"><label><i class="fas fa-droplet"></i>Litres Sold *</label><input class="fc" type="number" id="sLitresDirect" step="0.01" placeholder="0.00" oninput="calcTotal()"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-droplet"></i>Litres Sold</label><input class="fc" type="number" id="sLitres" step="0.01" placeholder="Auto-calculated" readonly></div>
+                <div class="fg"><label><i class="fas fa-tag"></i>Price per Litre (Rs.) *</label><input class="fc" type="number" id="sPrice" step="0.01" required oninput="calcTotal()"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Total Amount (Rs.)</label>
+                <input class="fc" type="number" id="sTotal" readonly style="font-weight:800;font-size:1.1rem;color:var(--primary);">
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar-check"></i>Shift</label>
+                    <select class="fc" id="sShiftLink"><option value="">— No shift linked —</option></select>
+                </div>
+                <div class="fg"><label><i class="fas fa-user"></i>Recorded By *</label>
+                    <select class="fc" id="sUser" required><option value="">Select staff</option></select>
+                </div>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><input class="fc" type="text" id="sNotes" placeholder="Optional"></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('saleModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saleSubmitBtn">Save Sale</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CREDIT ACCOUNT MODAL -->
+<div id="accountModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('accountModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-building-columns"></i><span id="accountModalTitle">New Credit Account</span></div>
+        <form id="accountForm">
+            <div class="fg"><label><i class="fas fa-building"></i>Account Name *</label><input class="fc" type="text" id="aName" required placeholder="e.g. Sri Lanka Police - Negombo"></div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-user"></i>Contact Person</label><input class="fc" type="text" id="aPerson" placeholder="Name"></div>
+                <div class="fg"><label><i class="fas fa-phone"></i>Phone</label><input class="fc" type="text" id="aPhone" placeholder="0312-..."></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-envelope"></i>Email</label><input class="fc" type="email" id="aEmail" placeholder="email@gov.lk"></div>
+                <div class="fg"><label><i class="fas fa-coins"></i>Credit Limit (Rs.) *</label><input class="fc" type="number" id="aLimit" required min="0" step="1000" placeholder="0"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-location-dot"></i>Address</label><textarea class="fc" id="aAddress" placeholder="Address"></textarea></div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-circle-half-stroke"></i>Status</label>
+                    <select class="fc" id="aStatus"><option>Active</option><option>Suspended</option><option>Closed</option></select>
+                </div>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><textarea class="fc" id="aNotes" placeholder="Optional"></textarea></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('accountModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="accountSubmitBtn">Save Account</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CREDIT SALE MODAL -->
+<div id="creditSaleModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('creditSaleModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-file-invoice-dollar"></i><span id="csModalTitle">Record Credit Sale</span></div>
+        <form id="creditSaleForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Date *</label><input class="fc" type="text" id="csDate" required></div>
+                <div class="fg"><label><i class="fas fa-building-columns"></i>Account *</label>
+                    <select class="fc" id="csAccount" required onchange="showCreditLimit()"><option value="">Select account</option></select>
+                </div>
+            </div>
+            <div id="csLimitInfo" style="display:none;background:var(--primary-bg);border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:0.82rem;color:var(--primary);font-weight:600;"></div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-gas-pump"></i>Pump *</label><select class="fc" id="csPump" required onchange="autoFillCreditPrice()"><option value="">Select pump</option></select></div>
+                <div class="fg"><label><i class="fas fa-car"></i>Vehicle Number</label><input class="fc" type="text" id="csVehicle" placeholder="e.g. NB-1234"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-droplet"></i>Litres *</label><input class="fc" type="number" id="csLitres" required step="0.01" oninput="calcCreditTotal()"></div>
+                <div class="fg"><label><i class="fas fa-tag"></i>Price per Litre (Rs.) *</label><input class="fc" type="number" id="csPrice" required step="0.01" oninput="calcCreditTotal()"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Total Amount (Rs.)</label>
+                <input class="fc" type="number" id="csTotal" readonly style="font-weight:800;font-size:1.1rem;color:var(--danger);">
+            </div>
+            <div class="fg"><label><i class="fas fa-hashtag"></i>Reference</label><input class="fc" type="text" id="csRef" placeholder="REQ-2024-..."></div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar-check"></i>Shift</label>
+                    <select class="fc" id="csShiftLink"><option value="">— No shift linked —</option></select>
+                </div>
+                <div class="fg"><label><i class="fas fa-user"></i>Recorded By *</label>
+                    <select class="fc" id="csUser" required><option value="">Select staff</option></select>
+                </div>
+            </div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><input class="fc" type="text" id="csNotes" placeholder="Optional"></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('creditSaleModal')">Cancel</button>
+                <button type="submit" class="btn btn-danger" id="csSubmitBtn">Record Credit Sale</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CREDIT PAYMENT MODAL -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content narrow">
+        <button class="modal-close" onclick="closeModal('paymentModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-money-bill-wave"></i>Record Payment</div>
+        <div style="background:var(--primary-bg);border-radius:8px;padding:10px 12px;margin-bottom:14px;">
+            <div style="font-size:0.75rem;color:var(--text-light);">Account</div>
+            <div style="font-weight:700;color:var(--text-dark);margin-top:2px;" id="payAccountName">—</div>
+            <div style="font-size:0.78rem;color:var(--danger);margin-top:3px;">Outstanding: <strong id="payOutstanding">Rs. 0</strong></div>
+        </div>
+        <form id="paymentForm">
+            <input type="hidden" id="payAccountId">
+            <div class="fg"><label><i class="fas fa-calendar"></i>Payment Date *</label><input class="fc" type="text" id="payDate" required></div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Amount (Rs.) *</label><input class="fc" type="number" id="payAmount" required min="1" step="0.01" placeholder="0.00"></div>
+            <div class="fg"><label><i class="fas fa-credit-card"></i>Payment Method</label>
+                <select class="fc" id="payMethod"><option>Cash</option><option>Cheque</option><option>Bank Transfer</option><option>Online</option></select>
+            </div>
+            <div class="fg"><label><i class="fas fa-hashtag"></i>Reference / Cheque No.</label><input class="fc" type="text" id="payRef" placeholder="Optional"></div>
+            <div class="fg"><label><i class="fas fa-user"></i>Received By *</label>
+                <select class="fc" id="payUser" required><option value="">Select staff</option></select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('paymentModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Record Payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- STATEMENT MODAL -->
+<div id="statementModal" class="modal">
+    <div class="modal-content" style="width:720px;">
+        <button class="modal-close" onclick="closeModal('statementModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-file-lines"></i><span id="stmtTitle">Account Statement</span></div>
+        <div id="stmtContent"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div></div>
+    </div>
+</div>
+
+<!-- DELIVERY MODAL -->
+<div id="deliveryModal" class="modal">
+    <div class="modal-content wide">
+        <button class="modal-close" onclick="closeModal('deliveryModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-truck"></i><span id="delivModalTitle">Log Delivery</span></div>
+        <form id="deliveryForm">
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-calendar"></i>Delivery Date *</label><input class="fc" type="text" id="dDate" required></div>
+                <div class="fg"><label><i class="fas fa-building"></i>Supplier</label><select class="fc" id="dSupplier"><option value="">Select supplier</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-hashtag"></i>Invoice Number</label><input class="fc" type="text" id="dInvoice" placeholder="CPC-INV-..."></div>
+                <div class="fg"><label><i class="fas fa-droplet"></i>Fuel Type *</label>
+                    <select class="fc" id="dFuelType" required>
+                        <option value="">Select</option><option>92 Octane</option><option>95 Octane</option><option>Auto Diesel</option><option>Super Diesel</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-droplet"></i>Litres Delivered *</label><input class="fc" type="number" id="dLitres" required step="0.01" oninput="calcDeliveryCost()"></div>
+                <div class="fg"><label><i class="fas fa-tag"></i>Price per Litre (Rs.) *</label><input class="fc" type="number" id="dPrice" required step="0.01" oninput="calcDeliveryCost()"></div>
+            </div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Total Cost (Rs.)</label>
+                <input class="fc" type="number" id="dTotal" readonly style="font-weight:800;font-size:1.1rem;color:var(--warning);">
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-truck"></i>Delivery Vehicle</label><input class="fc" type="text" id="dVehicle" placeholder="WP-LT-..."></div>
+                <div class="fg"><label><i class="fas fa-user"></i>Driver Name</label><input class="fc" type="text" id="dDriver" placeholder="Driver name"></div>
+            </div>
+            <div class="form-row">
+                <div class="fg"><label><i class="fas fa-user-check"></i>Received By</label>
+                    <select class="fc" id="dReceivedBy"><option value="">Select staff</option></select>
+                </div>
+                <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><input class="fc" type="text" id="dNotes" placeholder="Optional"></div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('deliveryModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="delivSubmitBtn">Save Delivery</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- PRICE EDIT MODAL -->
+<div id="priceModal" class="modal">
+    <div class="modal-content narrow">
+        <button class="modal-close" onclick="closeModal('priceModal')">&times;</button>
+        <div class="modal-title"><i class="fas fa-tag"></i>Update Fuel Price</div>
+        <form id="priceForm">
+            <input type="hidden" id="priceId">
+            <div class="fg"><label>Fuel Type</label><input class="fc" type="text" id="priceFuelType" readonly style="background:#f5f5f5;"></div>
+            <div class="fg"><label><i class="fas fa-coins"></i>Price per Litre (Rs.) *</label><input class="fc" type="number" id="priceVal" required step="0.01"></div>
+            <div class="fg"><label><i class="fas fa-calendar"></i>Effective Date</label><input class="fc" type="text" id="priceDate"></div>
+            <div class="fg"><label><i class="fas fa-note-sticky"></i>Notes</label><input class="fc" type="text" id="priceNotes" placeholder="e.g. CPC revision"></div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="closeModal('priceModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Price</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <div class="del-icon"><i class="fas fa-trash"></i></div>
+        <h3>Confirm Delete</h3>
+        <p id="deleteMsg">This action cannot be undone.</p>
+        <div class="form-actions">
+            <button class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const API = '/sales';
+    const FUEL_COLORS = {'92 Octane':'#3b82f6','95 Octane':'#8b5cf6','Auto Diesel':'#f59e0b','Super Diesel':'#ef4444'};
+
+    let pumps=[], accounts=[], suppliers=[], prices=[], users=[], todayShifts=[];
+    let editSaleId=null, editAccountId=null, editCreditSaleId=null, editDeliveryId=null;
+    let currentRecordType='shift';
+    let deleteTarget={url:null,cbName:null};
+
+    // Init flatpickr
+    ['#sSaleDate','#csDate','#dDate','#payDate','#priceDate'].forEach(id=>flatpickr(id,{dateFormat:'Y-m-d',defaultDate:'today'}));
+    ['#salesDateFilter','#creditStartFilter','#creditEndFilter','#delivStartFilter','#delivEndFilter','#repStart','#repEnd'].forEach(id=>flatpickr(id,{dateFormat:'Y-m-d'}));
+
+    loadAll();
+
+    async function loadAll(){
+        const today = new Date().toISOString().slice(0,10);
+        [pumps, accounts, prices, users, todayShifts] = await Promise.all([
+            apiFetch(API+'/pumps'),
+            apiFetch(API+'/credit/accounts'),
+            apiFetch(API+'/prices'),
+            apiFetch(API+'/users'),
+            apiFetch(API+'/shifts?date='+today),
+        ]);
+        // Load fuel suppliers from existing suppliers section (type = Fuel or Both)
+        const allSuppliers = await apiFetch('/suppliers/list');
+        suppliers = allSuppliers.filter(s => s.type === 'Fuel' || s.type === 'Both');
+        loadSummary();
+        renderPrices();
+        populateDropdowns();
+        loadSales();
+    }
+
+    // ── SUMMARY ──────────────────────────────────────────
+    async function loadSummary(){
+        const d = await apiFetch(API+'/summary');
+        document.getElementById('kpiTodayCash').textContent     = fmtRs(d.today_cash_revenue);
+        document.getElementById('kpiTodayLitres').textContent   = fmtL(d.today_cash_litres)+' sold';
+        document.getElementById('kpiTodayCredit').textContent   = fmtRs(d.today_credit_revenue);
+        document.getElementById('kpiTodayCreditLitres').textContent = fmtL(d.today_credit_litres)+' on credit';
+        document.getElementById('kpiTodayTotal').textContent    = fmtRs(d.today_total_revenue);
+        document.getElementById('kpiMonthTotal').textContent    = fmtRs(d.month_total_revenue);
+        document.getElementById('kpiOutstanding').textContent   = fmtRs(d.total_outstanding);
+        document.getElementById('kpiTodayTotalLitres').textContent = fmtL(d.today_total_litres);
+        renderTrend(d.trend||[]);
+    }
+
+    function renderTrend(trend){
+        const chart = document.getElementById('trendChart');
+        if(!trend.length){chart.innerHTML='';return;}
+        const maxVal = Math.max(...trend.map(t=>t.total), 1);
+        chart.innerHTML = trend.map(t=>{
+            const cashH   = Math.round((t.cash/maxVal)*60);
+            const creditH = Math.round((t.credit/maxVal)*60);
+            const lbl     = t.date.slice(5); // MM-DD
+            return `<div class="trend-col">
+                <div class="trend-bars">
+                    <div class="trend-bar cash"   style="height:${cashH}px;"   title="Cash: Rs.${fmtRs(t.cash)}"></div>
+                    <div class="trend-bar credit" style="height:${creditH}px;" title="Credit: Rs.${fmtRs(t.credit)}"></div>
+                </div>
+                <div class="trend-label">${lbl}</div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderPrices(){
+        const grid = document.getElementById('priceGrid');
+        if(!prices.length){grid.innerHTML='';return;}
+        grid.innerHTML = prices.map(p=>`
+            <div class="price-card">
+                <div class="price-card-left">
+                    <div class="ft"><span class="fuel-dot" style="background:${FUEL_COLORS[p.fuel_type]||'#999'};"></span>${p.fuel_type}</div>
+                    <div class="eff">Since ${p.effective_date||'—'}</div>
+                </div>
+                <div class="price-card-right" style="text-align:right;">
+                    <div class="price">Rs.${fmt(p.price_per_litre)}</div>
+                    <div class="unit">per litre</div>
+                </div>
+                <button class="btn-icon" style="margin-left:10px;" title="Edit price" onclick="openEditPrice(${JSON.stringify(p).replace(/"/g,'&quot;')})"><i class="fas fa-pen"></i></button>
+            </div>`).join('');
+    }
+
+    // ── TAB SWITCHING ─────────────────────────────────────
+    window.switchTab=function(tab){
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        document.getElementById('tab-'+tab).classList.add('active');
+        document.getElementById('panel-'+tab).classList.add('active');
+        if(tab==='sales')     loadSales();
+        if(tab==='credit')    {loadAccounts();loadCreditSales();}
+        if(tab==='deliveries'){loadDeliveries();loadDeliverySummary();}
+        if(tab==='reports')   loadCreditReport();
+    };
+
+    // ── DAILY SALES ───────────────────────────────────────
+    window.loadSales = async function(){
+        const p = new URLSearchParams();
+        const d = document.getElementById('salesDateFilter').value;
+        const pump = document.getElementById('salesPumpFilter').value;
+        const shift= document.getElementById('salesShiftFilter').value;
+        const pay  = document.getElementById('salesPayFilter').value;
+        if(d)    p.append('date',d);
+        if(pump) p.append('pump_id',pump);
+        if(shift)p.append('shift_period',shift);
+        if(pay)  p.append('payment_method',pay);
+        const data = await apiFetch(API+'/daily?'+p);
+        const tb = document.getElementById('salesTableBody');
+        if(!data.length){tb.innerHTML=emptyRow(10,'fa-cash-register','No sales records found.');document.getElementById('salesTotals').style.display='none';return;}
+        const payPillClass={Cash:'pill-green',Card:'pill-blue',Mobile:'pill-purple',Credit:'pill-yellow'};
+        tb.innerHTML = data.map(s=>`<tr>
+            <td>${s.sale_date}</td>
+            <td><div style="font-weight:600;">${esc(s.pump_number)}</div><div style="font-size:0.73rem;color:var(--text-light);">${esc(s.fuel_type)}</div></td>
+            <td><span class="pill ${s.record_type==='shift'?'pill-blue':'pill-purple'}">${s.record_type==='shift'?'Shift':'Transaction'}</span></td>
+            <td>${s.shift_period}${s.shift_label?`<div style="font-size:0.7rem;color:var(--text-light);">${esc(s.shift_label)}</div>`:''}</td>
+            <td class="text-right"><strong>${fmtL(s.litres_sold)}</strong>${s.opening_meter?`<div style="font-size:0.7rem;color:var(--text-light);">${s.opening_meter}→${s.closing_meter}</div>`:''}</td>
+            <td>Rs.${fmt(s.price_per_litre)}</td>
+            <td class="text-right amount-positive">Rs.${fmt(s.total_amount)}</td>
+            <td><span class="pill ${payPillClass[s.payment_method]||'pill-gray'}">${s.payment_method}</span></td>
+            <td>${esc(s.recorded_by||'')}</td>
+            <td><div style="display:flex;gap:4px;">
+                <button class="btn-icon" onclick="openEditSale(${s.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon del" onclick="confirmDelete('${API}/daily/delete/${s.id}','Delete this sale record?','loadSales')"><i class="fas fa-trash"></i></button>
+            </div></td></tr>`).join('');
+        window._salesData = data;
+        // Totals bar
+        const totalL = data.reduce((a,s)=>a+s.litres_sold,0);
+        const totalRs= data.reduce((a,s)=>a+s.total_amount,0);
+        const totDiv = document.getElementById('salesTotals');
+        totDiv.style.display='flex';
+        totDiv.innerHTML=`<span><strong>${data.length}</strong> records</span>
+            <span><i class="fas fa-droplet" style="color:var(--primary);"></i> <strong>${fmtL(totalL)}</strong> total</span>
+            <span><i class="fas fa-coins" style="color:var(--primary);"></i> <strong>Rs.${fmt(totalRs)}</strong> total</span>`;
+    };
+
+    // When shift is selected, auto-set the shift period based on start time
+    document.getElementById('sShiftLink').addEventListener('change', function(){
+        const shiftId = parseInt(this.value);
+        const shift = todayShifts.find(s=>s.id===shiftId);
+        if(shift && shift.shift_period) document.getElementById('sShift').value=shift.shift_period;
+        if(shift && shift.user_id){
+            const userSel = document.getElementById('sUser');
+            if([...userSel.options].some(o=>o.value==shift.user_id))
+                userSel.value = shift.user_id;
+        }
+    });
+    document.getElementById('csShiftLink').addEventListener('change', function(){
+        const shiftId = parseInt(this.value);
+        const shift = todayShifts.find(s=>s.id===shiftId);
+        if(shift && shift.user_id){
+            const userSel = document.getElementById('csUser');
+            if([...userSel.options].some(o=>o.value==shift.user_id))
+                userSel.value = shift.user_id;
+        }
+    });
+    // Reload shifts when date changes
+    document.getElementById('sSaleDate')._flatpickr.config.onChange.push((d,str)=>reloadShiftsForDate(str,'sShiftLink'));
+    document.getElementById('csDate')._flatpickr.config.onChange.push((d,str)=>reloadShiftsForDate(str,'csShiftLink'));
+    document.getElementById('addSaleBtn').addEventListener('click', () => {
+    editSaleId = null;
+    document.getElementById('saleModalTitle').textContent = 'Record Sale';
+    document.getElementById('saleSubmitBtn').textContent = 'Save Sale';
+    document.getElementById('saleForm').reset();
+    setRecordType('shift');
+    openModal('saleModal');
+});
+    window.openEditSale=function(id){
+        const s=(window._salesData||[]).find(x=>x.id===id);if(!s)return;
+        editSaleId=id;
+        document.getElementById('saleModalTitle').textContent='Edit Sale';
+        document.getElementById('saleSubmitBtn').textContent='Update Sale';
+        setRecordType(s.record_type);
+        document.getElementById('sSaleDate').value=s.sale_date;
+        reloadShiftsForDate(s.sale_date,'sShiftLink').then(()=>{
+            document.getElementById('sShiftLink').value=s.shift_id||'';
+        });
+        document.getElementById('sUser').value=s.user_id||'';
+        document.getElementById('sPump').value=s.pump_id;
+        document.getElementById('sShift').value=s.shift_period;
+        document.getElementById('sPayment').value=s.payment_method;
+        document.getElementById('sOpening').value=s.opening_meter||'';
+        document.getElementById('sClosing').value=s.closing_meter||'';
+        document.getElementById('sLitresDirect').value=s.litres_sold;
+        document.getElementById('sLitres').value=s.litres_sold;
+        document.getElementById('sPrice').value=s.price_per_litre;
+        document.getElementById('sTotal').value=s.total_amount;
+        document.getElementById('sNotes').value=s.notes||'';
+        openModal('saleModal');
+    };
+    window.setRecordType=function(type){
+        currentRecordType=type;
+        document.getElementById('rttShift').classList.toggle('active',type==='shift');
+        document.getElementById('rttTxn').classList.toggle('active',type==='transaction');
+        document.getElementById('meterFields').style.display=type==='shift'?'':'none';
+        document.getElementById('litresField').style.display=type==='transaction'?'':'none';
+        document.getElementById('sLitres').readOnly=type==='shift';
+        if(type==='transaction') document.getElementById('sOpening').removeAttribute('required');
+        else document.getElementById('sOpening').setAttribute('required','');
+    };
+    window.calcLitres=function(){
+        const o=parseFloat(document.getElementById('sOpening').value)||0;
+        const c=parseFloat(document.getElementById('sClosing').value)||0;
+        const l=Math.max(0,c-o);
+        document.getElementById('sLitres').value=l?l.toFixed(2):'';
+        calcTotal();
+    };
+    window.calcTotal=function(){
+        const l=parseFloat(currentRecordType==='transaction'?document.getElementById('sLitresDirect').value:document.getElementById('sLitres').value)||0;
+        const p=parseFloat(document.getElementById('sPrice').value)||0;
+        document.getElementById('sTotal').value=l&&p?(l*p).toFixed(2):'';
+        if(currentRecordType==='transaction') document.getElementById('sLitres').value=l?l.toFixed(2):'';
+    };
+    window.autoFillPrice=function(){
+        const pumpId=parseInt(document.getElementById('sPump').value);
+        const pump=pumps.find(p=>p.id===pumpId);
+        if(!pump)return;
+        const price=prices.find(p=>p.fuel_type===pump.fuel_type);
+        if(price) document.getElementById('sPrice').value=price.price_per_litre;
+        calcTotal();
+    };
+
+    document.getElementById('saleForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const litres=currentRecordType==='transaction'
+            ?parseFloat(document.getElementById('sLitresDirect').value)
+            :parseFloat(document.getElementById('sLitres').value);
+        const body={
+            sale_date:       document.getElementById('sSaleDate').value,
+            pump_id:         document.getElementById('sPump').value,
+            shift_id:        document.getElementById('sShiftLink').value||null,
+            user_id:         document.getElementById('sUser').value||null,
+            record_type:     currentRecordType,
+            shift_period:    document.getElementById('sShift').value,
+            payment_method:  document.getElementById('sPayment').value,
+            opening_meter:   document.getElementById('sOpening').value||null,
+            closing_meter:   document.getElementById('sClosing').value||null,
+            litres_sold:     litres,
+            price_per_litre: document.getElementById('sPrice').value,
+            notes:           document.getElementById('sNotes').value,
+        };
+        const url=editSaleId?API+'/daily/update/'+editSaleId:API+'/daily/add';
+        const r=await apiPost(url,body,editSaleId?'PUT':'POST');
+        if(r){closeModal('saleModal');loadSales();loadSummary();}
+    });
+    document.getElementById('salesFilterBtn').addEventListener('click',loadSales);
+
+    // ── CREDIT ACCOUNTS ───────────────────────────────────
+    window.loadAccounts = async function(){
+        accounts = await apiFetch(API+'/credit/accounts');
+        const grid = document.getElementById('accountsGrid');
+        if(!accounts.length){grid.innerHTML='<div class="empty-state"><i class="fas fa-building-columns"></i><p>No credit accounts yet.</p></div>';return;}
+        grid.innerHTML = accounts.map(a=>{
+            const pct=a.utilisation_pct;
+            const barClass=pct>=100?'credit-bar-over':pct>=75?'credit-bar-warn':'credit-bar-ok';
+            return `<div class="account-card ${a.status==='Suspended'?'suspended':''}" onclick="openStatement(${a.id})">
+                <div class="account-card-top">
+                    <div>
+                        <div class="account-name">${esc(a.account_name)}</div>
+                        <div class="account-contact">${esc(a.contact_person||'')}${a.contact_phone?' · '+esc(a.contact_phone):''}</div>
+                    </div>
+                    <span class="pill ${a.status==='Active'?'pill-green':a.status==='Suspended'?'pill-red':'pill-gray'}">${a.status}</span>
+                </div>
+                <div class="credit-bar-wrap">
+                    <div class="credit-bar-track"><div class="credit-bar-fill ${barClass}" style="width:${Math.min(pct,100)}%;"></div></div>
+                    <div class="credit-bar-labels"><span>${pct}% used</span><span>Limit: Rs.${fmtShort(a.credit_limit)}</span></div>
+                </div>
+                <div class="account-amounts">
+                    <div class="amount-box outstanding"><div class="albl">Outstanding</div><div class="aval">Rs.${fmtShort(a.outstanding_balance)}</div></div>
+                    <div class="amount-box"><div class="albl">Available</div><div class="aval">Rs.${fmtShort(a.available_credit)}</div></div>
+                </div>
+                <div class="account-card-footer" onclick="event.stopPropagation()">
+                    <button class="btn btn-outline btn-sm" onclick="openPayment(${a.id})"><i class="fas fa-money-bill-wave"></i> Record Payment</button>
+                    <button class="btn-icon" onclick="openEditAccount(${a.id})"><i class="fas fa-pen"></i></button>
+                    <button class="btn-icon del" onclick="confirmDelete('${API}/credit/accounts/delete/${a.id}','Delete this credit account?','loadAccounts')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+        // Populate credit account dropdowns
+        const opts='<option value="">All Accounts</option>'+accounts.map(a=>`<option value="${a.id}">${esc(a.account_name)}</option>`).join('');
+        document.getElementById('creditAccFilter').innerHTML=opts;
+        const csOpts='<option value="">Select account</option>'+accounts.filter(a=>a.status==='Active').map(a=>`<option value="${a.id}">${esc(a.account_name)}</option>`).join('');
+        document.getElementById('csAccount').innerHTML=csOpts;
+    };
+
+    document.getElementById('addAccountBtn').addEventListener('click',()=>{
+        editAccountId=null;
+        document.getElementById('accountModalTitle').textContent='New Credit Account';
+        document.getElementById('accountSubmitBtn').textContent='Save Account';
+        document.getElementById('accountForm').reset();
+        openModal('accountModal');
+    });
+    window.openEditAccount=function(id){
+        const a=accounts.find(x=>x.id===id);if(!a)return;
+        editAccountId=id;
+        document.getElementById('accountModalTitle').textContent='Edit Credit Account';
+        document.getElementById('accountSubmitBtn').textContent='Update Account';
+        document.getElementById('aName').value=a.account_name;
+        document.getElementById('aPerson').value=a.contact_person||'';
+        document.getElementById('aPhone').value=a.contact_phone||'';
+        document.getElementById('aEmail').value=a.contact_email||'';
+        document.getElementById('aLimit').value=a.credit_limit;
+        document.getElementById('aAddress').value=a.address||'';
+        document.getElementById('aStatus').value=a.status;
+        document.getElementById('aNotes').value=a.notes||'';
+        openModal('accountModal');
+    };
+    document.getElementById('accountForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const body={account_name:document.getElementById('aName').value,contact_person:document.getElementById('aPerson').value,contact_phone:document.getElementById('aPhone').value,contact_email:document.getElementById('aEmail').value,credit_limit:document.getElementById('aLimit').value,address:document.getElementById('aAddress').value,status:document.getElementById('aStatus').value,notes:document.getElementById('aNotes').value};
+        const url=editAccountId?API+'/credit/accounts/update/'+editAccountId:API+'/credit/accounts/add';
+        const r=await apiPost(url,body,editAccountId?'PUT':'POST');
+        if(r){closeModal('accountModal');loadAccounts();}
+    });
+
+    // ── CREDIT SALES ──────────────────────────────────────
+    window.loadCreditSales = async function(){
+        const p=new URLSearchParams();
+        const acc=document.getElementById('creditAccFilter').value;
+        const sd=document.getElementById('creditStartFilter').value;
+        const ed=document.getElementById('creditEndFilter').value;
+        if(acc)p.append('account_id',acc);
+        if(sd)p.append('start_date',sd);
+        if(ed)p.append('end_date',ed);
+        const data=await apiFetch(API+'/credit/sales?'+p);
+        const tb=document.getElementById('creditSalesTableBody');
+        if(!data.length){tb.innerHTML=emptyRow(10,'fa-file-invoice-dollar','No credit transactions found.');return;}
+        tb.innerHTML=data.map(s=>`<tr>
+            <td>${s.sale_date}</td>
+            <td style="font-weight:600;">${esc(s.account_name)}</td>
+            <td>${esc(s.pump_number)}</td>
+            <td>${esc(s.vehicle_number||'—')}</td>
+            <td><span class="pill" style="background:${FUEL_COLORS[s.fuel_type]||'#e0e0e0'}20;color:${FUEL_COLORS[s.fuel_type]||'#555'}">${s.fuel_type||'—'}</span></td>
+            <td class="text-right"><strong>${fmtL(s.litres_sold)}</strong></td>
+            <td>Rs.${fmt(s.price_per_litre)}</td>
+            <td class="text-right amount-negative">Rs.${fmt(s.total_amount)}</td>
+            <td style="font-size:0.75rem;color:var(--text-light);">${esc(s.reference||'—')}</td>
+            <td><div style="display:flex;gap:4px;">
+                <button class="btn-icon" onclick="openEditCreditSale(${s.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon del" onclick="confirmDelete('${API}/credit/sales/delete/${s.id}','Delete this credit sale?','loadCreditSales')"><i class="fas fa-trash"></i></button>
+            </div></td></tr>`).join('');
+        window._creditSalesData=data;
+    };
+
+    document.getElementById('addCreditSaleBtn').addEventListener('click',()=>{
+        editCreditSaleId=null;
+        document.getElementById('csModalTitle').textContent='Record Credit Sale';
+        document.getElementById('csSubmitBtn').textContent='Record Credit Sale';
+        document.getElementById('creditSaleForm').reset();
+        document.getElementById('csLimitInfo').style.display='none';
+        openModal('creditSaleModal');
+    });
+    window.openEditCreditSale=function(id){
+        const s=(window._creditSalesData||[]).find(x=>x.id===id);if(!s)return;
+        editCreditSaleId=id;
+        document.getElementById('csModalTitle').textContent='Edit Credit Sale';
+        document.getElementById('csSubmitBtn').textContent='Update';
+        document.getElementById('csDate').value=s.sale_date;
+        document.getElementById('csAccount').value=s.account_id;
+        document.getElementById('csPump').value=s.pump_id;
+        document.getElementById('csVehicle').value=s.vehicle_number||'';
+        document.getElementById('csLitres').value=s.litres_sold;
+        document.getElementById('csPrice').value=s.price_per_litre;
+        document.getElementById('csTotal').value=s.total_amount;
+        document.getElementById('csRef').value=s.reference||'';
+        document.getElementById('csUser').value=s.user_id||'';
+        document.getElementById('csNotes').value=s.notes||'';
+        openModal('creditSaleModal');
+    };
+    window.showCreditLimit=function(){
+        const id=parseInt(document.getElementById('csAccount').value);
+        const a=accounts.find(x=>x.id===id);
+        const info=document.getElementById('csLimitInfo');
+        if(!a){info.style.display='none';return;}
+        info.style.display='block';
+        info.innerHTML=`<i class="fas fa-circle-info"></i> Available credit: <strong>Rs.${fmt(a.available_credit)}</strong> / Limit: Rs.${fmt(a.credit_limit)} — Outstanding: Rs.${fmt(a.outstanding_balance)}`;
+        info.style.color=a.utilisation_pct>=90?'var(--danger)':a.utilisation_pct>=70?'var(--warning)':'var(--primary)';
+    };
+    window.autoFillCreditPrice=function(){
+        const pumpId=parseInt(document.getElementById('csPump').value);
+        const pump=pumps.find(p=>p.id===pumpId);
+        if(!pump)return;
+        const price=prices.find(p=>p.fuel_type===pump.fuel_type);
+        if(price)document.getElementById('csPrice').value=price.price_per_litre;
+        calcCreditTotal();
+    };
+    window.calcCreditTotal=function(){
+        const l=parseFloat(document.getElementById('csLitres').value)||0;
+        const p=parseFloat(document.getElementById('csPrice').value)||0;
+        document.getElementById('csTotal').value=l&&p?(l*p).toFixed(2):'';
+    };
+
+    document.getElementById('creditSaleForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const pumpId=parseInt(document.getElementById('csPump').value);
+        const pump=pumps.find(p=>p.id===pumpId);
+        const body={sale_date:document.getElementById('csDate').value,account_id:document.getElementById('csAccount').value,pump_id:pumpId,shift_id:document.getElementById('csShiftLink').value||null,user_id:document.getElementById('csUser').value||null,vehicle_number:document.getElementById('csVehicle').value,litres_sold:document.getElementById('csLitres').value,price_per_litre:document.getElementById('csPrice').value,fuel_type:pump?pump.fuel_type:'',reference:document.getElementById('csRef').value,notes:document.getElementById('csNotes').value};
+        const url=editCreditSaleId?API+'/credit/sales/update/'+editCreditSaleId:API+'/credit/sales/add';
+        const r=await apiPost(url,body,editCreditSaleId?'PUT':'POST');
+        if(r){closeModal('creditSaleModal');loadCreditSales();loadAccounts();loadSummary();}
+    });
+    document.getElementById('creditFilterBtn').addEventListener('click',loadCreditSales);
+
+    // ── PAYMENTS ──────────────────────────────────────────
+    window.openPayment=function(accountId){
+        const a=accounts.find(x=>x.id===accountId);if(!a)return;
+        document.getElementById('payAccountId').value=accountId;
+        document.getElementById('payAccountName').textContent=a.account_name;
+        document.getElementById('payOutstanding').textContent='Rs.'+fmt(a.outstanding_balance);
+        document.getElementById('paymentForm').reset();
+        document.getElementById('payAccountId').value=accountId;
+        openModal('paymentModal');
+    };
+    document.getElementById('paymentForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const body={account_id:document.getElementById('payAccountId').value,payment_date:document.getElementById('payDate').value,amount:document.getElementById('payAmount').value,payment_method:document.getElementById('payMethod').value,user_id:document.getElementById('payUser').value||null,reference_number:document.getElementById('payRef').value};
+        const r=await apiPost(API+'/credit/payments/add',body,'POST');
+        if(r){closeModal('paymentModal');loadAccounts();loadSummary();}
+    });
+
+    // ── STATEMENT ─────────────────────────────────────────
+    window.openStatement=function(accountId){
+        document.getElementById('stmtContent').innerHTML='<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div>';
+        openModal('statementModal');
+        apiFetch(API+'/credit/accounts/'+accountId+'/statement').then(d=>{
+            document.getElementById('stmtTitle').textContent='Statement: '+d.account.account_name;
+            if(!d.entries.length){document.getElementById('stmtContent').innerHTML='<div class="empty-state"><i class="fas fa-file-lines"></i><p>No transactions found.</p></div>';return;}
+            document.getElementById('stmtContent').innerHTML=`
+                <div style="display:flex;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+                    <div style="background:var(--danger-bg);border-radius:8px;padding:10px 14px;flex:1;min-width:120px;"><div style="font-size:0.7rem;color:var(--text-light);font-weight:600;">TOTAL SALES</div><div style="font-size:1.1rem;font-weight:800;color:var(--danger);">Rs.${fmt(d.total_sales)}</div></div>
+                    <div style="background:var(--primary-bg);border-radius:8px;padding:10px 14px;flex:1;min-width:120px;"><div style="font-size:0.7rem;color:var(--text-light);font-weight:600;">TOTAL PAID</div><div style="font-size:1.1rem;font-weight:800;color:var(--primary);">Rs.${fmt(d.total_payments)}</div></div>
+                    <div style="background:var(--accent-bg);border-radius:8px;padding:10px 14px;flex:1;min-width:120px;"><div style="font-size:0.7rem;color:var(--text-light);font-weight:600;">BALANCE DUE</div><div style="font-size:1.1rem;font-weight:800;color:var(--accent-dark);">Rs.${fmt(d.closing_balance)}</div></div>
+                </div>
+                <div style="max-height:350px;overflow-y:auto;">
+                <table class="statement-table">
+                    <thead><tr><th>Date</th><th>Description</th><th>Ref</th><th style="text-align:right">Debit</th><th style="text-align:right">Credit</th><th style="text-align:right">Balance</th></tr></thead>
+                    <tbody>${d.entries.map(e=>`<tr class="${e.type}">
+                        <td>${e.date}</td><td>${esc(e.description)}</td><td>${esc(e.reference)}</td>
+                        <td style="text-align:right">${e.debit?'Rs.'+fmt(e.debit):''}</td>
+                        <td style="text-align:right">${e.credit?'Rs.'+fmt(e.credit):''}</td>
+                        <td style="text-align:right;font-weight:700">Rs.${fmt(e.balance)}</td>
+                    </tr>`).join('')}</tbody>
+                </table></div>`;
+        });
+    };
+
+    // ── DELIVERIES ────────────────────────────────────────
+    async function loadDeliverySummary(){
+        const data = await apiFetch(API+'/deliveries');
+        const byFuel={};
+        data.forEach(d=>{byFuel[d.fuel_type]=(byFuel[d.fuel_type]||0)+d.litres_delivered;});
+        const div=document.getElementById('deliverySummary');
+        div.innerHTML=Object.entries(byFuel).map(([ft,l])=>`
+            <div class="fuel-stock-card">
+                <div class="ft-name"><span class="fuel-dot" style="background:${FUEL_COLORS[ft]||'#999'};"></span>${ft}</div>
+                <div class="ft-litres">${fmtL(l)}</div>
+                <div class="ft-sub">Total delivered (all time)</div>
+            </div>`).join('');
+    }
+
+    window.loadDeliveries = async function(){
+        const p=new URLSearchParams();
+        const sup=document.getElementById('delivSupplierFilter').value;
+        const ft=document.getElementById('delivFuelFilter').value;
+        const sd=document.getElementById('delivStartFilter').value;
+        const ed=document.getElementById('delivEndFilter').value;
+        if(sup)p.append('supplier_id',sup);
+        if(ft)p.append('fuel_type',ft);
+        if(sd)p.append('start_date',sd);
+        if(ed)p.append('end_date',ed);
+        const data=await apiFetch(API+'/deliveries?'+p);
+        const tb=document.getElementById('delivTableBody');
+        if(!data.length){tb.innerHTML=emptyRow(10,'fa-truck','No deliveries found.');return;}
+        tb.innerHTML=data.map(d=>`<tr>
+            <td>${d.delivery_date}</td>
+            <td style="font-weight:600;">${esc(d.supplier_name)}</td>
+            <td style="font-size:0.78rem;">${esc(d.invoice_number||'—')}</td>
+            <td><span class="pill" style="background:${FUEL_COLORS[d.fuel_type]||'#eee'}22;color:${FUEL_COLORS[d.fuel_type]||'#555'}">${d.fuel_type}</span></td>
+            <td class="text-right"><strong>${fmtL(d.litres_delivered)}</strong></td>
+            <td>Rs.${fmt(d.price_per_litre)}</td>
+            <td class="text-right" style="color:var(--warning);font-weight:700;">Rs.${fmt(d.total_cost)}</td>
+            <td style="font-size:0.78rem;">${esc(d.delivery_vehicle||'—')}</td>
+            <td style="font-size:0.78rem;">${esc(d.driver_name||'—')}</td>
+            <td><div style="display:flex;gap:4px;">
+                <button class="btn-icon" onclick="openEditDelivery(${d.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn-icon del" onclick="confirmDelete('${API}/deliveries/delete/${d.id}','Delete this delivery?','loadDeliveries')"><i class="fas fa-trash"></i></button>
+            </div></td></tr>`).join('');
+        window._delivData=data;
+    };
+
+    document.getElementById('addDeliveryBtn').addEventListener('click',()=>{
+        editDeliveryId=null;
+        document.getElementById('delivModalTitle').textContent='Log Delivery';
+        document.getElementById('delivSubmitBtn').textContent='Save Delivery';
+        document.getElementById('deliveryForm').reset();
+        openModal('deliveryModal');
+    });
+    window.openEditDelivery=function(id){
+        const d=(window._delivData||[]).find(x=>x.id===id);if(!d)return;
+        editDeliveryId=id;
+        document.getElementById('delivModalTitle').textContent='Edit Delivery';
+        document.getElementById('delivSubmitBtn').textContent='Update Delivery';
+        document.getElementById('dDate').value=d.delivery_date;
+        document.getElementById('dSupplier').value=d.supplier_id||'';
+        document.getElementById('dInvoice').value=d.invoice_number||'';
+        document.getElementById('dFuelType').value=d.fuel_type;
+        document.getElementById('dLitres').value=d.litres_delivered;
+        document.getElementById('dPrice').value=d.price_per_litre;
+        document.getElementById('dTotal').value=d.total_cost;
+        document.getElementById('dVehicle').value=d.delivery_vehicle||'';
+        document.getElementById('dDriver').value=d.driver_name||'';
+        document.getElementById('dReceivedBy').value=d.received_by_user_id||d.received_by||'';
+        document.getElementById('dNotes').value=d.notes||'';
+        openModal('deliveryModal');
+    };
+    window.calcDeliveryCost=function(){
+        const l=parseFloat(document.getElementById('dLitres').value)||0;
+        const p=parseFloat(document.getElementById('dPrice').value)||0;
+        document.getElementById('dTotal').value=l&&p?(l*p).toFixed(2):'';
+    };
+    document.getElementById('deliveryForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const body={delivery_date:document.getElementById('dDate').value,supplier_id:document.getElementById('dSupplier').value||null,invoice_number:document.getElementById('dInvoice').value,fuel_type:document.getElementById('dFuelType').value,litres_delivered:document.getElementById('dLitres').value,price_per_litre:document.getElementById('dPrice').value,delivery_vehicle:document.getElementById('dVehicle').value,driver_name:document.getElementById('dDriver').value,received_by_user_id:document.getElementById('dReceivedBy').value||null,notes:document.getElementById('dNotes').value};
+        const url=editDeliveryId?API+'/deliveries/update/'+editDeliveryId:API+'/deliveries/add';
+        const r=await apiPost(url,body,editDeliveryId?'PUT':'POST');
+        if(r){closeModal('deliveryModal');loadDeliveries();loadDeliverySummary();}
+    });
+    document.getElementById('delivFilterBtn').addEventListener('click',loadDeliveries);
+
+    // ── REPORTS ───────────────────────────────────────────
+    async function loadCreditReport(){
+        const data=await apiFetch(API+'/reports/credit');
+        const tb=document.getElementById('repCreditBody');
+        document.getElementById('repCreditWrap').style.display='block';
+        if(!data.length){tb.innerHTML=emptyRow(7,'fa-building-columns','No credit accounts.');return;}
+        tb.innerHTML=data.map(a=>{
+            const pct=a.utilisation_pct;
+            const clr=pct>=100?'var(--danger)':pct>=75?'var(--warning)':'var(--primary)';
+            return `<tr>
+                <td style="font-weight:600;">${esc(a.account_name)}</td>
+                <td class="text-right">Rs.${fmt(a.credit_limit)}</td>
+                <td class="text-right amount-negative">Rs.${fmt(a.total_sales)}</td>
+                <td class="text-right amount-positive">Rs.${fmt(a.total_payments)}</td>
+                <td class="text-right" style="color:var(--danger);font-weight:700;">Rs.${fmt(a.outstanding_balance)}</td>
+                <td><div style="display:flex;align-items:center;gap:6px;">
+                    <div style="flex:1;height:6px;background:#f0f0f0;border-radius:99px;overflow:hidden;min-width:60px;">
+                        <div style="height:100%;width:${Math.min(pct,100)}%;background:${clr};border-radius:99px;"></div>
+                    </div>
+                    <span style="font-size:0.75rem;color:${clr};font-weight:600;">${pct}%</span>
+                </div></td>
+                <td><span class="pill ${a.status==='Active'?'pill-green':a.status==='Suspended'?'pill-red':'pill-gray'}">${a.status}</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    document.getElementById('repRunBtn').addEventListener('click',async()=>{
+        const sd=document.getElementById('repStart').value;
+        const ed=document.getElementById('repEnd').value;
+        if(!sd||!ed){alert('Please select both start and end dates.');return;}
+        const data=await apiFetch(API+'/reports/revenue?start_date='+sd+'&end_date='+ed);
+        // Summary boxes
+        const sg=document.getElementById('repSummaryGrid');
+        sg.style.display='grid';
+        sg.innerHTML=[
+            {lbl:'Total Revenue',    val:'Rs.'+fmt(data.totals.total_revenue)},
+            {lbl:'Cash Revenue',     val:'Rs.'+fmt(data.totals.cash_revenue)},
+            {lbl:'Credit Revenue',   val:'Rs.'+fmt(data.totals.credit_revenue)},
+            {lbl:'Total Litres',     val:fmtL(data.totals.total_litres)},
+        ].map(b=>`<div class="report-summary-box"><div class="rs-lbl">${b.lbl}</div><div class="rs-val">${b.val}</div></div>`).join('');
+        // Daily table
+        const tw=document.getElementById('repTableWrap');
+        tw.style.display='block';
+        const tb=document.getElementById('repTableBody');
+        window._repData=data;
+        if(!data.daily_rows.length){tb.innerHTML=emptyRow(8,'fa-chart-bar','No data for selected period.');return;}
+        tb.innerHTML=data.daily_rows.map(r=>`<tr>
+            <td>${r.date}</td>
+            <td class="text-right amount-positive">Rs.${fmt(r.cash_revenue)}</td>
+            <td class="text-right">${fmtL(r.cash_litres)}</td>
+            <td class="text-right amount-negative">Rs.${fmt(r.credit_revenue)}</td>
+            <td class="text-right">${fmtL(r.credit_litres)}</td>
+            <td class="text-right" style="font-weight:800;">Rs.${fmt(r.total_revenue)}</td>
+            <td class="text-right">${fmtL(r.total_litres)}</td>
+            <td class="text-right">${r.transactions}</td>
+        </tr>`).join('');
+        // Pump breakdown
+        document.getElementById('repPumpWrap').style.display='block';
+        document.getElementById('repPumpBody').innerHTML=data.pump_breakdown.map(p=>`<tr>
+            <td style="font-weight:600;">${esc(p.pump_number)} — ${esc(p.pump_name)}</td>
+            <td><span class="pill" style="background:${FUEL_COLORS[p.fuel_type]||'#eee'}22;color:${FUEL_COLORS[p.fuel_type]||'#555'}">${p.fuel_type}</span></td>
+            <td class="text-right">${fmtL(p.litres)}</td>
+            <td class="text-right amount-positive">Rs.${fmt(p.revenue)}</td>
+        </tr>`).join('');
+    });
+
+    // ── EXPORT ────────────────────────────────────────────
+    document.getElementById('exportExcelBtn').addEventListener('click',()=>{
+        const d=window._repData;
+        if(!d){alert('Run a report first.');return;}
+        const ws=XLSX.utils.json_to_sheet(d.daily_rows);
+        const wb=XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb,ws,'Revenue');
+        if(d.pump_breakdown.length){
+            const ws2=XLSX.utils.json_to_sheet(d.pump_breakdown);
+            XLSX.utils.book_append_sheet(wb,ws2,'By Pump');
+        }
+        XLSX.writeFile(wb,`FuelSys_Revenue_${d.start_date}_${d.end_date}.xlsx`);
+    });
+    document.getElementById('exportPdfBtn').addEventListener('click',()=>{
+        const d=window._repData;
+        if(!d){alert('Run a report first.');return;}
+        const rows=d.daily_rows.map(r=>`<tr><td>${r.date}</td><td>Rs.${fmt(r.cash_revenue)}</td><td>${fmtL(r.cash_litres)}</td><td>Rs.${fmt(r.credit_revenue)}</td><td>Rs.${fmt(r.total_revenue)}</td><td>${fmtL(r.total_litres)}</td></tr>`).join('');
+        const html=`<!DOCTYPE html><html><head><title>Revenue Report</title><style>body{font-family:sans-serif;font-size:12px;padding:20px;}h2{color:#1a7a4a;}table{width:100%;border-collapse:collapse;}th{background:#e6f4ed;padding:6px 8px;text-align:left;font-size:11px;}td{padding:5px 8px;border-bottom:1px solid #eee;}</style></head><body><h2>FuelSys Pro — Revenue Report</h2><p>${d.start_date} to ${d.end_date}</p><p>Total Revenue: Rs.${fmt(d.totals.total_revenue)} | Total Litres: ${fmtL(d.totals.total_litres)}</p><table><thead><tr><th>Date</th><th>Cash Revenue</th><th>Cash Litres</th><th>Credit Revenue</th><th>Total Revenue</th><th>Total Litres</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+        const w=window.open('','_blank');
+        w.document.write(html);w.document.close();w.print();
+    });
+
+    // ── PRICE EDIT ────────────────────────────────────────
+    window.openEditPrice=function(p){
+        document.getElementById('priceId').value=p.id;
+        document.getElementById('priceFuelType').value=p.fuel_type;
+        document.getElementById('priceVal').value=p.price_per_litre;
+        document.getElementById('priceDate').value=p.effective_date||'';
+        document.getElementById('priceNotes').value=p.notes||'';
+        openModal('priceModal');
+    };
+    document.getElementById('priceForm').addEventListener('submit',async function(e){
+        e.preventDefault();
+        const id=document.getElementById('priceId').value;
+        const body={price_per_litre:document.getElementById('priceVal').value,effective_date:document.getElementById('priceDate').value,notes:document.getElementById('priceNotes').value};
+        const r=await apiPost(API+'/prices/update/'+id,body,'PUT');
+        if(r){closeModal('priceModal');prices=await apiFetch(API+'/prices');renderPrices();}
+    });
+
+    // ── DROPDOWNS ─────────────────────────────────────────
+    function populateDropdowns(){
+        const pumpOpts='<option value="">Select pump</option>'+pumps.map(p=>`<option value="${p.id}">${esc(p.pump_number)} — ${esc(p.fuel_type)}</option>`).join('');
+        ['sPump','csPump'].forEach(id=>document.getElementById(id).innerHTML=pumpOpts);
+        document.getElementById('salesPumpFilter').innerHTML='<option value="">All Pumps</option>'+pumps.map(p=>`<option value="${p.id}">${esc(p.pump_number)}</option>`).join('');
+
+        // Suppliers use existing schema: supplier_id, name
+        const supOpts='<option value="">Select supplier</option>'+suppliers.map(s=>`<option value="${s.supplier_id}">${esc(s.name)}</option>`).join('');
+        document.getElementById('dSupplier').innerHTML=supOpts;
+        document.getElementById('delivSupplierFilter').innerHTML='<option value="">All Suppliers</option>'+suppliers.map(s=>`<option value="${s.supplier_id}">${esc(s.name)}</option>`).join('');
+
+        // Users dropdown for all recorded-by/received-by selects
+        const userOpts='<option value="">Select staff</option>'+users.map(u=>`<option value="${u.id}">${esc(u.full_name)}${u.emp_no?' ('+esc(u.emp_no)+')':''}</option>`).join('');
+        ['sUser','csUser','payUser','dReceivedBy'].forEach(id=>document.getElementById(id).innerHTML=userOpts);
+
+        // Shifts dropdown — today's shifts
+        const shiftOpts='<option value="">— No shift linked —</option>'+todayShifts.map(s=>`<option value="${s.id}">${esc(s.label)}</option>`).join('');
+        ['sShiftLink','csShiftLink'].forEach(id=>document.getElementById(id).innerHTML=shiftOpts);
+    }
+
+    // Reload shifts when sale date changes (shifts are date-specific)
+    async function reloadShiftsForDate(dateStr, ...selectIds){
+        if(!dateStr) return;
+        const shifts = await apiFetch(API+'/shifts?date='+dateStr);
+        const opts='<option value="">— No shift linked —</option>'+shifts.map(s=>`<option value="${s.id}">${esc(s.label)}</option>`).join('');
+        selectIds.forEach(id=>document.getElementById(id).innerHTML=opts);
+        // If shift selected, auto-set the user
+        return shifts;
+    }
+
+    // ── DELETE ────────────────────────────────────────────
+    window.confirmDelete=function(url,msg,cbName){
+        document.getElementById('deleteMsg').textContent=msg;
+        deleteTarget={url,cbName};openModal('deleteModal');
+    };
+    document.getElementById('confirmDeleteBtn').addEventListener('click',async()=>{
+        const r=await fetch(deleteTarget.url,{method:'DELETE'});
+        const d=await r.json();
+        if(!r.ok){alert(d.message||'Delete failed');return;}
+        closeModal('deleteModal');
+        if(deleteTarget.cbName&&typeof window[deleteTarget.cbName]==='function') window[deleteTarget.cbName]();
+        loadSummary();
+    });
+
+    // ── MODAL HELPERS ─────────────────────────────────────
+    window.openModal=m=>{document.getElementById(m).classList.add('show');document.body.style.overflow='hidden';};
+    window.closeModal=m=>{document.getElementById(m).classList.remove('show');document.body.style.overflow='auto';};
+    window.addEventListener('click',e=>{
+        ['saleModal','accountModal','creditSaleModal','paymentModal','statementModal','deliveryModal','priceModal','deleteModal'].forEach(id=>{
+            if(e.target===document.getElementById(id))closeModal(id);
+        });
+    });
+
+    // ── UTILS ─────────────────────────────────────────────
+    async function apiFetch(url){try{const r=await fetch(url);if(!r.ok)return[];return await r.json();}catch{return[];}}
+    async function apiPost(url,body,method='POST'){
+        try{const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();if(!r.ok){alert(d.message||'Operation failed');return null;}return d;}
+        catch{alert('Network error');return null;}
+    }
+    function fmt(n){return parseFloat(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+    function fmtRs(n){const v=parseFloat(n||0);if(v>=1000000)return'Rs.'+(v/1000000).toFixed(2)+'M';if(v>=1000)return'Rs.'+(v/1000).toFixed(1)+'K';return'Rs.'+fmt(v);}
+    function fmtShort(n){const v=parseFloat(n||0);if(v>=1000000)return(v/1000000).toFixed(2)+'M';if(v>=1000)return(v/1000).toFixed(1)+'K';return fmt(v);}
+    function fmtL(n){const v=parseFloat(n||0);if(v>=1000000)return(v/1000000).toFixed(2)+'M L';if(v>=1000)return(v/1000).toFixed(1)+'K L';return v.toFixed(1)+' L';}
+    function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    function emptyRow(cols,icon,msg){return`<tr><td colspan="${cols}"><div class="empty-state"><i class="fas ${icon}"></i><p>${msg}</p></div></td></tr>`;}
+});
+</script>
+</body>
+</html>
