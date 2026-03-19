@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FuelSys Pro — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:    #1a7a4a;
+      --primary-dk: #155f39;
+      --accent:     #f5c518;
+      --danger:     #dc2626;
+      --bg:         #f0f4f1;
+      --card:       #ffffff;
+      --text:       #0f172a;
+      --muted:      #64748b;
+      --border:     #e2e8f0;
+      --input-bg:   #f8fafc;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Background pattern ── */
+    body {
+      background-color: #e8f0eb;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(26,122,74,0.12) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(26,122,74,0.08) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231a7a4a' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* ── Layout ── */
+    .login-wrap {
+      display: flex;
+      width: 100%;
+      max-width: 900px;
+      min-height: 540px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(0,0,0,0.06),
+        0 24px 80px rgba(0,0,0,0.14),
+        0 4px 16px rgba(0,0,0,0.08);
+      animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0)    scale(1); }
+    }
+
+    /* ── Left panel ── */
+    .login-left {
+      flex: 1;
+      background: linear-gradient(160deg, #1a7a4a 0%, #0d4f2f 100%);
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-left::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .login-left::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: -40px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(245,197,24,0.1);
+    }
+
+    .brand {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 48px;
+    }
+
+    .brand-logo-icon {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand-logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-logo-text span {
+      color: var(--accent);
+    }
+
+    .brand-headline {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+
+    .brand-sub {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.7;
+    }
+
+    .brand-features {
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .brand-feature-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .brand-feature-text {
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* ── Right panel ── */
+    .login-right {
+      width: 420px;
+      background: var(--card);
+      padding: 48px 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .login-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.4px;
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    /* ── Form ── */
+    .fg {
+      margin-bottom: 20px;
+    }
+
+    .fg label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 7px;
+      letter-spacing: 0.1px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      pointer-events: none;
+    }
+
+    .fg input {
+      width: 100%;
+      height: 46px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 0 14px 0 42px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .fg input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,122,74,0.1);
+      background: #ffffff;
+    }
+
+    .fg input::placeholder { color: #b0bec5; }
+
+    /* Password toggle */
+    .pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #94a3b8;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .pw-toggle:hover { color: var(--primary); }
+
+    /* ── Error banner ── */
+    #login-error {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #login-error.hidden { display: none !important; }
+
+    /* ── Submit button ── */
+    .btn-login {
+      width: 100%;
+      height: 48px;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-login:hover:not(:disabled)  { background: var(--primary-dk); transform: translateY(-1px); }
+    .btn-login:active:not(:disabled) { transform: translateY(0); }
+    .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    /* Spinner */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .btn-login.loading .spinner      { display: block; }
+    .btn-login.loading .btn-label    { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Footer ── */
+    .login-footer {
+      margin-top: 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #b0bec5;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 680px) {
+      .login-left  { display: none; }
+      .login-right { width: 100%; padding: 40px 28px; }
+      .login-wrap  { border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-wrap">
+
+  <!-- Left branding panel -->
+  <div class="login-left">
+    <div class="brand">
+      <div class="brand-logo">
+        <div class="brand-logo-icon">
+          <!-- Fuel pump icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 22V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16"/>
+            <path d="M14 10h2a2 2 0 0 1 2 2v3a2 2 0 0 0 2 2 2 2 0 0 0 2-2V8l-3-3"/>
+            <path d="M3 22h12"/>
+            <rect x="6" y="10" width="5" height="4" rx="1"/>
+          </svg>
+        </div>
+        <div class="brand-logo-text">Fuel<span>Sys</span> Pro</div>
+      </div>
+
+      <div class="brand-headline">Fuel Station<br>Management System</div>
+      <div class="brand-sub">Complete operations management for modern fuel stations. Real-time data, smart insights.</div>
+    </div>
+
+    <div class="brand-features">
+      <div class="brand-feature">
+        <div class="brand-feature-dot"></div>
+        <div class="brand-feature-text">Real-time sales & inventory tracking</div>
+      </div>
+      <div class="brand-feature">
+        <div class="brand-feature-dot"></div>
+        <div class="brand-feature-text">Multi-role access control</div>
+      </div>
+      <div class="brand-feature">
+        <div class="brand-feature-dot"></div>
+        <div class="brand-feature-text">Pump & maintenance management</div>
+      </div>
+      <div class="brand-feature">
+        <div class="brand-feature-dot"></div>
+        <div class="brand-feature-text">Credit accounts & supplier ledgers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-right">
+    <div class="login-title">Welcome back</div>
+    <div class="login-subtitle">Sign in to your account to continue</div>
+
+    <!-- Error banner -->
+    <div id="login-error" class="hidden">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="login-error-text"></span>
+    </div>
+
+    <!-- Form -->
+    <div class="fg">
+      <label for="email">Email address</label>
+      <div class="input-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+    </div>
+
+    <div class="fg">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
+        <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Toggle password visibility">
+          <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="handleLogin()">
+      <div class="spinner"></div>
+      <span class="btn-label">Sign In</span>
+    </button>
+
+    <div class="login-footer">
+      FuelSys Pro &copy; 2025 &nbsp;·&nbsp; All rights reserved
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Password toggle ──
+  document.getElementById('pw-toggle').addEventListener('click', function () {
+    const input = document.getElementById('password');
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    document.getElementById('eye-icon').innerHTML = isText
+      ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+      : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  });
+
+  // ── Enter key ──
+  ['email', 'password'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+  });
+
+  // ── Login handler ──
+  async function handleLogin() {
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('login-btn');
+    const errorBox = document.getElementById('login-error');
+    const errorTxt = document.getElementById('login-error-text');
+
+    // Hide previous error
+    errorBox.classList.add('hidden');
+
+    if (!email || !password) {
+      showError('Please enter your email and password.');
+      return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btn.classList.add('loading');
+
+    try {
+      const res = await fetch('/auth/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Redirect to dashboard on success
+        window.location.href = '/dashboard';
+      } else {
+        showError(data.message || 'Login failed. Please try again.');
+      }
+    } catch (err) {
+      showError('Connection error. Please check your network and try again.');
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+  }
+
+  function showError(msg) {
+    const errorBox = document.getElementById('login-error');
+    document.getElementById('login-error-text').textContent = msg;
+    errorBox.classList.remove('hidden');
+  }
+
+  // ── If already logged in, skip to dashboard ──
+  (async function checkAlreadyLoggedIn() {
+    try {
+      const res = await fetch('/auth/me', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated) window.location.href = '/dashboard';
+      }
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

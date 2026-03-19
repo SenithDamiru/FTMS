@@ -1,0 +1,294 @@
+/* ═══════════════════════════════════════════════
+   auth.css — FuelSys Pro Role Guard Styles
+   Include on every protected page
+   ═══════════════════════════════════════════════ */
+
+/* ── Locked nav item ── */
+.nav-locked {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  position: relative;
+}
+
+.nav-locked:hover {
+  opacity: 0.55;
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.nav-locked .lock-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+/* ── Tooltip ── */
+.nav-access-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: #1e293b;
+  color: #f1f5f9;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.nav-access-tooltip::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 5px 5px 5px 0;
+  border-style: solid;
+  border-color: transparent #1e293b transparent transparent;
+}
+
+.nav-access-tooltip.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Profile dropdown trigger ── */
+#user-profile-btn {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+#user-profile-btn #profile-chevron {
+  transition: transform 0.25s ease;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ── Profile dropdown panel ── */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 230px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.07),
+    0 8px 32px rgba(0,0,0,0.14),
+    0 2px 8px rgba(0,0,0,0.08);
+  z-index: 8000;
+  overflow: hidden;
+
+  /* Hidden state */
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  pointer-events: none;
+  transition:
+    opacity 0.2s cubic-bezier(0.22,1,0.36,1),
+    transform 0.2s cubic-bezier(0.22,1,0.36,1);
+}
+
+.profile-dropdown.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+
+/* ── Dropdown header — avatar + name + role ── */
+.profile-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 16px 14px;
+}
+
+.profile-dropdown-header img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.profile-dropdown-info {
+  overflow: hidden;
+}
+
+.profile-dropdown-name {
+  font-size: 13px;
+  font-weight: 650;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-dropdown-role {
+  font-size: 11px;
+  font-weight: 500;
+  color: #ffffff;
+  background: #1a7a4a;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+}
+
+/* ── Divider ── */
+.profile-dropdown-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0 12px;
+}
+
+/* ── Dropdown items ── */
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ef4444;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.profile-dropdown-item:hover {
+  background: #fff5f5;
+}
+
+.profile-dropdown-item i {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+}
+
+/* ── Full-screen overlay ── */
+#access-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+#access-overlay.visible {
+  opacity: 1;
+}
+
+.access-overlay-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 48px 40px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,0.06),
+    0 20px 60px rgba(0,0,0,0.18),
+    0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(12px);
+  transition: transform 0.35s ease;
+}
+
+#access-overlay.visible .access-overlay-card {
+  transform: translateY(0);
+}
+
+.access-overlay-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  color: #dc2626;
+}
+
+.access-overlay-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px;
+  letter-spacing: -0.3px;
+}
+
+.access-overlay-msg {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+
+.access-overlay-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 28px;
+}
+
+.access-overlay-role-label {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.access-overlay-role-value {
+  font-size: 13px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.access-overlay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #1a7a4a;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  text-decoration: none;
+}
+
+.access-overlay-btn:hover {
+  background: #15663d;
+  transform: translateY(-1px);
+}
+
+.access-overlay-btn:active {
+  transform: translateY(0);
+}

@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Management - FuelSys Pro</title>
+    <title>Shift Management - FuelSys Pro</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-   
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-   
-  
+    <!-- CHANGE 1: Add auth.css in <head> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
@@ -22,7 +21,6 @@
       padding: 20px;
       border-radius: 10px;
     }
-/* Content Area */
         .content {
             padding: 30px;
         }
@@ -37,7 +35,6 @@
             margin-bottom: 10px;
         }
 
-        /* Add Shift Card */
         .add-shift-card {
             background: white;
             border-radius: 15px;
@@ -105,7 +102,6 @@
             box-shadow: 0 5px 15px rgba(139, 195, 74, 0.3);
         }
 
-        /* Calendar Card */
         .calendar-card {
             background: white;
             border-radius: 15px;
@@ -154,7 +150,6 @@
             margin: 20px 0;
         }
 
-        /* Role Legend */
         .role-legend {
             display: flex;
             gap: 20px;
@@ -178,12 +173,6 @@
             border-radius: 50%;
         }
 
-        .role-admin { background-color: #FF5722; }
-        .role-manager { background-color: #2196F3; }
-        .role-attendant { background-color: #8BC34A; }
-        .role-security { background-color: #9C27B0; }
-
-        /* History Table Card */
         .history-card {
             background: white;
             border-radius: 15px;
@@ -242,7 +231,6 @@
             color: #E65100;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -289,7 +277,6 @@
             cursor: pointer;
         }
 
-        /* Custom Calendar Colors */
         .fc-event {
             border: none !important;
             border-radius: 6px !important;
@@ -305,41 +292,43 @@
 
         .fc-button-primary:hover {
             background: lch(62.52% 53.88 111.49) !important;
-            border-color:yellowgreen
+            border-color: yellowgreen;
         }
-        
     </style>
 </head>
-<body>
+
+<!-- CHANGE 2: Add data-page="shifts" on <body> -->
+<body data-page="shifts">
     <div class="dashboard">
-        
-      <!-- Sidebar -->
+
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo">
                 <i class="fas fa-gas-pump"></i>
                 <h2><span>FuelSys Pro</span></h2>
             </div>
+
+            <!-- Nav items -->
             <nav>
                 <ul>
-                    <li><a href="index.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
-                    <li><a href="sales.html"><i class="fas fa-cash-register"></i><span> Sales & Billing</span></a></li>
-                    <li><a href="inventory.html"><i class="fas fa-oil-can"></i> <span>Fuel Inventory</span></a></li>
-                    <li><a href="/ml/"><i class="fas fa-chart-line"></i><span>Tank Prediction</span></a></li>
-                    <li><a href="/pumps/page"><i class="fas fa-gas-pump"></i> <span>Pumps</span></a></li>
-                    <li><a href="/staff/page"><i class="fas fa-users"></i> <span>Staff</span></a></li>
-                    <li class="active"><a href="/shifts/page"><i class="fa fa-calendar"></i><span> Shifts</span></a></li>
-                    <li><a href="customers.html"><i class="fa-solid fa-spray-can-sparkles"></i> <span>Lubricants</span></a></li>
-                    <li><a href="reports.html"><i class="fas fa-chart-bar"></i><span> Reports</span></a></li>
-                    <li><a href="/suppliers/page"><i class="fas fa-truck"></i> <span>Suppliers</span></a></li>
-                    <li><a href="/expenses/page"><i class="fas fa-money-bill-wave"></i> <span>Expenses</span></a></li>
-                    <li><a href="settings.html"><i class="fas fa-cog"></i><span> Settings</span></a></li>
+                    <li><a href="/dashboard"       data-page="dashboard">  <i class="fas fa-tachometer-alt"></i>     <span>Dashboard</span></a></li>
+                    <li><a href="/sales/page"       data-page="sales">      <i class="fas fa-cash-register"></i>      <span>Sales & Billing</span></a></li>
+                    <li><a href="/inventory"        data-page="inventory">  <i class="fas fa-oil-can"></i>            <span>Fuel Inventory</span></a></li>
+                    <li><a href="/ml/"              data-page="tank">       <i class="fas fa-chart-line"></i>         <span>Tank Prediction</span></a></li>
+                    <li><a href="/pumps/page"       data-page="pumps">      <i class="fas fa-gas-pump"></i>           <span>Pumps</span></a></li>
+                    <li><a href="/staff/page"       data-page="staff">      <i class="fas fa-users"></i>              <span>Staff</span></a></li>
+                    <li class="active"><a href="/shifts/page" data-page="shifts"><i class="fa fa-calendar"></i>      <span>Shifts</span></a></li>
+                    <li><a href="/lubricants/page"  data-page="lubricants"> <i class="fa-solid fa-spray-can-sparkles"></i><span>Lubricants</span></a></li>
+                    <li><a href="/reports"          data-page="reports">    <i class="fas fa-chart-bar"></i>          <span>Reports</span></a></li>
+                    <li><a href="/suppliers/page"   data-page="suppliers">  <i class="fas fa-truck"></i>              <span>Suppliers</span></a></li>
+                    <li><a href="/expenses/page"    data-page="expenses">   <i class="fas fa-money-bill-wave"></i>    <span>Expenses</span></a></li>
+                    <li><a href="/settings"         data-page="settings">   <i class="fas fa-cog"></i>                <span>Settings</span></a></li>
                 </ul>
             </nav>
+
             <div class="sidebar-toggle">
-    <i class="fas fa-angle-left"></i>
-</div>
-
-
+                <i class="fas fa-angle-left"></i>
+            </div>
         </aside>
 
         <!-- Main Content -->
@@ -354,10 +343,26 @@
                         <i class="fas fa-bell"></i>
                         <span class="badge">3</span>
                     </div>
-                    <div class="user-profile">
-                        <img src="https://via.placeholder.com/40" alt="User">
-                        <span>Admin</span>
-                        <i class="fas fa-chevron-down"></i>
+                    <div class="user-profile" id="user-profile-btn">
+                        <img id="auth-user-image" src="https://via.placeholder.com/40" alt="User">
+                        <span id="auth-user-name">...</span>
+                        <i class="fas fa-chevron-down" id="profile-chevron"></i>
+
+                        <!-- Profile dropdown -->
+                        <div class="profile-dropdown" id="profile-dropdown">
+                            <div class="profile-dropdown-header">
+                                <img id="auth-user-image-dd" src="https://via.placeholder.com/48" alt="User">
+                                <div class="profile-dropdown-info">
+                                    <div class="profile-dropdown-name" id="auth-user-name-dd">...</div>
+                                    <div class="profile-dropdown-role" id="auth-user-role-dd">—</div>
+                                </div>
+                            </div>
+                            <div class="profile-dropdown-divider"></div>
+                            <button class="profile-dropdown-item" onclick="authLogout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -365,8 +370,9 @@
             <div class="content">
                 <div class="page-header">
                     <h1>Manage Shifts</h1>
-                        
-  <!-- Add Shift Card -->
+                </div>
+
+                <!-- Add Shift Card -->
                 <div class="add-shift-card">
                     <h3>Schedule New Shift</h3>
                     <form id="shiftForm">
@@ -410,27 +416,25 @@
                             <button class="view-btn" data-view="dayGridMonth">Month</button>
                         </div>
                     </div>
-                    
-                    <!-- Role Legend -->
-                    <div class="role-legend">
-    <div class="legend-item">
-        <div class="legend-color" style="background-color: #FF5722;"></div>
-        <span>Admin</span>
-    </div>
-    <div class="legend-item">
-        <div class="legend-color" style="background-color: #2196F3;"></div>
-        <span>Manager</span>
-    </div>
-    <div class="legend-item">
-        <div class="legend-color" style="background-color: #FFC107;"></div>
-        <span>Cashier</span>
-    </div>
-    <div class="legend-item">
-        <div class="legend-color" style="background-color: #8BC34A;"></div>
-        <span>Pump Attendant</span>
-    </div>
-</div>
 
+                    <div class="role-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #FF5722;"></div>
+                            <span>Admin</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #2196F3;"></div>
+                            <span>Manager</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #FFC107;"></div>
+                            <span>Cashier</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #8BC34A;"></div>
+                            <span>Pump Attendant</span>
+                        </div>
+                    </div>
 
                     <div id="calendar"></div>
                 </div>
@@ -452,11 +456,7 @@
                                     <th>Notes</th>
                                 </tr>
                             </thead>
-                            <tbody id="historyTableBody">
-                                <!-- Sample data -->
-                               
-                                
-                            </tbody>
+                            <tbody id="historyTableBody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -471,12 +471,10 @@
             <form id="editForm">
                 <input type="hidden" id="editId">
                 <input type="hidden" id="editUserId">
-
                 <div class="form-group">
                     <label>Date</label>
                     <input type="date" id="editDate" required>
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Start Time</label>
@@ -487,12 +485,10 @@
                         <input type="time" id="editEndTime" required>
                     </div>
                 </div>
-
                 <div class="form-group">
                     <label>Notes</label>
                     <input type="text" id="editNotes" placeholder="Optional notes...">
                 </div>
-
                 <div style="margin-top: 20px; display: flex; gap: 10px;">
                     <button type="submit" class="btn-primary">Update</button>
                     <button type="button" id="deleteBtn" class="btn-delete">Delete</button>
@@ -502,263 +498,195 @@
         </div>
     </div>
 
-    <div class="history-card">
- 
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 
+    <!-- CHANGE 4: auth.js FIRST before any other scripts -->
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 
+    <script>
+        let calendar;
+        let currentEvent = null;
+        let roleColors = {};
+        let roleNames = {};
+        let staffData = [];
 
+        document.addEventListener('DOMContentLoaded', async () => {
+            const calendarEl = document.getElementById('calendar');
+            const userSelect = document.getElementById('userSelect');
 
- <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-<script> 
+            const rolesRes = await fetch('/shifts/roles');
+            const rolesData = await rolesRes.json();
+            rolesData.forEach(role => {
+                roleColors[role.id] = role.color;
+                roleNames[role.id] = role.name;
+            });
 
-let calendar;
-let currentEvent = null;
-let roleColors = {};
-let roleNames = {};
-let staffData = [];  // global staff data array
+            const staffRes = await fetch('/shifts/staff');
+            staffData = await staffRes.json();
+            userSelect.innerHTML = '<option value="">Select Staff</option>';
+            staffData.forEach(staff => {
+                const option = document.createElement('option');
+                option.value = staff.id;
+                option.textContent = staff.name;
+                userSelect.appendChild(option);
+            });
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const calendarEl = document.getElementById('calendar');
-    const userSelect = document.getElementById('userSelect');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                height: 'auto',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: async function(fetchInfo, successCallback) {
+                    try {
+                        const res = await fetch('/shifts/api');
+                        const events = await res.json();
+                        const formatted = events.map(e => ({
+                            id: e.id,
+                            title: e.staff_name || 'Staff',
+                            start: e.start,
+                            end: e.end,
+                            backgroundColor: roleColors[e.role_id] || '#8BC34A',
+                            borderColor: roleColors[e.role_id] || '#8BC34A',
+                            textColor: 'white',
+                            extendedProps: e
+                        }));
+                        successCallback(formatted);
+                    } catch (err) {
+                        console.error('Error fetching events:', err);
+                    }
+                },
+                eventClick: (info) => {
+                    const e = info.event;
+                    currentEvent = e;
+                    document.getElementById('editId').value = e.id;
+                    document.getElementById('editUserId').value = e.extendedProps.user_id || '';
+                    document.getElementById('editDate').value = formatDateLocal(e.start);
+                    document.getElementById('editStartTime').value = formatTimeLocal(e.start);
+                    document.getElementById('editEndTime').value = formatTimeLocal(e.end);
+                    document.getElementById('editNotes').value = e.extendedProps.notes || '';
+                    document.getElementById('editModal').style.display = 'flex';
+                }
+            });
 
-    // Fetch roles and store colors/names
-    const rolesRes = await fetch('/shifts/roles');
-    const rolesData = await rolesRes.json();
+            calendar.render();
+            loadHistoryTable();
 
-    rolesData.forEach(role => {
-        roleColors[role.id] = role.color;
-        roleNames[role.id] = role.name;
-    });
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    calendar.changeView(this.dataset.view);
+                });
+            });
 
-    // Load staff into dropdown and assign to global staffData
-    const staffRes = await fetch('/shifts/staff');
-    staffData = await staffRes.json();
+            document.getElementById('shiftForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const selectedUserId = document.getElementById('userSelect').value;
+                if (!selectedUserId) { alert('Please select a staff member'); return; }
+                const selectedUser = staffData.find(s => s.id == selectedUserId);
+                if (!selectedUser) { alert('Selected staff member not found'); return; }
 
-    // Clear existing options if any
-    userSelect.innerHTML = '<option value="">Select Staff</option>';
+                const payload = {
+                    user_id: selectedUserId,
+                    role_id: selectedUser.role_id,
+                    shift_date: document.getElementById('shiftDate').value,
+                    start_time: document.getElementById('startTime').value,
+                    end_time: document.getElementById('endTime').value,
+                    notes: document.getElementById('notes').value
+                };
 
-    staffData.forEach(staff => {
-        const option = document.createElement('option');
-        option.value = staff.id;
-        option.textContent = staff.name;
-        userSelect.appendChild(option);
-    });
+                const res = await fetch('/shifts/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
 
-    // Initialize FullCalendar
-    calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',
-        height: 'auto',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: ''
-        },
-        events: async function(fetchInfo, successCallback) {
+                if (res.ok) {
+                    calendar.refetchEvents();
+                    loadHistoryTable();
+                    document.getElementById('shiftForm').reset();
+                    alert("Shift Added");
+                } else {
+                    alert('Failed to add shift');
+                }
+            });
+
+            document.getElementById('editForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('editId').value;
+                const user_id = document.getElementById('editUserId').value;
+                if (!user_id) { alert('User ID missing'); return; }
+
+                const payload = {
+                    user_id: user_id,
+                    role_id: currentEvent.extendedProps.role_id,
+                    shift_date: document.getElementById('editDate').value,
+                    start_time: document.getElementById('editStartTime').value,
+                    end_time: document.getElementById('editEndTime').value,
+                    notes: document.getElementById('editNotes').value
+                };
+
+                const res = await fetch(`/shifts/update/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) { closeModal(); calendar.refetchEvents(); loadHistoryTable(); }
+                else { alert("Update failed"); }
+            });
+
+            document.getElementById('deleteBtn').addEventListener('click', async () => {
+                const id = document.getElementById('editId').value;
+                if (confirm('Are you sure you want to delete this shift?')) {
+                    const res = await fetch(`/shifts/delete/${id}`, { method: 'DELETE' });
+                    if (res.ok) { closeModal(); calendar.refetchEvents(); loadHistoryTable(); }
+                    else { alert('Delete failed'); }
+                }
+            });
+        });
+
+        async function loadHistoryTable() {
             try {
-                const res = await fetch('/shifts/api');
-                const events = await res.json();
-
-                const formatted = events.map(e => ({
-                    id: e.id,
-                    title: e.staff_name || 'Staff',
-                    start: e.start,
-                    end: e.end,
-                    backgroundColor: roleColors[e.role_id] || '#8BC34A',
-                    borderColor: roleColors[e.role_id] || '#8BC34A',
-                    textColor: 'white',
-                    extendedProps: e  // send whole event props for easier access
-                }));
-
-                successCallback(formatted);
+                const response = await fetch('/shifts/history');
+                const data = await response.json();
+                const tableBody = document.getElementById('historyTableBody');
+                tableBody.innerHTML = '';
+                data.forEach(shift => {
+                    const roleColor = roleColors[shift.role_id] || '#8BC34A';
+                    const roleName  = roleNames[shift.role_id]  || 'Unknown';
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${shift.staff_name}</td>
+                        <td><span style="color:${roleColor}">●</span> ${roleName}</td>
+                        <td>${formatDate(shift.shift_date)}</td>
+                        <td>${shift.start_time}</td>
+                        <td>${shift.end_time}</td>
+                        <td>${shift.duration}</td>
+                        <td><span class="status-badge status-completed">${shift.status || 'Completed'}</span></td>
+                        <td>${shift.notes || '-'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
             } catch (err) {
-                console.error('Error fetching events:', err);
-            }
-        },
-        eventClick: (info) => {
-            const e = info.event;
-            currentEvent = e;
-
-            document.getElementById('editId').value = e.id;
-            document.getElementById('editUserId').value = e.extendedProps.user_id || '';
-            document.getElementById('editDate').value = formatDateLocal(e.start);
-
-            document.getElementById('editStartTime').value = formatTimeLocal(e.start);
-            document.getElementById('editEndTime').value = formatTimeLocal(e.end);
-
-            document.getElementById('editNotes').value = e.extendedProps.notes || '';
-
-            document.getElementById('editModal').style.display = 'flex';
-        }
-    });
-
-    calendar.render();
-    loadHistoryTable();
-
-    // View switching buttons
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            calendar.changeView(this.dataset.view);
-        });
-    });
-
-    // Add shift
-    document.getElementById('shiftForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const selectedUserId = document.getElementById('userSelect').value;
-        if (!selectedUserId) {
-            alert('Please select a staff member');
-            return;
-        }
-
-        const selectedUser = staffData.find(s => s.id == selectedUserId);
-        if (!selectedUser) {
-            alert('Selected staff member not found');
-            return;
-        }
-
-        const payload = {
-            user_id: selectedUserId,
-            role_id: selectedUser.role_id,  // Correct key name
-            shift_date: document.getElementById('shiftDate').value,
-            start_time: document.getElementById('startTime').value,
-            end_time: document.getElementById('endTime').value,
-            notes: document.getElementById('notes').value
-        };
-
-        const res = await fetch('/shifts/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-            calendar.refetchEvents();
-            loadHistoryTable();
-            document.getElementById('shiftForm').reset();
-            alert("Shift Added");
-        } else {
-            alert('Failed to add shift');
-        }
-    });
-
-    // Update shift
-    document.getElementById('editForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const id = document.getElementById('editId').value;
-        const user_id = document.getElementById('editUserId').value;
-
-        if (!user_id) {
-            alert('User ID missing');
-            return;
-        }
-
-        const payload = {
-            user_id: user_id,
-            role_id: currentEvent.extendedProps.role_id,
-            shift_date: document.getElementById('editDate').value,
-            start_time: document.getElementById('editStartTime').value,
-            end_time: document.getElementById('editEndTime').value,
-            notes: document.getElementById('editNotes').value
-        };
-
-        const res = await fetch(`/shifts/update/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (res.ok) {
-            closeModal();
-            calendar.refetchEvents();
-            loadHistoryTable();
-        } else {
-            alert("Update failed");
-        }
-    });
-
-    // Delete shift
-    document.getElementById('deleteBtn').addEventListener('click', async () => {
-        const id = document.getElementById('editId').value;
-        if (confirm('Are you sure you want to delete this shift?')) {
-            const res = await fetch(`/shifts/delete/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                closeModal();
-                calendar.refetchEvents();
-                loadHistoryTable();
-            } else {
-                alert('Delete failed');
+                console.error('Error loading history:', err);
             }
         }
-    });
-});
 
-// Load recent shifts into history table
-async function loadHistoryTable() {
-    try {
-        const response = await fetch('/shifts/history');
-        const data = await response.json();
-        const tableBody = document.getElementById('historyTableBody');
-        tableBody.innerHTML = '';
-
-        data.forEach(shift => {
-            const roleColor = roleColors[shift.role_id] || '#8BC34A';
-            const roleName = roleNames[shift.role_id] || 'Unknown';
-
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${shift.staff_name}</td>
-                <td><span style="color: ${roleColor}">●</span> ${roleName}</td>
-                <td>${formatDate(shift.shift_date)}</td>
-                <td>${shift.start_time}</td>
-                <td>${shift.end_time}</td>
-                <td>${shift.duration}</td>
-                <td><span class="status-badge status-completed">${shift.status || 'Completed'}</span></td>
-                <td>${shift.notes || '-'}</td>
-            `;
-            tableBody.appendChild(row);
-        });
-    } catch (err) {
-        console.error('Error loading history:', err);
-    }
-}
-
-function formatTimeLocal(date) {
-    return date.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
-}
-function formatDateLocal(date) {
-    return date.toLocaleDateString('en-CA'); // Returns YYYY-MM-DD
-}
-
-
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-}
-
-function closeModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
-
-window.addEventListener('click', function (event) {
-    if (event.target === document.getElementById('editModal')) {
-        closeModal();
-    }
-});
-
-
-
-</script>
-
+        function formatTimeLocal(date) {
+            return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+        function formatDateLocal(date) { return date.toLocaleDateString('en-CA'); }
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+        window.addEventListener('click', e => { if (e.target === document.getElementById('editModal')) closeModal(); });
+    </script>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    
 </body>
 </html>
