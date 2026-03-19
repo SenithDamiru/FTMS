@@ -1,6 +1,8 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
+import os
+from datetime import timedelta
 
 db = SQLAlchemy()
 
@@ -9,7 +11,8 @@ def create_app():
     app.config.from_object(Config)
 
     # ── Session config ──
-    app.secret_key = 'fuelsys-secret-key-change-in-production'
+    app.secret_key = os.urandom(24)  # Random on every restart — logs everyone out
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=8)
     app.config['SESSION_COOKIE_HTTPONLY'] = True
     app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
