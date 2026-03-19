@@ -34,6 +34,9 @@ def create_app():
     from .routes.pumps_routes import pumps_bp
     app.register_blueprint(pumps_bp)
 
+    from .routes.sales_routes import sales_bp
+    app.register_blueprint(sales_bp)
+
     from flask import render_template
     @app.route('/')
     def index():
