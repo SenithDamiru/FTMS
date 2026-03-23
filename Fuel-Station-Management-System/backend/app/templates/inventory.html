@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuel Inventory — FuelSys Pro</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+
+  <style>
+    /* ── Page-level overrides ── */
+    .content { padding: 28px; }
+
+    /* ── Tab bar ── */
+    .inv-tabs {
+      display: flex;
+      gap: 4px;
+      background: #f1f5f2;
+      border-radius: 12px;
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 28px;
+    }
+    .inv-tab {
+      padding: 9px 22px;
+      border: none;
+      border-radius: 9px;
+      background: transparent;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .inv-tab.active {
+      background: #ffffff;
+      color: #1a7a4a;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    }
+    .inv-tab-panel { display: none; }
+    .inv-tab-panel.active { display: block; }
+
+    /* ══════════════════════════════════════
+       IOT MONITOR PANEL
+    ══════════════════════════════════════ */
+
+    .iot-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+    }
+
+    /* ── Device header card ── */
+    .device-header-card {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, #0f2419 0%, #1a4a2e 60%, #1e5c38 100%);
+      border-radius: 16px;
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .device-header-card::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .device-header-left { display: flex; align-items: center; gap: 16px; }
+    .device-icon {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      backdrop-filter: blur(8px);
+    }
+    .device-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+    .device-subtitle { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+    .device-status-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+    .status-dot.pulse {
+      animation: pulse-green 1.5s ease-in-out infinite;
+    }
+    .status-dot.offline { background: #f87171; animation: none; }
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.6); }
+      50%       { box-shadow: 0 0 0 6px rgba(74,222,128,0); }
+    }
+    .sync-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      margin-left: 8px;
+    }
+
+    /* ── Animated SVG tank ── */
+    .tank-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .tank-visual-wrap { position: relative; width: 160px; }
+    .tank-svg { width: 160px; height: 240px; }
+
+    /* Tank fill animation */
+    .tank-fill-rect {
+      transition: y 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+                  height 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+                  fill 1.2s ease;
+    }
+
+    /* Flame icon overlay */
+    .tank-flame-overlay {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 32px;
+      display: none;
+      animation: flame-pulse 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes flame-pulse {
+      from { transform: translateX(-50%) scale(1);   filter: drop-shadow(0 0 6px #ff4444); }
+      to   { transform: translateX(-50%) scale(1.15);filter: drop-shadow(0 0 12px #ff4444); }
+    }
+
+    .tank-stats {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tank-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border-radius: 10px;
+    }
+    .tank-stat-label { font-size: 12px; color: #64748b; font-weight: 500; }
+    .tank-stat-value { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .tank-stat-value.green  { color: #16a34a; }
+    .tank-stat-value.yellow { color: #ca8a04; }
+    .tank-stat-value.red    { color: #dc2626; }
+
+    /* ── Right column: pills + charts ── */
+    .iot-right {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Status pills */
+    .status-pills-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .status-pills-card h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 14px;
+    }
+    .pills-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.3s;
+    }
+    .status-pill.danger {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      animation: danger-pulse 1s ease-in-out infinite;
+    }
+    .status-pill.safe {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    @keyframes danger-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+    .pill-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pill-dot.green  { background: #22c55e; }
+    .pill-dot.red    { background: #ef4444; animation: danger-dot 0.8s infinite; }
+    .pill-dot.gray   { background: #cbd5e1; }
+    @keyframes danger-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+    .pill-label { font-size: 12px; font-weight: 600; color: #374151; }
+    .pill-value { font-size: 11px; color: #64748b; margin-left: auto; }
+
+    /* Charts */
+    .charts-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      flex: 1;
+    }
+    .charts-card h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 16px;
+    }
+    .chart-section { margin-bottom: 24px; }
+    .chart-section:last-child { margin-bottom: 0; }
+    .chart-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chart-wrap { height: 130px; position: relative; }
+
+    /* ── Fire event timeline ── */
+    .fire-timeline-card {
+      grid-column: 1 / -1;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .fire-timeline-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .timeline-scroll {
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .timeline-scroll::-webkit-scrollbar { width: 4px; }
+    .timeline-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .timeline-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    .timeline-empty {
+      text-align: center;
+      padding: 40px;
+      color: #94a3b8;
+      font-size: 13px;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      animation: slideInUp 0.4s ease both;
+    }
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .timeline-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .timeline-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #ef4444;
+      border: 2px solid #fca5a5;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .timeline-connector {
+      width: 2px;
+      flex: 1;
+      background: #f1f5f9;
+      margin-top: 4px;
+      min-height: 20px;
+    }
+    .timeline-content {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 14px 16px;
+      flex: 1;
+      margin-bottom: 4px;
+    }
+    .timeline-time {
+      font-size: 11px;
+      color: #ef4444;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .timeline-details {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .timeline-detail {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: #374151;
+      background: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #fecaca;
+    }
+    .tl-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tl-badge.detected { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+    .tl-badge.resolved { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
+    .tl-badge.pump-yes  { background: #fff7ed; color: #ea580c; border: 1px solid #fdba74; }
+    .tl-badge.pump-no   { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+
+    /* ══════════════════════════════════════
+       TANK INVENTORY PANEL
+    ══════════════════════════════════════ */
+
+    .tanks-kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: white;
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .kpi-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .kpi-icon.green  { background: #dcfce7; color: #16a34a; }
+    .kpi-icon.blue   { background: #dbeafe; color: #2563eb; }
+    .kpi-icon.yellow { background: #fef9c3; color: #ca8a04; }
+    .kpi-icon.red    { background: #fee2e2; color: #dc2626; }
+    .kpi-label { font-size: 12px; color: #64748b; font-weight: 500; }
+    .kpi-value { font-size: 22px; font-weight: 750; color: #0f172a; letter-spacing: -0.5px; }
+
+    .tanks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 18px;
+    }
+    .tank-inv-card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1.5px solid #f1f5f9;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .tank-inv-card:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+      border-color: #e2e8f0;
+    }
+    .tank-inv-card.low-stock {
+      border-color: #fca5a5;
+      background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+    }
+    .tank-inv-card.iot-linked::after {
+      content: '⚡ IoT';
+      position: absolute;
+      top: 14px; right: 14px;
+      font-size: 10px;
+      font-weight: 700;
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      padding: 3px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.3px;
+    }
+    .tank-inv-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .tank-id-badge {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #1a7a4a, #15663d);
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      letter-spacing: 0.3px;
+    }
+    .tank-inv-title { font-size: 15px; font-weight: 700; color: #0f172a; }
+    .tank-inv-sub   { font-size: 12px; color: #64748b; }
+
+    .tank-progress-wrap { margin-bottom: 14px; }
+    .tank-progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .tank-progress-pct { font-size: 22px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+    .tank-progress-litres { font-size: 13px; color: #64748b; align-self: flex-end; padding-bottom: 3px; }
+    .tank-progress-bar {
+      height: 10px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .tank-progress-fill {
+      height: 100%;
+      border-radius: 8px;
+      transition: width 1s cubic-bezier(0.4,0,0.2,1);
+    }
+    .tank-progress-fill.green  { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .tank-progress-fill.yellow { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .tank-progress-fill.red    { background: linear-gradient(90deg, #f87171, #ef4444); }
+
+    .tank-inv-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .tank-cap-label { font-size: 11px; color: #94a3b8; }
+    .tank-cap-value { font-size: 12px; font-weight: 600; color: #374151; }
+    .btn-update-stock {
+      padding: 7px 14px;
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-update-stock:hover { background: #16a34a; color: white; }
+    .low-stock-banner {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 12px;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #dc2626;
+      font-weight: 500;
+    }
+    .tank-inv-card.low-stock .low-stock-banner { display: flex; }
+
+    /* ── Update stock modal ── */
+    .update-modal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 5000;
+      align-items: center; justify-content: center;
+    }
+    .update-modal.open { display: flex; }
+    .update-modal-content {
+      background: white;
+      border-radius: 20px;
+      padding: 32px;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .update-modal-content h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .update-modal-content p  { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+    .um-input-wrap { margin-bottom: 20px; }
+    .um-input-wrap label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 7px; }
+    .um-input-wrap input {
+      width: 100%; height: 46px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .um-input-wrap input:focus { border-color: #1a7a4a; box-shadow: 0 0 0 3px rgba(26,122,74,0.1); }
+    .um-capacity-hint { font-size: 12px; color: #94a3b8; margin-top: 6px; }
+    .um-actions { display: flex; gap: 10px; }
+    .um-cancel { flex: 1; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; }
+    .um-save   { flex: 2; padding: 12px; background: #1a7a4a; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; color: white; cursor: pointer; transition: background 0.2s; }
+    .um-save:hover { background: #15663d; }
+
+    /* ══════════════════════════════════════
+       FIRE OVERLAY
+    ══════════════════════════════════════ */
+    #fire-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 9999;
+      background: rgba(180, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+      animation: fire-bg-pulse 1s ease-in-out infinite alternate;
+    }
+    #fire-overlay.active { display: flex; }
+    @keyframes fire-bg-pulse {
+      from { background: rgba(180,0,0,0.8); }
+      to   { background: rgba(220,0,0,0.92); }
+    }
+    .fire-overlay-card {
+      background: white;
+      border-radius: 24px;
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 460px;
+      width: 90%;
+      box-shadow: 0 0 80px rgba(255,0,0,0.4);
+      animation: fire-card-shake 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes fire-card-shake {
+      from { transform: rotate(-0.5deg) scale(1); }
+      to   { transform: rotate(0.5deg)  scale(1.01); }
+    }
+    .fire-icon-large {
+      font-size: 72px;
+      display: block;
+      margin-bottom: 16px;
+      animation: fire-icon-bounce 0.4s ease-in-out infinite alternate;
+    }
+    @keyframes fire-icon-bounce {
+      from { transform: scale(1); }
+      to   { transform: scale(1.1); }
+    }
+    .fire-overlay-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #dc2626;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .fire-overlay-sub { font-size: 14px; color: #64748b; margin-bottom: 10px; }
+    .fire-overlay-tank {
+      display: inline-block;
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #dc2626;
+      margin-bottom: 28px;
+    }
+    .fire-dismiss-btn {
+      padding: 14px 32px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .fire-dismiss-btn:hover { background: #b91c1c; }
+
+    /* ══════════════════════════════════════
+       TOAST NOTIFICATIONS
+    ══════════════════════════════════════ */
+    #toast-container {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      z-index: 8000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: all;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      border-radius: 12px;
+      min-width: 280px;
+      max-width: 360px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      transform: translateX(400px);
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .toast.show { transform: translateX(0); }
+    .toast.warning { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .toast.danger  { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+    .toast-icon { font-size: 18px; flex-shrink: 0; }
+    .toast-close {
+      margin-left: auto;
+      background: none; border: none;
+      cursor: pointer; color: inherit;
+      opacity: 0.6; font-size: 14px;
+    }
+  </style>
+</head>
+
+<body data-page="inventory">
+<div class="dashboard">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fas fa-gas-pump"></i>
+      <h2><span>FuelSys Pro</span></h2>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="/dashboard"       data-page="dashboard">  <i class="fas fa-tachometer-alt"></i>           <span>Dashboard</span></a></li>
+        <li><a href="/sales/page"       data-page="sales">      <i class="fas fa-cash-register"></i>            <span>Sales & Billing</span></a></li>
+        <li class="active"><a href="/inventory/page" data-page="inventory"><i class="fas fa-oil-can"></i>      <span>Fuel Inventory</span></a></li>
+        <li><a href="/ml/"              data-page="tank">       <i class="fas fa-chart-line"></i>               <span>Tank Prediction</span></a></li>
+        <li><a href="/pumps/page"       data-page="pumps">      <i class="fas fa-gas-pump"></i>                 <span>Pumps</span></a></li>
+        <li><a href="/staff/page"       data-page="staff">      <i class="fas fa-users"></i>                   <span>Staff</span></a></li>
+        <li><a href="/shifts/page"      data-page="shifts">     <i class="fa fa-calendar"></i>                 <span>Shifts</span></a></li>
+        <li><a href="/lubricants/page"  data-page="lubricants"> <i class="fa-solid fa-spray-can-sparkles"></i> <span>Lubricants</span></a></li>
+        <li><a href="/reports"          data-page="reports">    <i class="fas fa-chart-bar"></i>                <span>Reports</span></a></li>
+        <li><a href="/suppliers/page"   data-page="suppliers">  <i class="fas fa-truck"></i>                   <span>Suppliers</span></a></li>
+        <li><a href="/expenses/page"    data-page="expenses">   <i class="fas fa-money-bill-wave"></i>          <span>Expenses</span></a></li>
+        <li><a href="/settings/page"         data-page="settings">   <i class="fas fa-cog"></i>                     <span>Settings</span></a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-toggle"><i class="fas fa-angle-left"></i></div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="user-actions">
+        <div class="notifications">
+          <i class="fas fa-bell"></i>
+          <span class="badge">3</span>
+        </div>
+        <div class="user-profile" id="user-profile-btn">
+          <img id="auth-user-image" src="https://via.placeholder.com/40" alt="User">
+          <span id="auth-user-name">...</span>
+          <i class="fas fa-chevron-down" id="profile-chevron"></i>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <img id="auth-user-image-dd" src="https://via.placeholder.com/48" alt="User">
+              <div class="profile-dropdown-info">
+                <div class="profile-dropdown-name" id="auth-user-name-dd">...</div>
+                <div class="profile-dropdown-role" id="auth-user-role-dd">—</div>
+              </div>
+            </div>
+            <div class="profile-dropdown-divider"></div>
+            <button class="profile-dropdown-item" onclick="authLogout()">
+              <i class="fas fa-sign-out-alt"></i><span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-header" style="margin-bottom:24px;">
+        <div>
+          <h1 style="font-size:1.8rem;font-weight:750;color:#0f172a;letter-spacing:-0.5px;">Fuel Inventory</h1>
+          <p style="color:#64748b;font-size:13px;margin-top:4px;">Live IoT monitoring + manual tank management</p>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="inv-tabs">
+        <button class="inv-tab active" data-tab="iot">
+          <i class="fas fa-satellite-dish"></i> IoT Live Monitor
+        </button>
+        <button class="inv-tab" data-tab="tanks">
+          <i class="fas fa-database"></i> Tank Inventory
+        </button>
+      </div>
+
+      <!-- ══ TAB: IoT Monitor ══ -->
+      <div class="inv-tab-panel active" id="tab-iot">
+        <div class="iot-grid">
+
+          <!-- Device header -->
+          <div class="device-header-card">
+            <div class="device-header-left">
+              <div class="device-icon">🛢</div>
+              <div>
+                <div class="device-title">TANK_001 — 92 Octane (1P)</div>
+                <div class="device-subtitle">Underground — Bay A &nbsp;·&nbsp; Capacity: 14,490 L</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="device-status-badge">
+                <div class="status-dot pulse" id="iot-status-dot"></div>
+                <span id="iot-status-text">Connecting...</span>
+              </div>
+              <span class="sync-label" id="sync-label">—</span>
+            </div>
+          </div>
+
+          <!-- Animated tank visual -->
+          <div class="tank-card">
+            <div class="tank-visual-wrap">
+              <svg class="tank-svg" viewBox="0 0 160 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <clipPath id="tankClip">
+                    <rect x="18" y="28" width="124" height="184" rx="14"/>
+                  </clipPath>
+                  <linearGradient id="fillGradGreen" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4ade80"/>
+                    <stop offset="100%" stop-color="#16a34a"/>
+                  </linearGradient>
+                  <linearGradient id="fillGradYellow" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#fbbf24"/>
+                    <stop offset="100%" stop-color="#f59e0b"/>
+                  </linearGradient>
+                  <linearGradient id="fillGradRed" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f87171"/>
+                    <stop offset="100%" stop-color="#dc2626"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- Tank body background -->
+                <rect x="18" y="28" width="124" height="184" rx="14" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+
+                <!-- Tank fill (animated) -->
+                <g clip-path="url(#tankClip)">
+                  <rect id="tank-fill" class="tank-fill-rect"
+                    x="18" y="180" width="124" height="32"
+                    fill="url(#fillGradGreen)"/>
+                </g>
+
+                <!-- Tank level markers -->
+                <line x1="22" y1="75"  x2="32" y2="75"  stroke="#cbd5e1" stroke-width="1.5"/>
+                <text x="34" y="79"  font-size="9" fill="#94a3b8">75%</text>
+                <line x1="22" y1="120" x2="32" y2="120" stroke="#fde68a" stroke-width="1.5"/>
+                <text x="34" y="124" font-size="9" fill="#94a3b8">50%</text>
+                <line x1="22" y1="165" x2="32" y2="165" stroke="#fca5a5" stroke-width="1.5"/>
+                <text x="34" y="169" font-size="9" fill="#94a3b8">20%</text>
+
+                <!-- Tank outline on top -->
+                <rect x="18" y="28" width="124" height="184" rx="14" fill="none" stroke="#94a3b8" stroke-width="2"/>
+
+                <!-- Top cap -->
+                <rect x="58" y="16" width="44" height="16" rx="5" fill="#94a3b8"/>
+                <rect x="68" y="10" width="24" height="10" rx="4" fill="#64748b"/>
+
+                <!-- Bottom pipe -->
+                <rect x="68" y="212" width="24" height="16" rx="4" fill="#94a3b8"/>
+                <rect x="62" y="226" width="36" height="6"  rx="3" fill="#64748b"/>
+
+                <!-- Percentage label inside tank -->
+                <text id="tank-pct-label" x="80" y="125" text-anchor="middle"
+                  font-size="22" font-weight="800" fill="#0f172a" opacity="0.85">—%</text>
+              </svg>
+
+              <!-- Flame overlay when fire detected -->
+              <div class="tank-flame-overlay" id="flame-overlay">🔥</div>
+            </div>
+
+            <!-- Stats below tank -->
+            <div class="tank-stats">
+              <div class="tank-stat-row">
+                <span class="tank-stat-label">⛽ Fuel Level</span>
+                <span class="tank-stat-value" id="stat-litres">— L</span>
+              </div>
+              <div class="tank-stat-row">
+                <span class="tank-stat-label">🌡 Temperature</span>
+                <span class="tank-stat-value" id="stat-temp">—°C</span>
+              </div>
+              <div class="tank-stat-row">
+                <span class="tank-stat-label">📏 Distance</span>
+                <span class="tank-stat-value" id="stat-dist">— cm</span>
+              </div>
+              <div class="tank-stat-row">
+                <span class="tank-stat-label">⚠ Alert Level</span>
+                <span class="tank-stat-value" id="stat-alert">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div class="iot-right">
+
+            <!-- Status pills -->
+            <div class="status-pills-card">
+              <h4><i class="fas fa-circle-dot"></i> Live Status</h4>
+              <div class="pills-grid">
+                <div class="status-pill safe" id="pill-pump">
+                  <div class="pill-dot green" id="dot-pump"></div>
+                  <span class="pill-label">Pump</span>
+                  <span class="pill-value" id="val-pump">Idle</span>
+                </div>
+                <div class="status-pill safe" id="pill-fire">
+                  <div class="pill-dot green" id="dot-fire"></div>
+                  <span class="pill-label">Fire</span>
+                  <span class="pill-value" id="val-fire">Clear</span>
+                </div>
+                <div class="status-pill safe" id="pill-cooldown">
+                  <div class="pill-dot green" id="dot-cooldown"></div>
+                  <span class="pill-label">Cooldown</span>
+                  <span class="pill-value" id="val-cooldown">Off</span>
+                </div>
+                <div class="status-pill safe" id="pill-online">
+                  <div class="pill-dot green" id="dot-online"></div>
+                  <span class="pill-label">Device</span>
+                  <span class="pill-value" id="val-online">Online</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-card">
+              <h4><i class="fas fa-chart-line"></i> Historical Trends (7 days)</h4>
+              <div class="chart-section">
+                <div class="chart-title">⛽ Fuel Level (%)</div>
+                <div class="chart-wrap"><canvas id="chart-fuel"></canvas></div>
+              </div>
+              <div class="chart-section">
+                <div class="chart-title">🌡 Temperature (°C)</div>
+                <div class="chart-wrap"><canvas id="chart-temp"></canvas></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fire event timeline -->
+          <div class="fire-timeline-card">
+            <h4>🔥 Fire Event Log <span id="fire-count-badge" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px;margin-left:8px;"></span></h4>
+            <div class="timeline-scroll" id="fire-timeline">
+              <div class="timeline-empty">
+                <i class="fas fa-shield-halved" style="font-size:28px;color:#cbd5e1;display:block;margin-bottom:10px;"></i>
+                No fire events recorded. Stay safe!
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div><!-- end iot tab -->
+
+      <!-- ══ TAB: Tank Inventory ══ -->
+      <div class="inv-tab-panel" id="tab-tanks">
+
+        <!-- KPIs -->
+        <div class="tanks-kpi-row" id="tanks-kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="fas fa-database"></i></div>
+            <div>
+              <div class="kpi-label">Total Stock</div>
+              <div class="kpi-value" id="kpi-total-stock">—</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon blue"><i class="fas fa-fill-drip"></i></div>
+            <div>
+              <div class="kpi-label">Overall Level</div>
+              <div class="kpi-value" id="kpi-overall-pct">—</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon yellow"><i class="fas fa-triangle-exclamation"></i></div>
+            <div>
+              <div class="kpi-label">Low Stock Tanks</div>
+              <div class="kpi-value" id="kpi-low-tanks">—</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green"><i class="fas fa-gauge-high"></i></div>
+            <div>
+              <div class="kpi-label">Total Capacity</div>
+              <div class="kpi-value" id="kpi-total-cap">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tank cards -->
+        <div class="tanks-grid" id="tanks-grid">
+          <div style="padding:40px;text-align:center;color:#94a3b8;">Loading tanks...</div>
+        </div>
+      </div><!-- end tanks tab -->
+
+    </div>
+  </main>
+</div>
+
+<!-- Update Stock Modal -->
+<div class="update-modal" id="update-modal">
+  <div class="update-modal-content">
+    <h3 id="um-title">Update Stock Level</h3>
+    <p id="um-sub">Enter the current stock level in litres.</p>
+    <div class="um-input-wrap">
+      <label>Current Stock (Litres)</label>
+      <input type="number" id="um-input" min="0" step="0.01" placeholder="e.g. 9200">
+      <div class="um-capacity-hint" id="um-hint"></div>
+    </div>
+    <div class="um-actions">
+      <button class="um-cancel" id="um-cancel">Cancel</button>
+      <button class="um-save"   id="um-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fire Overlay -->
+<div id="fire-overlay">
+  <div class="fire-overlay-card">
+    <span class="fire-icon-large">🔥</span>
+    <div class="fire-overlay-title">FIRE DETECTED</div>
+    <div class="fire-overlay-sub">Emergency alert from IoT sensor</div>
+    <div class="fire-overlay-tank" id="fire-overlay-tank">TANK_001 — Underground Bay A</div>
+    <button class="fire-dismiss-btn" id="fire-dismiss-btn">
+      <i class="fas fa-check"></i> Acknowledge & Dismiss
+    </button>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<!-- auth.js first -->
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+
+<!-- Firebase SDK (module) -->
+<script type="module">
+  import { initializeApp }          from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+  // ── Firebase config ──
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCIluVVHwbQYcQujSC060eS4WWQ6dp8WLA",
+    authDomain:        "fuelstationmanagement-c748c.firebaseapp.com",
+    databaseURL:       "https://fuelstationmanagement-c748c-default-rtdb.firebaseio.com",
+    projectId:         "fuelstationmanagement-c748c",
+    storageBucket:     "fuelstationmanagement-c748c.firebasestorage.app",
+    messagingSenderId: "350557460994",
+    appId:             "1:350557460994:web:6ba1c947658f6f909a251b"
+  };
+
+  const DEVICE_ID  = 'TANK_001';
+  const CAPACITY_L = 14490;
+
+  const app      = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  // ── State ──
+  let lastData         = null;
+  let fireAlarmActive  = false;
+  let snapshotTimer    = null;
+  let syncSeconds      = 0;
+  let syncInterval     = null;
+  let knownFireEvents  = new Set();
+  let audioCtx         = null;
+  let alarmNode        = null;
+  let chartsInitialised = false;
+  let fuelChart, tempChart;
+
+  // ── Audio unlock (requires user interaction) ──
+  document.addEventListener('click', () => {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }, { once: false });
+
+  function playAlarm() {
+    if (!audioCtx) return;
+    stopAlarm();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode   = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.type      = 'square';
+    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+    oscillator.frequency.setValueAtTime(660, audioCtx.currentTime + 0.3);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    oscillator.start();
+    oscillator.stop(audioCtx.currentTime + 0.6);
+    alarmNode = setInterval(() => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.connect(g); g.connect(audioCtx.destination);
+      o.type = 'square';
+      o.frequency.setValueAtTime(880, audioCtx.currentTime);
+      o.frequency.setValueAtTime(660, audioCtx.currentTime + 0.3);
+      g.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      o.start(); o.stop(audioCtx.currentTime + 0.6);
+    }, 1200);
+  }
+
+  function stopAlarm() {
+    if (alarmNode) { clearInterval(alarmNode); alarmNode = null; }
+  }
+
+  // ── Firebase listener ──
+  const tankRef = ref(database, `tanks/${DEVICE_ID}`);
+
+  onValue(tankRef, (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
+    lastData = data;
+    updateUI(data);
+    resetSyncCounter();
+  });
+
+  // ── Update UI ──
+  function updateUI(data) {
+    const sensors = data.sensors  || {};
+    const status  = data.status   || {};
+    const info    = data.info     || {};
+
+    const fuelPct  = parseFloat(sensors.fuelLevel   || 0);
+    const temp     = parseFloat(sensors.temperature || 0);
+    const dist     = parseFloat(sensors.distance    || 0);
+    const fuelL    = Math.round(fuelPct * CAPACITY_L / 100);
+    const alert    = data.alertLevel || 'normal';
+
+    const fireDetected = status.fireDetected  || false;
+    const pumpRunning  = status.pumpRunning   || false;
+    const inCooldown   = status.inCooldown    || false;
+    const online       = info.status === 'online';
+
+    // ── SVG tank fill ──
+    updateTankSVG(fuelPct);
+
+    // ── Stats ──
+    const litresEl = document.getElementById('stat-litres');
+    litresEl.textContent = `${fuelL.toLocaleString()} L (${fuelPct.toFixed(1)}%)`;
+    litresEl.className = `tank-stat-value ${fuelPct > 50 ? 'green' : fuelPct > 20 ? 'yellow' : 'red'}`;
+
+    const tempEl = document.getElementById('stat-temp');
+    tempEl.textContent = `${temp.toFixed(1)}°C`;
+    tempEl.className = `tank-stat-value ${temp < 35 ? 'green' : temp < 45 ? 'yellow' : 'red'}`;
+
+    document.getElementById('stat-dist').textContent  = `${dist.toFixed(1)} cm`;
+    const alertEl = document.getElementById('stat-alert');
+    alertEl.textContent = alert.charAt(0).toUpperCase() + alert.slice(1);
+    alertEl.className = `tank-stat-value ${alert === 'normal' ? 'green' : alert === 'warning' ? 'yellow' : 'red'}`;
+
+    // ── Status pills ──
+    setPill('pump',     pumpRunning,  'Running',  'Idle');
+    setPill('fire',     fireDetected, 'DETECTED', 'Clear');
+    setPill('cooldown', inCooldown,   'Active',   'Off');
+    setPillOnline('online', online);
+
+    // ── Device header status ──
+    const dot  = document.getElementById('iot-status-dot');
+    const text = document.getElementById('iot-status-text');
+    if (online) {
+      dot.className  = 'status-dot pulse';
+      text.textContent = 'Online';
+    } else {
+      dot.className  = 'status-dot offline';
+      text.textContent = 'Offline';
+    }
+
+    // ── Flame overlay on SVG ──
+    document.getElementById('flame-overlay').style.display = fireDetected ? 'block' : 'none';
+
+    // ── Fire overlay + alarm ──
+    if (fireDetected && !fireAlarmActive) {
+      fireAlarmActive = true;
+      document.getElementById('fire-overlay').classList.add('active');
+      playAlarm();
+    }
+
+    // ── Fire events ──
+    const events = data.events?.fire || {};
+    Object.entries(events).forEach(([key, evt]) => {
+      if (!knownFireEvents.has(key)) {
+        knownFireEvents.add(key);
+        saveFireEvent(key, evt);
+      }
+    });
+
+    // ── Low stock toast ──
+    if (fuelPct < 20) {
+      showToast('warning', `⚠ Low Fuel: TANK_001 is at ${fuelPct.toFixed(1)}% (${fuelL.toLocaleString()} L)`);
+    }
+    if (alert === 'critical') {
+      showToast('danger', `🚨 Critical Alert: TANK_001 alert level is CRITICAL`);
+    }
+  }
+
+  function updateTankSVG(pct) {
+    // SVG tank body: y=28 to y=212, height=184
+    const tankTop    = 28;
+    const tankBottom = 212;
+    const tankH      = tankBottom - tankTop; // 184
+
+    const fillH = Math.max(0, Math.min(tankH, (pct / 100) * tankH));
+    const fillY = tankBottom - fillH;
+
+    const fillEl = document.getElementById('tank-fill');
+    fillEl.setAttribute('y', fillY);
+    fillEl.setAttribute('height', fillH);
+
+    // Color
+    const grad = pct > 50 ? 'url(#fillGradGreen)' : pct > 20 ? 'url(#fillGradYellow)' : 'url(#fillGradRed)';
+    fillEl.setAttribute('fill', grad);
+
+    // Label
+    document.getElementById('tank-pct-label').textContent = `${Math.round(pct)}%`;
+  }
+
+  function setPill(id, danger, dangerLabel, safeLabel) {
+    const pill  = document.getElementById(`pill-${id}`);
+    const dot   = document.getElementById(`dot-${id}`);
+    const val   = document.getElementById(`val-${id}`);
+    pill.className = `status-pill ${danger ? 'danger' : 'safe'}`;
+    dot.className  = `pill-dot ${danger ? 'red' : 'green'}`;
+    val.textContent = danger ? dangerLabel : safeLabel;
+  }
+
+  function setPillOnline(id, online) {
+    const pill = document.getElementById(`pill-${id}`);
+    const dot  = document.getElementById(`dot-${id}`);
+    const val  = document.getElementById(`val-${id}`);
+    pill.className = `status-pill ${online ? 'safe' : 'danger'}`;
+    dot.className  = `pill-dot ${online ? 'green' : 'red'}`;
+    val.textContent = online ? 'Online' : 'Offline';
+  }
+
+  // ── Save fire event to PostgreSQL ──
+  async function saveFireEvent(key, evt) {
+    try {
+      await fetch('/iot/fire-event', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          device_id:          DEVICE_ID,
+          firebase_event_key: key,
+          fuel_level_pct:     evt.fuelLevel    || 0,
+          temperature:        evt.temperature  || 0,
+          pump_activated:     evt.pumpActivated|| false,
+          status:             evt.status       || 'detected',
+          firebase_timestamp: evt.timestamp    || 0,
+        })
+      });
+      loadFireTimeline();
+    } catch (e) { console.error('Failed to save fire event', e); }
+  }
+
+  // ── Snapshot every 5 minutes ──
+  function scheduleSnapshot() {
+    snapshotTimer = setInterval(async () => {
+      if (!lastData) return;
+      const sensors = lastData.sensors || {};
+      const status  = lastData.status  || {};
+      try {
+        await fetch('/iot/snapshot', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            device_id:     DEVICE_ID,
+            fuel_level_pct:parseFloat(sensors.fuelLevel   || 0),
+            temperature:   parseFloat(sensors.temperature || 0),
+            distance:      parseFloat(sensors.distance    || 0),
+            fire_detected: status.fireDetected  || false,
+            pump_running:  status.pumpRunning   || false,
+            in_cooldown:   status.inCooldown    || false,
+            alert_level:   lastData.alertLevel  || 'normal',
+          })
+        });
+      } catch (e) { console.error('Snapshot failed', e); }
+    }, 5 * 60 * 1000); // 5 minutes
+  }
+
+  // ── Sync counter ──
+  function resetSyncCounter() {
+    syncSeconds = 0;
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(() => {
+      syncSeconds++;
+      const label = document.getElementById('sync-label');
+      if (label) label.textContent = `Synced ${syncSeconds}s ago`;
+    }, 1000);
+  }
+
+  // ── Fire dismiss ──
+  document.getElementById('fire-dismiss-btn').addEventListener('click', () => {
+    document.getElementById('fire-overlay').classList.remove('active');
+    stopAlarm();
+    fireAlarmActive = false;
+  });
+
+  // ── Toast ──
+  let shownToasts = new Set();
+  function showToast(type, message) {
+    if (shownToasts.has(message)) return;
+    shownToasts.add(message);
+    setTimeout(() => shownToasts.delete(message), 30000);
+
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <span class="toast-icon">${type === 'warning' ? '⚠️' : '🚨'}</span>
+      <span>${message}</span>
+      <button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 400); }, 8000);
+  }
+
+  // ── Load fire timeline from PostgreSQL ──
+  async function loadFireTimeline() {
+    try {
+      const res    = await fetch(`/iot/fire-events/${DEVICE_ID}`);
+      const events = await res.json();
+      const container = document.getElementById('fire-timeline');
+      const badge     = document.getElementById('fire-count-badge');
+
+      badge.textContent = events.length > 0 ? `${events.length} events` : '';
+
+      if (events.length === 0) {
+        container.innerHTML = `<div class="timeline-empty">
+          <i class="fas fa-shield-halved" style="font-size:28px;color:#cbd5e1;display:block;margin-bottom:10px;"></i>
+          No fire events recorded. Stay safe!</div>`;
+        return;
+      }
+
+      container.innerHTML = events.map((evt, i) => {
+        const date    = new Date(evt.recorded_at);
+        const dateStr = date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        const timeStr = date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+        const fuelL   = evt.fuel_level_l ? `${Math.round(evt.fuel_level_l).toLocaleString()} L` : '—';
+        const statusCls = evt.status === 'resolved' ? 'resolved' : 'detected';
+        const pumpCls   = evt.pump_activated ? 'pump-yes' : 'pump-no';
+
+        return `
+          <div class="timeline-item" style="animation-delay:${i * 0.06}s">
+            <div class="timeline-line">
+              <div class="timeline-dot"></div>
+              ${i < events.length - 1 ? '<div class="timeline-connector"></div>' : ''}
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-time">
+                <i class="fas fa-fire"></i> ${dateStr} · ${timeStr}
+                <span class="tl-badge ${statusCls}">${evt.status || 'detected'}</span>
+              </div>
+              <div class="timeline-details">
+                <div class="timeline-detail">⛽ ${evt.fuel_level_pct?.toFixed(1) ?? '—'}% · ${fuelL}</div>
+                <div class="timeline-detail">🌡 ${evt.temperature?.toFixed(1) ?? '—'}°C</div>
+                <div class="timeline-detail">
+                  <span class="tl-badge ${pumpCls}">Pump ${evt.pump_activated ? 'Activated' : 'Not activated'}</span>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (e) { console.error('Failed to load fire timeline', e); }
+  }
+
+  // ── Load charts from PostgreSQL history ──
+  async function loadCharts() {
+    try {
+      const res      = await fetch(`/iot/history/${DEVICE_ID}?days=7`);
+      const readings = await res.json();
+
+      if (readings.length === 0) {
+        document.querySelector('.charts-card h4').insertAdjacentHTML('afterend',
+          '<p style="font-size:12px;color:#94a3b8;padding:12px 0;">No historical data yet — data saves every 5 minutes.</p>');
+        return;
+      }
+
+      const labels   = readings.map(r => {
+        const d = new Date(r.recorded_at);
+        return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+      });
+      const fuelData = readings.map(r => r.fuel_level_pct);
+      const tempData = readings.map(r => r.temperature);
+
+      const commonOpts = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { maxTicksLimit: 6, font: { size: 10 }, color: '#94a3b8' }, grid: { display: false } },
+          y: { ticks: { font: { size: 10 }, color: '#94a3b8' }, grid: { color: '#f1f5f9' } }
+        },
+        elements: { point: { radius: 2 } }
+      };
+
+      // Fuel chart
+      fuelChart = new Chart(document.getElementById('chart-fuel'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data: fuelData,
+            borderColor: '#1a7a4a',
+            backgroundColor: 'rgba(26,122,74,0.08)',
+            fill: true, tension: 0.4, borderWidth: 2,
+          }]
+        },
+        options: {
+          ...commonOpts,
+          plugins: {
+            ...commonOpts.plugins,
+            annotation: {
+              annotations: {
+                warningLine: {
+                  type: 'line', yMin: 20, yMax: 20,
+                  borderColor: '#f59e0b', borderWidth: 1.5,
+                  borderDash: [4, 4],
+                  label: { content: 'Low (20%)', enabled: true, font: { size: 9 } }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Temp chart
+      tempChart = new Chart(document.getElementById('chart-temp'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            data: tempData,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245,158,11,0.08)',
+            fill: true, tension: 0.4, borderWidth: 2,
+          }]
+        },
+        options: {
+          ...commonOpts,
+          plugins: {
+            ...commonOpts.plugins,
+            annotation: {
+              annotations: {
+                warningLine: {
+                  type: 'line', yMin: 40, yMax: 40,
+                  borderColor: '#ef4444', borderWidth: 1.5,
+                  borderDash: [4, 4],
+                  label: { content: 'Warning (40°C)', enabled: true, font: { size: 9 } }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      chartsInitialised = true;
+    } catch (e) { console.error('Failed to load charts', e); }
+  }
+
+  // ── Init ──
+  scheduleSnapshot();
+  loadFireTimeline();
+  loadCharts();
+
+</script>
+
+<!-- Regular script for inventory tab + modal -->
+<script>
+  // ── Tab switching ──
+  document.querySelectorAll('.inv-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.inv-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.inv-tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      if (btn.dataset.tab === 'tanks') loadTanks();
+    });
+  });
+
+  // ── Update stock modal state ──
+  let editingTankId = null;
+
+  document.getElementById('um-cancel').addEventListener('click', () => {
+    document.getElementById('update-modal').classList.remove('open');
+  });
+
+  document.getElementById('um-save').addEventListener('click', async () => {
+    const val = parseFloat(document.getElementById('um-input').value);
+    if (isNaN(val) || val < 0) { alert('Please enter a valid stock level'); return; }
+    try {
+      const res    = await fetch(`/inventory/tanks/${editingTankId}/stock`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_stock_l: val })
+      });
+      const result = await res.json();
+      if (res.ok) {
+        document.getElementById('update-modal').classList.remove('open');
+        loadTanks();
+        showInvToast('✅ Stock updated successfully');
+      } else {
+        alert('❌ ' + (result.message || 'Update failed'));
+      }
+    } catch (e) { alert('❌ Network error'); }
+  });
+
+  function openUpdateModal(tankId, tankName, currentStock, capacity) {
+    editingTankId = tankId;
+    document.getElementById('um-title').textContent    = `Update Stock — ${tankName}`;
+    document.getElementById('um-sub').textContent      = `Enter current fuel level for ${tankName}`;
+    document.getElementById('um-input').value          = currentStock;
+    document.getElementById('um-input').max            = capacity;
+    document.getElementById('um-hint').textContent     = `Max capacity: ${capacity.toLocaleString()} L`;
+    document.getElementById('update-modal').classList.add('open');
+  }
+
+  // ── Load tanks ──
+  async function loadTanks() {
+    try {
+      const [tanksRes, summaryRes] = await Promise.all([
+        fetch('/inventory/tanks'),
+        fetch('/inventory/summary')
+      ]);
+      const tanks   = await tanksRes.json();
+      const summary = await summaryRes.json();
+
+      // KPIs
+      document.getElementById('kpi-total-stock').textContent = `${Math.round(summary.total_stock_l).toLocaleString()} L`;
+      document.getElementById('kpi-overall-pct').textContent = `${summary.overall_pct}%`;
+      document.getElementById('kpi-low-tanks').textContent   = summary.low_stock_tanks.length;
+      document.getElementById('kpi-total-cap').textContent   = `${Math.round(summary.total_capacity_l).toLocaleString()} L`;
+
+      // Tank cards
+      const grid = document.getElementById('tanks-grid');
+      grid.innerHTML = tanks.map(tank => {
+        const pct       = tank.stock_pct;
+        const colorCls  = pct > 50 ? 'green' : pct > 20 ? 'yellow' : 'red';
+        const isLow     = tank.is_low;
+        const isIoT     = !!tank.iot_device_id;
+
+        return `
+          <div class="tank-inv-card ${isLow ? 'low-stock' : ''} ${isIoT ? 'iot-linked' : ''}">
+            <div class="tank-inv-header">
+              <div class="tank-id-badge">${tank.tank_id}</div>
+              <div>
+                <div class="tank-inv-title">${tank.fuel_type}</div>
+                <div class="tank-inv-sub">${tank.location || 'Underground'}</div>
+              </div>
+            </div>
+            <div class="tank-progress-wrap">
+              <div class="tank-progress-labels">
+                <span class="tank-progress-pct">${pct.toFixed(1)}%</span>
+                <span class="tank-progress-litres">${Math.round(tank.current_stock_l).toLocaleString()} L</span>
+              </div>
+              <div class="tank-progress-bar">
+                <div class="tank-progress-fill ${colorCls}" style="width:${pct}%"></div>
+              </div>
+            </div>
+            <div class="tank-inv-footer">
+              <div>
+                <div class="tank-cap-label">Capacity</div>
+                <div class="tank-cap-value">${tank.capacity_l.toLocaleString()} L</div>
+              </div>
+              <button class="btn-update-stock"
+                onclick="openUpdateModal('${tank.tank_id}','${tank.fuel_type} (${tank.tank_id})',${tank.current_stock_l},${tank.capacity_l})">
+                <i class="fas fa-pen"></i> Update Stock
+              </button>
+            </div>
+            <div class="low-stock-banner">
+              <i class="fas fa-triangle-exclamation"></i>
+              Low stock — below threshold (${Math.round(tank.low_stock_threshold_l).toLocaleString()} L)
+            </div>
+          </div>`;
+      }).join('');
+    } catch (e) {
+      document.getElementById('tanks-grid').innerHTML =
+        '<p style="color:#94a3b8;padding:20px;">Failed to load tanks.</p>';
+    }
+  }
+
+  function showInvToast(message) {
+    const n = document.createElement('div');
+    n.style.cssText = `position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#1a7a4a,#15663d);color:white;padding:14px 22px;border-radius:12px;box-shadow:0 8px 24px rgba(26,122,74,.3);z-index:10000;font-size:13px;font-weight:600;transform:translateX(400px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);`;
+    n.textContent = message;
+    document.body.appendChild(n);
+    requestAnimationFrame(() => { n.style.transform = 'translateX(0)'; });
+    setTimeout(() => { n.style.transform = 'translateX(400px)'; setTimeout(() => n.remove(), 400); }, 3000);
+  }
+
+  // Close modal on outside click
+  window.addEventListener('click', e => {
+    if (e.target === document.getElementById('update-modal'))
+      document.getElementById('update-modal').classList.remove('open');
+  });
+</script>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
