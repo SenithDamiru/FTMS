@@ -49,6 +49,18 @@ def create_app():
     from .routes.auth_routes import auth_bp
     app.register_blueprint(auth_bp)
 
+
+    # ── Inventory blueprint ──
+    from .routes.inventory_routes import inventory_bp
+    app.register_blueprint(inventory_bp)
+ 
+    from .routes.iot_routes import iot_bp
+    app.register_blueprint(iot_bp)
+
+
+    from .routes.settings_routes import settings_bp
+    app.register_blueprint(settings_bp)
+
     # ── Page routes ──
     @app.route('/')
     @app.route('/login')
