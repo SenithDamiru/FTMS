@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports & Analytics - FuelSys Pro</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+    --primary:#1a7a4a; --primary-light:#22a862; --primary-bg:#e6f4ed;
+    --accent:#f5c518;  --accent-dark:#d4a800;   --accent-bg:#fffbe6;
+    --danger:#c62828;  --danger-bg:#ffebee;
+    --warning:#c17b00; --warning-bg:#fff8e1;
+    --border:#dee2e6;  --text-dark:#0d1f15;     --text-mid:#3d5a47;
+    --text-light:#6b8070; --card-bg:#ffffff;    --page-bg:#f2f7f4;
+    --blue:#1565c0;    --blue-bg:#e3f2fd;
+    --purple:#7b1fa2;  --purple-bg:#f3e5f5;
+}
+
+/* ── NAV PILLS ── */
+.rep-nav {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 6px; margin-bottom: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.rep-nav-btn {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    background: none; font-size: 0.83rem; font-weight: 600;
+    color: var(--text-light); cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px; font-family: inherit;
+    white-space: nowrap;
+}
+.rep-nav-btn:hover  { background: var(--primary-bg); color: var(--primary); }
+.rep-nav-btn.active { background: var(--primary); color: #fff; }
+
+/* ── DATE BAR ── */
+.date-bar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.date-bar label { font-size:0.8rem; font-weight:600; color:var(--text-mid); white-space:nowrap; }
+.date-inp {
+    padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 7px;
+    font-size: 0.84rem; outline: none; width: 130px; font-family: inherit;
+    transition: border-color 0.2s;
+}
+.date-inp:focus { border-color: var(--primary); }
+.quick-btn {
+    padding: 6px 12px; border-radius: 7px; border: 1.5px solid var(--border);
+    background: #fff; font-size: 0.78rem; font-weight: 600; color: var(--text-mid);
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.quick-btn:hover  { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+.quick-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+.run-btn {
+    padding: 8px 20px; border-radius: 8px; background: var(--primary); color: #fff;
+    border: none; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; font-family: inherit;
+    transition: background 0.2s; margin-left: auto;
+}
+.run-btn:hover { background: var(--primary-light); }
+.export-btn {
+    padding: 7px 14px; border-radius: 7px; border: 1.5px solid var(--border);
+    background: #fff; font-size: 0.78rem; font-weight: 600; color: var(--text-mid);
+    cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit;
+    transition: all 0.2s;
+}
+.export-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── KPI ROW ── */
+.kpi-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px; margin-bottom: 22px;
+}
+.kpi-card {
+    background: var(--card-bg); border-radius: 11px; padding: 16px 18px;
+    border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 13px;
+    animation: fadeUp 0.4s ease both;
+}
+.kpi-icon {
+    width: 44px; height: 44px; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0;
+}
+.kpi-icon.green  { background:var(--primary-bg); color:var(--primary); }
+.kpi-icon.blue   { background:var(--blue-bg);    color:var(--blue); }
+.kpi-icon.red    { background:var(--danger-bg);  color:var(--danger); }
+.kpi-icon.yellow { background:var(--accent-bg);  color:var(--accent-dark); }
+.kpi-icon.orange { background:var(--warning-bg); color:var(--warning); }
+.kpi-icon.purple { background:var(--purple-bg);  color:var(--purple); }
+.kpi-lbl { font-size:0.7rem; color:var(--text-light); font-weight:500; text-transform:uppercase; letter-spacing:0.4px; }
+.kpi-val { font-size:1.22rem; font-weight:800; color:var(--text-dark); line-height:1.2; margin-top:2px; }
+.kpi-sub { font-size:0.7rem; color:var(--text-light); margin-top:2px; }
+
+/* ── SECTION CARDS ── */
+.section-panel { display:none; }
+.section-panel.active { display:block; }
+.card {
+    background: var(--card-bg); border-radius: 11px; border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 20px;
+}
+.card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #f4faf7 0%, #fff 100%); flex-wrap: wrap; gap: 8px;
+}
+.card-title {
+    display: flex; align-items: center; gap: 9px;
+    font-size: 0.93rem; font-weight: 700; color: var(--text-dark);
+}
+.card-title-icon {
+    width: 30px; height: 30px; border-radius: 7px; background: var(--primary-bg);
+    color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 0.82rem;
+}
+.card-body { padding: 18px 20px; }
+.chart-wrap { position:relative; width:100%; }
+
+/* ── CHARTS GRID ── */
+.charts-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.charts-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+.charts-2-1 { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:16px; }
+.charts-1-2 { display:grid; grid-template-columns:1fr 2fr; gap:16px; margin-bottom:16px; }
+
+/* ── OVERVIEW CARDS ── */
+.overview-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;
+}
+.ov-card {
+    background: var(--card-bg); border-radius: 11px; padding: 18px;
+    border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    animation: fadeUp 0.4s ease both; text-align: center;
+}
+.ov-card:nth-child(1){animation-delay:.04s} .ov-card:nth-child(2){animation-delay:.08s}
+.ov-card:nth-child(3){animation-delay:.12s} .ov-card:nth-child(4){animation-delay:.16s}
+.ov-card:nth-child(5){animation-delay:.20s} .ov-card:nth-child(6){animation-delay:.24s}
+.ov-icon { width:52px; height:52px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin:0 auto 10px; }
+.ov-val  { font-size:1.4rem; font-weight:800; color:var(--text-dark); line-height:1.2; }
+.ov-lbl  { font-size:0.72rem; color:var(--text-light); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-top:4px; }
+.ov-trend { font-size:0.75rem; margin-top:4px; font-weight:600; }
+.ov-trend.up   { color:var(--primary); }
+.ov-trend.down { color:var(--danger); }
+.ov-trend.warn { color:var(--warning); }
+
+/* ── SMALL TABLE ── */
+.mini-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+.mini-table th { background:#f4faf7; color:var(--text-mid); font-weight:600; padding:8px 10px;
+    text-align:left; border-bottom:2px solid var(--border); font-size:0.72rem; text-transform:uppercase; }
+.mini-table td { padding:8px 10px; border-bottom:1px solid #f5f5f5; color:var(--text-dark); vertical-align:middle; }
+.mini-table tr:last-child td { border-bottom:none; }
+.mini-table tr:hover td { background:#f8fcfa; }
+.tbl-scroll { max-height: 300px; overflow-y: auto; }
+
+/* ── PILLS ── */
+.pill { display:inline-flex; align-items:center; padding:2px 8px; border-radius:99px; font-size:0.7rem; font-weight:600; }
+.pill-green  { background:var(--primary-bg); color:var(--primary); }
+.pill-red    { background:var(--danger-bg);  color:var(--danger); }
+.pill-yellow { background:var(--accent-bg);  color:var(--accent-dark); }
+.pill-blue   { background:var(--blue-bg);    color:var(--blue); }
+.pill-gray   { background:#f0f0f0;            color:#555; }
+.pill-orange { background:var(--warning-bg); color:var(--warning); }
+
+/* ── LOADING ── */
+.loading-overlay {
+    display:none; position:absolute; inset:0; background:rgba(255,255,255,0.8);
+    align-items:center; justify-content:center; border-radius:11px; z-index:10;
+}
+.loading-overlay.show { display:flex; }
+.spinner { width:32px; height:32px; border:3px solid #e0e0e0; border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+
+/* ── GAUGE ── */
+.gauge-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+.gauge-card { background:var(--page-bg); border-radius:9px; padding:14px; border:1px solid var(--border); text-align:center; }
+.gauge-label { font-size:0.75rem; font-weight:700; color:var(--text-mid); text-transform:uppercase; margin-top:8px; }
+.gauge-pct   { font-size:1.4rem; font-weight:800; margin-top:2px; }
+.gauge-sub   { font-size:0.7rem; color:var(--text-light); margin-top:2px; }
+
+/* ── PROFIT INDICATOR ── */
+.profit-box {
+    display:flex; align-items:center; gap:10px;
+    background:var(--primary-bg); border-radius:9px; padding:12px 16px; margin-bottom:16px;
+}
+.profit-box.negative { background:var(--danger-bg); }
+.profit-box-icon { font-size:1.3rem; }
+.profit-box-val  { font-size:1.5rem; font-weight:800; }
+.profit-box.positive .profit-box-val { color:var(--primary); }
+.profit-box.negative .profit-box-val { color:var(--danger); }
+.profit-box-lbl  { font-size:0.75rem; color:var(--text-mid); font-weight:600; }
+
+/* ── MISC ── */
+.empty { text-align:center; padding:40px 20px; color:var(--text-light); }
+.empty i { font-size:2.5rem; opacity:0.3; display:block; margin-bottom:10px; }
+.text-right { text-align:right; }
+.fw7 { font-weight:700; }
+.text-green { color:var(--primary); font-weight:700; }
+.text-red   { color:var(--danger);  font-weight:700; }
+.section-divider { height:1px; background:var(--border); margin:16px 0; }
+
+@media(max-width:900px){
+    .charts-2,.charts-3,.charts-2-1,.charts-1-2 { grid-template-columns:1fr; }
+    .kpi-row { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:500px){
+    .kpi-row { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body data-page="reports">
+<div class="dashboard">
+<aside class="sidebar">
+    <div class="logo"><i class="fas fa-gas-pump"></i><h2><span>FuelSys Pro</span></h2></div>
+    <nav><ul>
+        <li><a href="/dashboard"      data-page="dashboard">  <i class="fas fa-tachometer-alt"></i>         <span>Dashboard</span></a></li>
+        <li><a href="/sales/page"     data-page="sales">      <i class="fas fa-cash-register"></i>          <span>Sales &amp; Billing</span></a></li>
+        <li><a href="/inventory/page" data-page="inventory">  <i class="fas fa-oil-can"></i>                <span>Fuel Inventory</span></a></li>
+        <li><a href="/ml/"            data-page="tank">       <i class="fas fa-chart-line"></i>             <span>Tank Prediction</span></a></li>
+        <li><a href="/pumps/page"     data-page="pumps">      <i class="fas fa-gas-pump"></i>               <span>Pumps</span></a></li>
+        <li><a href="/staff/page"     data-page="staff">      <i class="fas fa-users"></i>                  <span>Staff</span></a></li>
+        <li><a href="/shifts/page"    data-page="shifts">     <i class="fa fa-calendar"></i>                <span>Shifts</span></a></li>
+        <li><a href="/lubricants/page"data-page="lubricants"> <i class="fa-solid fa-spray-can-sparkles"></i><span>Lubricants</span></a></li>
+        <li class="active"><a href="/reports" data-page="reports"><i class="fas fa-chart-bar"></i>          <span>Reports</span></a></li>
+        <li><a href="/suppliers/page" data-page="suppliers">  <i class="fas fa-truck"></i>                  <span>Suppliers</span></a></li>
+        <li><a href="/expenses/page"  data-page="expenses">   <i class="fas fa-money-bill-wave"></i>        <span>Expenses</span></a></li>
+        <li><a href="/settings/page"  data-page="settings">   <i class="fas fa-cog"></i>                   <span>Settings</span></a></li>
+    </ul></nav>
+    <div class="sidebar-toggle"><i class="fas fa-angle-left"></i></div>
+</aside>
+
+<main class="main-content">
+<header>
+    <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Search..."></div>
+    <div class="user-actions">
+        <div class="notifications"><i class="fas fa-bell"></i><span class="badge">3</span></div>
+        <div class="user-profile" id="user-profile-btn">
+            <img id="auth-user-image" src="https://via.placeholder.com/40" alt="User">
+            <span id="auth-user-name">...</span>
+            <i class="fas fa-chevron-down" id="profile-chevron"></i>
+            <div class="profile-dropdown" id="profile-dropdown">
+                <div class="profile-dropdown-header">
+                    <img id="auth-user-image-dd" src="https://via.placeholder.com/48" alt="User">
+                    <div class="profile-dropdown-info">
+                        <div class="profile-dropdown-name" id="auth-user-name-dd">...</div>
+                        <div class="profile-dropdown-role" id="auth-user-role-dd">—</div>
+                    </div>
+                </div>
+                <div class="profile-dropdown-divider"></div>
+                <button class="profile-dropdown-item" onclick="authLogout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="content">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:8px;">
+    <div>
+        <h1 style="margin:0;">Reports &amp; Analytics</h1>
+        <div style="font-size:0.78rem;color:var(--text-light);margin-top:3px;">Dashboard / <span style="color:var(--primary);font-weight:600;">Reports</span></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <button class="export-btn" id="exportExcelBtn"><i class="fas fa-file-excel"></i> Excel</button>
+        <button class="export-btn" id="exportPdfBtn"><i class="fas fa-file-pdf"></i> PDF</button>
+    </div>
+</div>
+
+<!-- NAV PILLS -->
+<div class="rep-nav">
+    <button class="rep-nav-btn active" data-section="overview"  onclick="switchSection('overview')"><i class="fas fa-grip-horizontal"></i> Overview</button>
+    <button class="rep-nav-btn"        data-section="sales"     onclick="switchSection('sales')"><i class="fas fa-cash-register"></i> Sales</button>
+    <button class="rep-nav-btn"        data-section="inventory" onclick="switchSection('inventory')"><i class="fas fa-oil-can"></i> Inventory</button>
+    <button class="rep-nav-btn"        data-section="credit"    onclick="switchSection('credit')"><i class="fas fa-building-columns"></i> Credit</button>
+    <button class="rep-nav-btn"        data-section="staff"     onclick="switchSection('staff')"><i class="fas fa-users"></i> Staff</button>
+    <button class="rep-nav-btn"        data-section="expenses"  onclick="switchSection('expenses')"><i class="fas fa-money-bill-wave"></i> Expenses</button>
+    <button class="rep-nav-btn"        data-section="lubricants"onclick="switchSection('lubricants')"><i class="fas fa-spray-can-sparkles"></i> Lubricants</button>
+    <button class="rep-nav-btn"        data-section="suppliers" onclick="switchSection('suppliers')"><i class="fas fa-truck"></i> Suppliers</button>
+    <button class="rep-nav-btn"        data-section="pumps"     onclick="switchSection('pumps')"><i class="fas fa-wrench"></i> Pumps</button>
+</div>
+
+<!-- DATE BAR -->
+<div class="date-bar">
+    <label>From</label>
+    <input type="text" id="dateStart" class="date-inp" placeholder="Start">
+    <label>To</label>
+    <input type="text" id="dateEnd" class="date-inp" placeholder="End">
+    <button class="quick-btn active" data-days="30" onclick="setQuick(30,this)">30D</button>
+    <button class="quick-btn" data-days="7"  onclick="setQuick(7,this)">7D</button>
+    <button class="quick-btn" data-days="90" onclick="setQuick(90,this)">90D</button>
+    <button class="quick-btn" data-days="365"onclick="setQuick(365,this)">1Y</button>
+    <button class="run-btn" onclick="runReport()"><i class="fas fa-play"></i> Run Report</button>
+</div>
+
+<!-- ═══════════════ OVERVIEW ═══════════════ -->
+<div id="section-overview" class="section-panel active">
+    <div class="overview-grid" id="ovGrid">
+        <div class="ov-card"><div class="ov-icon green"><i class="fas fa-coins"></i></div><div class="ov-val" id="ov-revenue">—</div><div class="ov-lbl">Total Revenue</div></div>
+        <div class="ov-card"><div class="ov-icon blue"><i class="fas fa-droplet"></i></div><div class="ov-val" id="ov-litres">—</div><div class="ov-lbl">Litres Sold</div></div>
+        <div class="ov-card"><div class="ov-icon yellow"><i class="fas fa-spray-can-sparkles"></i></div><div class="ov-val" id="ov-lub">—</div><div class="ov-lbl">Lubricant Sales</div></div>
+        <div class="ov-card"><div class="ov-icon red"><i class="fas fa-money-bill-wave"></i></div><div class="ov-val" id="ov-expenses">—</div><div class="ov-lbl">Total Expenses</div></div>
+        <div class="ov-card"><div class="ov-icon green"><i class="fas fa-chart-line"></i></div><div class="ov-val" id="ov-profit">—</div><div class="ov-lbl">Net Profit</div></div>
+        <div class="ov-card"><div class="ov-icon orange"><i class="fas fa-clock"></i></div><div class="ov-val" id="ov-outstanding">—</div><div class="ov-lbl">Credit Outstanding</div></div>
+        <div class="ov-card"><div class="ov-icon red"><i class="fas fa-triangle-exclamation"></i></div><div class="ov-val" id="ov-faults">—</div><div class="ov-lbl">Open Faults</div></div>
+        <div class="ov-card"><div class="ov-icon orange"><i class="fas fa-gas-pump"></i></div><div class="ov-val" id="ov-tanks">—</div><div class="ov-lbl">Low Stock Tanks</div></div>
+        <div class="ov-card"><div class="ov-icon blue"><i class="fas fa-users"></i></div><div class="ov-val" id="ov-staff">—</div><div class="ov-lbl">Active Staff</div></div>
+        <div class="ov-card"><div class="ov-icon red"><i class="fas fa-file-invoice"></i></div><div class="ov-val" id="ov-overdue">—</div><div class="ov-lbl">Overdue Invoices</div></div>
+    </div>
+    <div class="charts-2-1">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-area"></i></div>Revenue Trend</div></div><div class="card-body"><div id="chart-ov-trend" style="height:260px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-pie"></i></div>Revenue Split</div></div><div class="card-body"><div id="chart-ov-split" style="height:260px;"></div></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════ SALES ═══════════════ -->
+<div id="section-sales" class="section-panel">
+    <div class="kpi-row" id="sales-kpis"></div>
+    <div class="card" style="margin-bottom:16px;">
+        <div class="card-header">
+            <div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-area"></i></div>Daily Revenue Trend — Cash vs Credit</div>
+        </div>
+        <div class="card-body"><div id="chart-sales-trend" style="height:280px;"></div></div>
+    </div>
+    <div class="charts-3">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-chart-pie"></i></div>Fuel Type Revenue</div></div><div class="card-body"><div id="chart-sales-fuel" style="height:240px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fas fa-credit-card"></i></div>Payment Methods</div></div><div class="card-body"><div id="chart-sales-pay" style="height:240px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--purple-bg);color:var(--purple);"><i class="fas fa-sun"></i></div>By Shift Period</div></div><div class="card-body"><div id="chart-sales-shift" style="height:240px;"></div></div></div>
+    </div>
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-gas-pump"></i></div>Pump Performance — Revenue</div></div><div class="card-body"><div id="chart-sales-pump" style="height:260px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-droplet"></i></div>Pump Performance — Litres</div></div><div class="card-body"><div id="chart-sales-pump-l" style="height:260px;"></div></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════ INVENTORY ═══════════════ -->
+<div id="section-inventory" class="section-panel">
+    <div class="gauge-grid" id="tank-gauges" style="margin-bottom:20px;"></div>
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-bar"></i></div>Delivery vs Consumption by Fuel Type</div></div><div class="card-body"><div id="chart-inv-bkdn" style="height:260px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-truck"></i></div>Delivery Timeline</div></div><div class="card-body"><div id="chart-inv-deliv" style="height:260px;"></div></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════ CREDIT ═══════════════ -->
+<div id="section-credit" class="section-panel">
+    <div class="kpi-row" id="credit-kpis"></div>
+    <div class="charts-2-1">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-area"></i></div>Credit Sales vs Payments Received</div></div><div class="card-body"><div id="chart-credit-trend" style="height:260px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="fas fa-chart-pie"></i></div>Paid vs Outstanding</div></div><div class="card-body"><div id="chart-credit-pie" style="height:260px;"></div></div></div>
+    </div>
+    <div class="card">
+        <div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-building-columns"></i></div>Outstanding Balance by Account</div></div>
+        <div class="card-body"><div id="chart-credit-bar" style="height:280px;"></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════ STAFF ═══════════════ -->
+<div id="section-staff" class="section-panel">
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-coins"></i></div>Revenue Recorded per Staff</div></div><div class="card-body"><div id="chart-staff-revenue" style="height:260px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fas fa-calendar-check"></i></div>Shifts per Staff Member</div></div><div class="card-body"><div id="chart-staff-shifts" style="height:260px;"></div></div></div>
+    </div>
+    <div class="charts-3">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-id-badge"></i></div>Role Distribution</div></div><div class="card-body"><div id="chart-staff-roles" style="height:220px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--primary-bg);color:var(--primary);"><i class="fas fa-circle-half-stroke"></i></div>Staff Status</div></div><div class="card-body"><div id="chart-staff-status" style="height:220px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--purple-bg);color:var(--purple);"><i class="fas fa-calendar-week"></i></div>Shifts by Day of Week</div></div><div class="card-body"><div id="chart-staff-dow" style="height:220px;"></div></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════ EXPENSES ═══════════════ -->
+<div id="section-expenses" class="section-panel">
+    <div class="kpi-row" id="exp-kpis"></div>
+    <div class="charts-1-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="fas fa-chart-pie"></i></div>By Category</div></div><div class="card-body"><div id="chart-exp-cat" style="height:280px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-area"></i></div>Daily Expense Trend</div></div><div class="card-body"><div id="chart-exp-trend" style="height:280px;"></div></div></div>
+    </div>
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fas fa-credit-card"></i></div>By Payment Method</div></div><div class="card-body"><div id="chart-exp-pay" style="height:220px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-calendar"></i></div>Monthly Totals</div></div><div class="card-body"><div id="chart-exp-monthly" style="height:220px;"></div></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════ LUBRICANTS ═══════════════ -->
+<div id="section-lubricants" class="section-panel">
+    <div class="kpi-row" id="lub-kpis"></div>
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-area"></i></div>Sales Revenue Trend</div></div><div class="card-body"><div id="chart-lub-trend" style="height:240px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-chart-bar"></i></div>Top 10 Products by Revenue</div></div><div class="card-body"><div id="chart-lub-products" style="height:240px;"></div></div></div>
+    </div>
+    <div class="charts-3">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fas fa-chart-pie"></i></div>By Brand</div></div><div class="card-body"><div id="chart-lub-brand" style="height:220px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--purple-bg);color:var(--purple);"><i class="fas fa-layer-group"></i></div>By Category</div></div><div class="card-body"><div id="chart-lub-cat" style="height:220px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--warning-bg);color:var(--warning);"><i class="fas fa-triangle-exclamation"></i></div>Low Stock Items</div></div>
+            <div class="card-body tbl-scroll" id="lub-low-stock-table"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ SUPPLIERS ═══════════════ -->
+<div id="section-suppliers" class="section-panel">
+    <div class="kpi-row" id="sup-kpis"></div>
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-area"></i></div>Invoice vs Payment Timeline</div></div><div class="card-body"><div id="chart-sup-timeline" style="height:260px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="fas fa-chart-pie"></i></div>Invoice Status</div></div><div class="card-body"><div id="chart-sup-status" style="height:260px;"></div></div></div>
+    </div>
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-chart-bar"></i></div>Top Suppliers by Invoice Amount</div></div><div class="card-body"><div id="chart-sup-top" style="height:260px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fas fa-layer-group"></i></div>By Category &amp; Type</div></div><div class="card-body"><div id="chart-sup-cat" style="height:260px;"></div></div></div>
+    </div>
+</div>
+
+<!-- ═══════════════ PUMPS ═══════════════ -->
+<div id="section-pumps" class="section-panel">
+    <div class="kpi-row" id="pump-kpis"></div>
+    <div class="charts-2">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-chart-area"></i></div>Fault Timeline (Daily Count)</div></div><div class="card-body"><div id="chart-pump-faults" style="height:240px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--warning-bg);color:var(--warning);"><i class="fas fa-wrench"></i></div>Maintenance Cost Timeline</div></div><div class="card-body"><div id="chart-pump-maint" style="height:240px;"></div></div></div>
+    </div>
+    <div class="charts-3">
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--danger-bg);color:var(--danger);"><i class="fas fa-chart-pie"></i></div>Fault Severity</div></div><div class="card-body"><div id="chart-pump-sev" style="height:220px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--accent-bg);color:var(--accent-dark);"><i class="fas fa-circle-half-stroke"></i></div>Pump Status</div></div><div class="card-body"><div id="chart-pump-status" style="height:220px;"></div></div></div>
+        <div class="card"><div class="card-header"><div class="card-title"><div class="card-title-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="fas fa-chart-bar"></i></div>Faults per Pump</div></div><div class="card-body"><div id="chart-pump-per-pump" style="height:220px;"></div></div></div>
+    </div>
+    <div class="card">
+        <div class="card-header"><div class="card-title"><div class="card-title-icon"><i class="fas fa-table"></i></div>Pump Summary</div></div>
+        <div class="card-body">
+            <div class="tbl-scroll"><table class="mini-table" id="pump-summary-table">
+                <thead><tr><th>Pump</th><th>Fuel Type</th><th>Status</th><th>Total Dispensed</th><th>Faults</th><th>Maint. Cost</th><th>Alert</th></tr></thead>
+                <tbody id="pump-summary-body"></tbody>
+            </table></div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /content -->
+</main>
+</div>
+
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const API       = '/reports';
+const COLORS    = ['#1a7a4a','#f5c518','#c62828','#1565c0','#7b1fa2','#c17b00','#00897b','#e64a19','#5c6bc0','#43a047'];
+const FUEL_CLR  = {'92 Octane':'#1565c0','95 Octane':'#7b1fa2','Auto Diesel':'#f5c518','Super Diesel':'#c62828'};
+
+let currentSection = 'overview';
+let charts = {};
+let currentData = {};
+
+// ─── INIT ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    // Init flatpickr
+    flatpickr('#dateStart', {dateFormat:'Y-m-d', defaultDate: daysBefore(29)});
+    flatpickr('#dateEnd',   {dateFormat:'Y-m-d', defaultDate: 'today'});
+    runReport();
+});
+
+function daysBefore(n) {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.toISOString().slice(0,10);
+}
+
+function setQuick(days, btn) {
+    document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('dateStart')._flatpickr.setDate(daysBefore(days - 1));
+    document.getElementById('dateEnd')._flatpickr.setDate(new Date());
+}
+
+function switchSection(name) {
+    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.rep-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    document.querySelector(`[data-section="${name}"]`).classList.add('active');
+    currentSection = name;
+    renderSection(name);
+}
+
+// ─── RUN REPORT ───────────────────────────────────────────
+async function runReport() {
+    const start = document.getElementById('dateStart').value;
+    const end   = document.getElementById('dateEnd').value;
+    const qs    = `?start_date=${start}&end_date=${end}`;
+
+    showLoading(true);
+    const [ov, sales, inv, credit, staff, exp, lub, sup, pumps] = await Promise.all([
+        fetch(API + '/overview'   + qs).then(r=>r.json()),
+        fetch(API + '/sales'      + qs).then(r=>r.json()),
+        fetch(API + '/inventory'  + qs).then(r=>r.json()),
+        fetch(API + '/credit'     + qs).then(r=>r.json()),
+        fetch(API + '/staff'      + qs).then(r=>r.json()),
+        fetch(API + '/expenses'   + qs).then(r=>r.json()),
+        fetch(API + '/lubricants' + qs).then(r=>r.json()),
+        fetch(API + '/suppliers'  + qs).then(r=>r.json()),
+        fetch(API + '/pumps'      + qs).then(r=>r.json()),
+    ]);
+    currentData = {ov, sales, inv, credit, staff, exp, lub, sup, pumps};
+    showLoading(false);
+    renderSection(currentSection);
+}
+
+function showLoading(on) {
+    document.querySelectorAll('.section-panel.active .card').forEach(c => {
+        c.style.opacity = on ? '0.5' : '1';
+    });
+}
+
+function renderSection(name) {
+    if (!currentData.ov) return;
+    const d = currentData;
+    switch(name) {
+        case 'overview':   renderOverview(d.ov, d.sales);         break;
+        case 'sales':      renderSales(d.sales);                  break;
+        case 'inventory':  renderInventory(d.inv);                break;
+        case 'credit':     renderCredit(d.credit);                break;
+        case 'staff':      renderStaff(d.staff);                  break;
+        case 'expenses':   renderExpenses(d.exp);                 break;
+        case 'lubricants': renderLubricants(d.lub);               break;
+        case 'suppliers':  renderSuppliers(d.sup);                break;
+        case 'pumps':      renderPumps(d.pumps);                  break;
+    }
+}
+
+// ─── APEX HELPERS ─────────────────────────────────────────
+const BASE_OPTS = {
+    chart: { toolbar: { show:false }, fontFamily: 'inherit', animations: { enabled:true, easing:'easeinout', speed:600 } },
+    grid:  { borderColor:'#e8eef0', strokeDashArray: 3 },
+    tooltip: { theme:'light' },
+};
+
+function mkChart(id, opts) {
+    if (charts[id]) { charts[id].destroy(); }
+    const el = document.getElementById(id);
+    if (!el) return;
+    charts[id] = new ApexCharts(el, {...BASE_OPTS, ...opts});
+    charts[id].render();
+}
+
+function fmtRs(n) {
+    const v = parseFloat(n||0);
+    if (v >= 1e6) return 'Rs.' + (v/1e6).toFixed(2) + 'M';
+    if (v >= 1e3) return 'Rs.' + (v/1e3).toFixed(1) + 'K';
+    return 'Rs.' + v.toFixed(0);
+}
+function fmtL(n) {
+    const v = parseFloat(n||0);
+    if (v >= 1e6) return (v/1e6).toFixed(2)+'M L';
+    if (v >= 1e3) return (v/1e3).toFixed(1)+'K L';
+    return v.toFixed(1)+' L';
+}
+function fmtNum(n) { return parseFloat(n||0).toLocaleString('en-IN', {maximumFractionDigits:2}); }
+function esc(s)    { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── OVERVIEW ─────────────────────────────────────────────
+function renderOverview(ov, sales) {
+    document.getElementById('ov-revenue').textContent     = fmtRs(ov.total_revenue);
+    document.getElementById('ov-litres').textContent      = fmtL(ov.total_litres);
+    document.getElementById('ov-lub').textContent         = fmtRs(ov.lub_revenue);
+    document.getElementById('ov-expenses').textContent    = fmtRs(ov.total_expenses);
+    const profEl = document.getElementById('ov-profit');
+    profEl.textContent = fmtRs(ov.net_profit);
+    profEl.style.color = ov.net_profit >= 0 ? 'var(--primary)' : 'var(--danger)';
+    document.getElementById('ov-outstanding').textContent = fmtRs(ov.total_outstanding);
+    document.getElementById('ov-faults').textContent      = ov.open_faults;
+    document.getElementById('ov-tanks').textContent       = ov.low_stock_tanks;
+    document.getElementById('ov-staff').textContent       = ov.active_staff;
+    document.getElementById('ov-overdue').textContent     = ov.overdue_invoices;
+
+    // Trend
+    const tr = sales.trend || [];
+    mkChart('chart-ov-trend', {
+        chart: { type:'area', height:260, toolbar:{show:false}, fontFamily:'inherit', animations:{enabled:true,easing:'easeinout',speed:700} },
+        series: [
+            { name:'Cash Revenue',   data: tr.map(r=>r.cash)   },
+            { name:'Credit Revenue', data: tr.map(r=>r.credit) },
+        ],
+        xaxis: { categories: tr.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        colors: ['#1a7a4a','#1565c0'],
+        fill:   { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.55, opacityTo:0.05 } },
+        stroke: { curve:'smooth', width:2 },
+        grid:   { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ theme:'light', y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    // Split donut
+    const cashT   = ov.total_revenue;
+    const creditT = ov.total_outstanding;
+    mkChart('chart-ov-split', {
+        chart: { type:'donut', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [parseFloat(cashT), parseFloat(ov.lub_revenue), parseFloat(ov.total_expenses)],
+        labels: ['Fuel Revenue','Lubricant Revenue','Expenses'],
+        colors: ['#1a7a4a','#f5c518','#c62828'],
+        legend:{ position:'bottom', fontSize:'12px' },
+        plotOptions:{ pie:{ donut:{ size:'65%', labels:{ show:true, total:{ show:true, label:'Total', formatter:()=>fmtRs(parseFloat(cashT)+parseFloat(ov.lub_revenue)) } } } } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+}
+
+// ─── SALES ────────────────────────────────────────────────
+function renderSales(d) {
+    // KPIs
+    const kpis = [
+        {icon:'fa-coins',      color:'green',  lbl:'Total Revenue',    val:fmtRs(d.totals.total_revenue)},
+        {icon:'fa-droplet',    color:'blue',   lbl:'Total Litres',     val:fmtL(d.totals.total_litres)},
+        {icon:'fa-money-bill', color:'green',  lbl:'Cash Revenue',     val:fmtRs(d.totals.cash_revenue)},
+        {icon:'fa-building-columns',color:'orange',lbl:'Credit Revenue',val:fmtRs(d.totals.credit_revenue)},
+        {icon:'fa-chart-line', color:'purple', lbl:'Avg Daily Revenue',val:fmtRs(d.totals.avg_daily)},
+    ];
+    document.getElementById('sales-kpis').innerHTML = kpis.map(k=>`
+        <div class="kpi-card"><div class="kpi-icon ${k.color}"><i class="fas ${k.icon}"></i></div>
+        <div><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div></div></div>`).join('');
+
+    const tr = d.trend || [];
+    mkChart('chart-sales-trend', {
+        chart: { type:'bar', height:280, stacked:false, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [
+            { name:'Cash',   type:'bar',  data: tr.map(r=>r.cash)   },
+            { name:'Credit', type:'bar',  data: tr.map(r=>r.credit) },
+            { name:'Total',  type:'line', data: tr.map(r=>r.total)  },
+        ],
+        xaxis: { categories: tr.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        colors:['#1a7a4a','#1565c0','#f5c518'],
+        stroke:{ width:[0,0,3], curve:'smooth' },
+        fill:  { opacity:[0.85,0.85,1] },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    // Fuel type donut
+    const ft = d.fuel_breakdown || [];
+    mkChart('chart-sales-fuel', {
+        chart: { type:'donut', height:240, toolbar:{show:false}, fontFamily:'inherit' },
+        series: ft.map(r=>r.revenue),
+        labels: ft.map(r=>r.fuel_type),
+        colors: ft.map(r=>FUEL_CLR[r.fuel_type]||COLORS[0]),
+        legend:{ position:'bottom', fontSize:'11px' },
+        plotOptions:{ pie:{ donut:{ size:'60%' } } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    // Payment methods donut
+    const pm = d.payment_breakdown || [];
+    mkChart('chart-sales-pay', {
+        chart: { type:'pie', height:240, toolbar:{show:false}, fontFamily:'inherit' },
+        series: pm.map(r=>r.amount),
+        labels: pm.map(r=>r.method),
+        colors: COLORS,
+        legend:{ position:'bottom', fontSize:'11px' },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    // Shift period bar
+    const sp = d.shift_breakdown || [];
+    mkChart('chart-sales-shift', {
+        chart: { type:'bar', height:240, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Revenue', data: sp.map(r=>r.revenue) }],
+        xaxis: { categories: sp.map(r=>r.shift) },
+        colors:['#7b1fa2'],
+        plotOptions:{ bar:{ borderRadius:6, distributed:true } },
+        legend:{ show:false },
+        yaxis:{ labels:{ formatter: v=>fmtRs(v) } },
+        grid: { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    // Pump performance
+    const pp = d.pump_performance || [];
+    mkChart('chart-sales-pump', {
+        chart: { type:'bar', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Revenue', data: pp.map(r=>r.revenue) }],
+        xaxis: { categories: pp.map(r=>r.pump_number) },
+        colors:['#1a7a4a'],
+        plotOptions:{ bar:{ borderRadius:5, distributed:true } },
+        legend:{ show:false },
+        yaxis:{ labels:{ formatter: v=>fmtRs(v) } },
+        grid: { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    mkChart('chart-sales-pump-l', {
+        chart: { type:'bar', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Litres', data: pp.map(r=>r.litres) }],
+        xaxis: { categories: pp.map(r=>r.pump_number) },
+        colors:['#1565c0'],
+        plotOptions:{ bar:{ borderRadius:5, distributed:true } },
+        legend:{ show:false },
+        yaxis:{ labels:{ formatter: v=>fmtL(v) } },
+        grid: { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>fmtNum(v)+' L' } },
+    });
+}
+
+// ─── INVENTORY ────────────────────────────────────────────
+function renderInventory(d) {
+    // Tank gauges
+    const tanks = d.tanks || [];
+    document.getElementById('tank-gauges').innerHTML = tanks.map(t=>{
+        const pct   = t.stock_pct || 0;
+        const color = pct <= 20 ? '#c62828' : pct <= 40 ? '#c17b00' : '#1a7a4a';
+        const arc   = 2 * Math.PI * 34;
+        const fill  = arc * pct / 100;
+        return `<div class="gauge-card">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+                <circle cx="45" cy="45" r="34" fill="none" stroke="#e8eef0" stroke-width="8"/>
+                <circle cx="45" cy="45" r="34" fill="none" stroke="${color}" stroke-width="8"
+                    stroke-dasharray="${fill} ${arc - fill}"
+                    stroke-linecap="round"
+                    transform="rotate(-90 45 45)"/>
+                <text x="45" y="50" text-anchor="middle" font-size="14" font-weight="800" fill="${color}">${pct}%</text>
+            </svg>
+            <div class="gauge-label">${esc(t.tank_id)} — ${esc(t.fuel_type)}</div>
+            <div class="gauge-pct" style="color:${color};">${fmtL(t.current_stock_l)}</div>
+            <div class="gauge-sub">of ${fmtL(t.capacity_l)}</div>
+        </div>`;
+    }).join('');
+
+    // Delivery vs Consumption
+    const dc = d.delivery_vs_consumption || [];
+    mkChart('chart-inv-bkdn', {
+        chart: { type:'bar', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [
+            { name:'Delivered', data: dc.map(r=>r.delivered) },
+            { name:'Consumed',  data: dc.map(r=>r.consumed)  },
+        ],
+        xaxis: { categories: dc.map(r=>r.fuel_type) },
+        colors:['#1a7a4a','#c62828'],
+        plotOptions:{ bar:{ borderRadius:4, columnWidth:'60%' } },
+        yaxis:{ labels:{ formatter: v=>fmtL(v) } },
+        grid: { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>fmtNum(v)+' L' } },
+    });
+
+    // Delivery timeline
+    const dl = d.delivery_timeline || [];
+    const fuelTypes = [...new Set(dl.flatMap(r => Object.keys(r).filter(k=>k!=='date')))];
+    mkChart('chart-inv-deliv', {
+        chart: { type:'area', height:260, toolbar:{show:false}, fontFamily:'inherit', stacked:true },
+        series: fuelTypes.map((ft,i)=>({ name:ft, data: dl.map(r=>r[ft]||0) })),
+        xaxis: { categories: dl.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        colors: fuelTypes.map(ft=>FUEL_CLR[ft]||COLORS[0]),
+        fill:  { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.6, opacityTo:0.1 } },
+        stroke:{ curve:'smooth', width:2 },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis:{ labels:{ formatter: v=>fmtL(v) } },
+        tooltip:{ y:{ formatter: v=>fmtNum(v)+' L' } },
+    });
+}
+
+// ─── CREDIT ───────────────────────────────────────────────
+function renderCredit(d) {
+    const accs = d.account_summary || [];
+    const totalLimit       = accs.reduce((a,r)=>a+r.credit_limit,0);
+    const totalOutstanding = accs.reduce((a,r)=>a+r.outstanding_balance,0);
+    const totalSales       = accs.reduce((a,r)=>a+r.period_sales,0);
+    const totalPaid        = accs.reduce((a,r)=>a+r.period_payments,0);
+
+    document.getElementById('credit-kpis').innerHTML = [
+        {icon:'fa-coins',       color:'red',    lbl:'Total Outstanding',    val:fmtRs(totalOutstanding)},
+        {icon:'fa-chart-line',  color:'green',  lbl:'Period Credit Sales',  val:fmtRs(totalSales)},
+        {icon:'fa-check-circle',color:'blue',   lbl:'Period Payments',      val:fmtRs(totalPaid)},
+        {icon:'fa-building',    color:'orange', lbl:'Total Credit Limit',   val:fmtRs(totalLimit)},
+    ].map(k=>`<div class="kpi-card"><div class="kpi-icon ${k.color}"><i class="fas ${k.icon}"></i></div>
+        <div><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div></div></div>`).join('');
+
+    // Trend area
+    const st = d.sale_trend    || [];
+    const pt = d.payment_trend || [];
+    const allDates = [...new Set([...st.map(r=>r.date),...pt.map(r=>r.date)])].sort();
+    const stMap = Object.fromEntries(st.map(r=>[r.date,r.amount]));
+    const ptMap = Object.fromEntries(pt.map(r=>[r.date,r.amount]));
+    mkChart('chart-credit-trend', {
+        chart: { type:'area', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [
+            { name:'Credit Sales',      data: allDates.map(d=>stMap[d]||0) },
+            { name:'Payments Received', data: allDates.map(d=>ptMap[d]||0) },
+        ],
+        xaxis: { categories: allDates, labels:{rotate:-30,style:{fontSize:'10px'}} },
+        colors:['#c62828','#1a7a4a'],
+        fill:  { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.5, opacityTo:0.05 } },
+        stroke:{ curve:'smooth', width:2 },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    // Paid vs Outstanding donut
+    mkChart('chart-credit-pie', {
+        chart: { type:'donut', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [totalPaid, totalOutstanding],
+        labels: ['Paid','Outstanding'],
+        colors:['#1a7a4a','#c62828'],
+        legend:{ position:'bottom' },
+        plotOptions:{ pie:{ donut:{ size:'65%', labels:{ show:true, total:{ show:true, label:'Total', formatter:()=>fmtRs(totalPaid+totalOutstanding) } } } } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    // Outstanding bar
+    const sorted = [...accs].sort((a,b)=>b.outstanding_balance-a.outstanding_balance);
+    mkChart('chart-credit-bar', {
+        chart: { type:'bar', height:280, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Outstanding', data: sorted.map(r=>r.outstanding_balance) }],
+        xaxis: { categories: sorted.map(r=>r.account_name), labels:{style:{fontSize:'10px'}} },
+        colors:['#c62828'],
+        plotOptions:{ bar:{ borderRadius:5, horizontal:true } },
+        yaxis:{ labels:{ maxWidth:180, style:{fontSize:'11px'} } },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ x:{ show:true }, y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+}
+
+// ─── STAFF ────────────────────────────────────────────────
+function renderStaff(d) {
+    const ss = d.staff_sales  || [];
+    const sh = d.staff_shifts || [];
+
+    mkChart('chart-staff-revenue', {
+        chart: { type:'bar', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Revenue', data: ss.map(r=>r.revenue) }],
+        xaxis: { categories: ss.map(r=>r.name), labels:{style:{fontSize:'11px'}} },
+        colors:['#1a7a4a'],
+        plotOptions:{ bar:{ borderRadius:5, distributed:true } },
+        legend:{ show:false },
+        yaxis:{ labels:{ formatter: v=>fmtRs(v) } },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    mkChart('chart-staff-shifts', {
+        chart: { type:'bar', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Shifts', data: sh.map(r=>r.shift_count) }],
+        xaxis: { categories: sh.map(r=>r.name), labels:{style:{fontSize:'11px'}} },
+        colors:['#1565c0'],
+        plotOptions:{ bar:{ borderRadius:5, distributed:true } },
+        legend:{ show:false },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>v+' shifts' } },
+    });
+
+    const rd = d.role_dist || [];
+    mkChart('chart-staff-roles', {
+        chart: { type:'pie', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: rd.map(r=>r.count),
+        labels: rd.map(r=>r.role),
+        colors: COLORS,
+        legend:{ position:'bottom', fontSize:'11px' },
+        tooltip:{ y:{ formatter: v=>v+' staff' } },
+    });
+
+    const sd = d.status_dist || [];
+    const sdColors = {'Active':'#1a7a4a','Inactive':'#c62828','On Leave':'#c17b00'};
+    mkChart('chart-staff-status', {
+        chart: { type:'donut', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: sd.map(r=>r.count),
+        labels: sd.map(r=>r.status),
+        colors: sd.map(r=>sdColors[r.status]||'#999'),
+        legend:{ position:'bottom', fontSize:'11px' },
+        plotOptions:{ pie:{ donut:{ size:'60%' } } },
+        tooltip:{ y:{ formatter: v=>v+' staff' } },
+    });
+
+    const dow = d.shifts_by_dow || [];
+    mkChart('chart-staff-dow', {
+        chart: { type:'bar', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Shifts', data: dow.map(r=>r.shifts) }],
+        xaxis: { categories: dow.map(r=>r.day) },
+        colors:['#7b1fa2'],
+        plotOptions:{ bar:{ borderRadius:5, distributed:true } },
+        legend:{ show:false },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>v+' shifts' } },
+    });
+}
+
+// ─── EXPENSES ─────────────────────────────────────────────
+function renderExpenses(d) {
+    document.getElementById('exp-kpis').innerHTML = [
+        {icon:'fa-coins',      color:'red',    lbl:'Total Expenses', val:fmtRs(d.total)},
+        {icon:'fa-calendar',   color:'blue',   lbl:'Avg Per Day',    val:fmtRs(d.avg_per_day)},
+        {icon:'fa-list',       color:'orange', lbl:'Transactions',   val:d.count},
+        {icon:'fa-chart-bar',  color:'purple', lbl:'Categories',     val:(d.by_category||[]).length},
+    ].map(k=>`<div class="kpi-card"><div class="kpi-icon ${k.color}"><i class="fas ${k.icon}"></i></div>
+        <div><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div></div></div>`).join('');
+
+    const bc = d.by_category || [];
+    mkChart('chart-exp-cat', {
+        chart: { type:'donut', height:280, toolbar:{show:false}, fontFamily:'inherit' },
+        series: bc.map(r=>r.amount),
+        labels: bc.map(r=>r.category),
+        colors: COLORS,
+        legend:{ position:'bottom', fontSize:'11px' },
+        plotOptions:{ pie:{ donut:{ size:'65%', labels:{ show:true, total:{ show:true, label:'Total', formatter:()=>fmtRs(d.total) } } } } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const dt = d.daily_trend || [];
+    mkChart('chart-exp-trend', {
+        chart: { type:'area', height:280, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Expenses', data: dt.map(r=>r.amount) }],
+        xaxis: { categories: dt.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        colors:['#c62828'],
+        fill:  { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.5, opacityTo:0.05 } },
+        stroke:{ curve:'smooth', width:2 },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const bp = d.by_payment || [];
+    mkChart('chart-exp-pay', {
+        chart: { type:'pie', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: bp.map(r=>r.amount),
+        labels: bp.map(r=>r.method),
+        colors: COLORS,
+        legend:{ position:'bottom', fontSize:'11px' },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const bm = d.monthly_totals || [];
+    mkChart('chart-exp-monthly', {
+        chart: { type:'bar', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Expenses', data: bm.map(r=>r.amount) }],
+        xaxis: { categories: bm.map(r=>r.month), labels:{style:{fontSize:'11px'}} },
+        colors:['#c17b00'],
+        plotOptions:{ bar:{ borderRadius:5 } },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+}
+
+// ─── LUBRICANTS ───────────────────────────────────────────
+function renderLubricants(d) {
+    document.getElementById('lub-kpis').innerHTML = [
+        {icon:'fa-coins',      color:'green',  lbl:'Revenue',      val:fmtRs(d.total_revenue)},
+        {icon:'fa-cart-plus',  color:'red',    lbl:'Stock Cost',   val:fmtRs(d.total_cost)},
+        {icon:'fa-chart-line', color:'purple', lbl:'Gross Profit', val:fmtRs(d.gross_profit)},
+        {icon:'fa-boxes',      color:'blue',   lbl:'Qty Sold',     val:fmtNum(d.total_qty_sold)},
+        {icon:'fa-list',       color:'orange', lbl:'Transactions', val:d.sales_count},
+        {icon:'fa-triangle-exclamation',color:'red',lbl:'Low Stock',val:(d.low_stock||[]).length},
+    ].map(k=>`<div class="kpi-card"><div class="kpi-icon ${k.color}"><i class="fas ${k.icon}"></i></div>
+        <div><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div></div></div>`).join('');
+
+    const st = d.sales_trend || [];
+    const pt = d.purchase_trend || [];
+    mkChart('chart-lub-trend', {
+        chart: { type:'area', height:240, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [
+            { name:'Revenue',  data: st.map(r=>r.revenue) },
+            { name:'Purchase Cost', data: pt.map(r=>r.cost) },
+        ],
+        xaxis: { categories: st.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        colors:['#1a7a4a','#c62828'],
+        fill:  { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.5, opacityTo:0.05 } },
+        stroke:{ curve:'smooth', width:2 },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const tp = (d.top_products||[]).slice(0,10);
+    mkChart('chart-lub-products', {
+        chart: { type:'bar', height:240, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Revenue', data: tp.map(r=>r.revenue) }],
+        xaxis: { categories: tp.map(r=>r.name), labels:{style:{fontSize:'10px'}} },
+        colors:['#1a7a4a'],
+        plotOptions:{ bar:{ borderRadius:5, horizontal:true } },
+        legend:{ show:false },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const bb = d.by_brand||[];
+    mkChart('chart-lub-brand', {
+        chart: { type:'pie', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: bb.map(r=>r.revenue),
+        labels: bb.map(r=>r.brand),
+        colors: COLORS,
+        legend:{ position:'bottom', fontSize:'11px' },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const bc = d.by_category||[];
+    mkChart('chart-lub-cat', {
+        chart: { type:'donut', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: bc.map(r=>r.revenue),
+        labels: bc.map(r=>r.category),
+        colors: COLORS.slice(3),
+        legend:{ position:'bottom', fontSize:'11px' },
+        plotOptions:{ pie:{ donut:{ size:'60%' } } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const ls = d.low_stock||[];
+    document.getElementById('lub-low-stock-table').innerHTML = ls.length
+        ? `<table class="mini-table"><thead><tr><th>Product</th><th>Brand</th><th>Stock</th><th>Threshold</th></tr></thead><tbody>
+            ${ls.map(p=>`<tr><td class="fw7">${esc(p.name)}</td><td>${esc(p.brand)}</td>
+            <td class="text-red">${fmtNum(p.stock_qty)}</td><td>${fmtNum(p.low_stock_threshold)}</td></tr>`).join('')}
+          </tbody></table>`
+        : `<div class="empty"><i class="fas fa-check-circle" style="color:var(--primary);opacity:1;"></i><p>All items adequately stocked</p></div>`;
+}
+
+// ─── SUPPLIERS ────────────────────────────────────────────
+function renderSuppliers(d) {
+    document.getElementById('sup-kpis').innerHTML = [
+        {icon:'fa-file-invoice', color:'blue',   lbl:'Total Invoiced', val:fmtRs(d.total_invoiced)},
+        {icon:'fa-check-circle', color:'green',  lbl:'Total Paid',     val:fmtRs(d.total_paid)},
+        {icon:'fa-clock',        color:'orange', lbl:'Balance Due',    val:fmtRs(d.total_invoiced - d.total_paid)},
+        {icon:'fa-triangle-exclamation',color:'red',lbl:'Overdue',     val:`${d.overdue_count} (${fmtRs(d.overdue_amount)})`},
+    ].map(k=>`<div class="kpi-card"><div class="kpi-icon ${k.color}"><i class="fas ${k.icon}"></i></div>
+        <div><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div></div></div>`).join('');
+
+    const it = d.inv_timeline||[];
+    const pt = d.pay_timeline||[];
+    mkChart('chart-sup-timeline', {
+        chart: { type:'area', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [
+            { name:'Invoiced', data: it.map(r=>r.amount) },
+            { name:'Paid',     data: pt.map(r=>r.amount) },
+        ],
+        xaxis: { categories: it.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        colors:['#c62828','#1a7a4a'],
+        fill:  { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.5, opacityTo:0.05 } },
+        stroke:{ curve:'smooth', width:2 },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const bs = d.by_status||[];
+    const statusColors = {'Paid':'#1a7a4a','Partial':'#c17b00','Unpaid':'#c62828'};
+    mkChart('chart-sup-status', {
+        chart: { type:'donut', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: bs.map(r=>r.amount),
+        labels: bs.map(r=>r.status),
+        colors: bs.map(r=>statusColors[r.status]||'#999'),
+        legend:{ position:'bottom' },
+        plotOptions:{ pie:{ donut:{ size:'65%', labels:{ show:true, total:{ show:true, label:'Total', formatter:()=>fmtRs(d.total_invoiced) } } } } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const top = d.by_supplier||[];
+    mkChart('chart-sup-top', {
+        chart: { type:'bar', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [
+            { name:'Invoiced', data: top.map(r=>r.invoiced) },
+            { name:'Paid',     data: top.map(r=>r.paid)     },
+        ],
+        xaxis: { categories: top.map(r=>r.name), labels:{style:{fontSize:'10px'}} },
+        colors:['#c62828','#1a7a4a'],
+        plotOptions:{ bar:{ borderRadius:4, columnWidth:'55%' } },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const bc = d.by_category||[];
+    const td = d.type_dist||[];
+    mkChart('chart-sup-cat', {
+        chart: { type:'bar', height:260, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Amount', data: bc.map(r=>r.amount) }],
+        xaxis: { categories: bc.map(r=>r.category) },
+        colors: COLORS,
+        plotOptions:{ bar:{ borderRadius:5, distributed:true } },
+        legend:{ show:false },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+}
+
+// ─── PUMPS ────────────────────────────────────────────────
+function renderPumps(d) {
+    document.getElementById('pump-kpis').innerHTML = [
+        {icon:'fa-triangle-exclamation',color:'red',    lbl:'Total Faults',  val:d.total_faults},
+        {icon:'fa-wrench',              color:'orange', lbl:'Maintenance Jobs',val:d.total_maint},
+        {icon:'fa-coins',               color:'yellow', lbl:'Maint. Cost',   val:fmtRs(d.total_maint_cost)},
+        {icon:'fa-circle-xmark',        color:'red',    lbl:'Open Faults',   val:d.open_faults},
+    ].map(k=>`<div class="kpi-card"><div class="kpi-icon ${k.color}"><i class="fas ${k.icon}"></i></div>
+        <div><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div></div></div>`).join('');
+
+    const ft = d.fault_timeline||[];
+    mkChart('chart-pump-faults', {
+        chart: { type:'area', height:240, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Faults', data: ft.map(r=>r.count) }],
+        xaxis: { categories: ft.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        colors:['#c62828'],
+        fill:  { type:'gradient', gradient:{ shadeIntensity:1, opacityFrom:0.5, opacityTo:0.05 } },
+        stroke:{ curve:'smooth', width:2 },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>v+' faults' } },
+    });
+
+    const mt = d.maint_timeline||[];
+    mkChart('chart-pump-maint', {
+        chart: { type:'bar', height:240, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Maintenance Cost', data: mt.map(r=>r.cost) }],
+        xaxis: { categories: mt.map(r=>r.date), labels:{rotate:-30,style:{fontSize:'10px'}} },
+        colors:['#c17b00'],
+        plotOptions:{ bar:{ borderRadius:3 } },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        yaxis: { labels:{ formatter: v=>fmtRs(v) } },
+        tooltip:{ y:{ formatter: v=>'Rs.'+fmtNum(v) } },
+    });
+
+    const sev = d.by_severity||[];
+    const sevColors = {'Low':'#1a7a4a','Medium':'#c17b00','High':'#e64a19','Critical':'#c62828'};
+    mkChart('chart-pump-sev', {
+        chart: { type:'donut', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: sev.map(r=>r.count),
+        labels: sev.map(r=>r.severity),
+        colors: sev.map(r=>sevColors[r.severity]||'#999'),
+        legend:{ position:'bottom', fontSize:'11px' },
+        plotOptions:{ pie:{ donut:{ size:'60%' } } },
+        tooltip:{ y:{ formatter: v=>v+' faults' } },
+    });
+
+    const st = d.pump_status_dist||[];
+    const stColors = {'Active':'#1a7a4a','Inactive':'#c62828','Under Maintenance':'#c17b00'};
+    mkChart('chart-pump-status', {
+        chart: { type:'pie', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: st.map(r=>r.count),
+        labels: st.map(r=>r.status),
+        colors: st.map(r=>stColors[r.status]||'#999'),
+        legend:{ position:'bottom', fontSize:'11px' },
+        tooltip:{ y:{ formatter: v=>v+' pumps' } },
+    });
+
+    const ps = d.pump_summary||[];
+    const pfMap = Object.fromEntries(ps.map(p=>[p.pump_id, p.fault_count]));
+    mkChart('chart-pump-per-pump', {
+        chart: { type:'bar', height:220, toolbar:{show:false}, fontFamily:'inherit' },
+        series: [{ name:'Faults', data: ps.map(r=>r.fault_count) }],
+        xaxis: { categories: ps.map(r=>r.pump_number), labels:{style:{fontSize:'11px'}} },
+        colors:['#c62828'],
+        plotOptions:{ bar:{ borderRadius:5, distributed:true } },
+        legend:{ show:false },
+        grid:  { borderColor:'#e8eef0', strokeDashArray:3 },
+        tooltip:{ y:{ formatter: v=>v+' faults' } },
+    });
+
+    const alertPill = a => a === 'overdue'  ? '<span class="pill pill-red">Overdue</span>'
+                         : a === 'warning'  ? '<span class="pill pill-yellow">Warning</span>'
+                         : '<span class="pill pill-green">OK</span>';
+    const stPill = s => s === 'Active'           ? '<span class="pill pill-green">Active</span>'
+                      : s === 'Under Maintenance' ? '<span class="pill pill-yellow">Maintenance</span>'
+                      : '<span class="pill pill-red">Inactive</span>';
+    document.getElementById('pump-summary-body').innerHTML = ps.map(p=>`<tr>
+        <td class="fw7">${esc(p.pump_number)}</td>
+        <td>${esc(p.fuel_type)}</td>
+        <td>${stPill(p.status)}</td>
+        <td>${fmtL(p.total_dispensed)}</td>
+        <td>${p.fault_count}</td>
+        <td>Rs.${fmtNum(p.maint_cost)}</td>
+        <td>${alertPill(p.alert)}</td>
+    </tr>`).join('');
+}
+
+// ─── EXPORT ───────────────────────────────────────────────
+document.getElementById('exportExcelBtn').addEventListener('click', () => {
+    const d = currentData;
+    if (!d.sales) { alert('Run a report first.'); return; }
+    const wb = XLSX.utils.book_new();
+    if (d.sales?.trend?.length)       XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(d.sales.trend),       'Sales Trend');
+    if (d.exp?.daily_trend?.length)   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(d.exp.daily_trend),   'Expenses');
+    if (d.lub?.sales_trend?.length)   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(d.lub.top_products),  'Lubricants');
+    if (d.credit?.account_summary?.length) XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(d.credit.account_summary), 'Credit');
+    if (d.pumps?.pump_summary?.length)XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(d.pumps.pump_summary),'Pumps');
+    const sd = document.getElementById('dateStart').value;
+    const ed = document.getElementById('dateEnd').value;
+    XLSX.writeFile(wb, `FuelSys_Report_${sd}_${ed}.xlsx`);
+});
+
+document.getElementById('exportPdfBtn').addEventListener('click', () => {
+    const d = currentData.ov;
+    if (!d) { alert('Run a report first.'); return; }
+    const sd = document.getElementById('dateStart').value;
+    const ed = document.getElementById('dateEnd').value;
+    const html = `<!DOCTYPE html><html><head><title>FuelSys Report</title>
+    <style>body{font-family:sans-serif;padding:24px;font-size:13px;}
+    h1{color:#1a7a4a;}h2{color:#3d5a47;margin-top:24px;border-bottom:1px solid #eee;padding-bottom:6px;}
+    table{width:100%;border-collapse:collapse;margin-top:12px;}
+    th{background:#e6f4ed;padding:7px 10px;text-align:left;font-size:11px;}
+    td{padding:6px 10px;border-bottom:1px solid #f0f0f0;}
+    .row{display:flex;gap:24px;margin:12px 0;}
+    .kpi{background:#f4faf7;border-radius:8px;padding:12px 16px;flex:1;text-align:center;}
+    .kpi-v{font-size:1.3rem;font-weight:800;color:#1a7a4a;}
+    .kpi-l{font-size:0.75rem;color:#6b8070;text-transform:uppercase;}
+    </style></head><body>
+    <h1>FuelSys Pro — Analytics Report</h1>
+    <p style="color:#6b8070;">Period: ${sd} to ${ed} &nbsp;|&nbsp; Generated: ${new Date().toLocaleString()}</p>
+    <h2>Business Overview</h2>
+    <div class="row">
+        <div class="kpi"><div class="kpi-v">${fmtRs(d.total_revenue)}</div><div class="kpi-l">Total Fuel Revenue</div></div>
+        <div class="kpi"><div class="kpi-v">${fmtRs(d.lub_revenue)}</div><div class="kpi-l">Lubricant Revenue</div></div>
+        <div class="kpi"><div class="kpi-v">${fmtRs(d.total_expenses)}</div><div class="kpi-l">Total Expenses</div></div>
+        <div class="kpi"><div class="kpi-v" style="color:${d.net_profit>=0?'#1a7a4a':'#c62828'}">${fmtRs(d.net_profit)}</div><div class="kpi-l">Net Profit</div></div>
+    </div>
+    <div class="row">
+        <div class="kpi"><div class="kpi-v">${fmtL(d.total_litres)}</div><div class="kpi-l">Litres Sold</div></div>
+        <div class="kpi"><div class="kpi-v" style="color:#c62828">${fmtRs(d.total_outstanding)}</div><div class="kpi-l">Credit Outstanding</div></div>
+        <div class="kpi"><div class="kpi-v">${d.active_staff}</div><div class="kpi-l">Active Staff</div></div>
+        <div class="kpi"><div class="kpi-v" style="color:${d.open_faults>0?'#c62828':'#1a7a4a'}">${d.open_faults}</div><div class="kpi-l">Open Pump Faults</div></div>
+    </div>
+    </body></html>`;
+    const w = window.open('', '_blank');
+    w.document.write(html);
+    w.document.close();
+    w.print();
+});
+</script>
+</body>
+</html>
