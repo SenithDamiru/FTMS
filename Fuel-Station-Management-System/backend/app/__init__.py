@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, app, render_template
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 import os
@@ -60,6 +60,12 @@ def create_app():
 
     from .routes.settings_routes import settings_bp
     app.register_blueprint(settings_bp)
+
+    from .routes.reports_routes import reports_bp
+    app.register_blueprint(reports_bp)
+
+    from .routes.dashboard_routes import dashboard_bp
+    app.register_blueprint(dashboard_bp)
 
     # ── Page routes ──
     @app.route('/')
