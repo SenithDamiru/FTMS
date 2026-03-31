@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tank_prediction.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+
      <!-- CHANGE 1: Add auth.css in <head> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 
@@ -83,11 +85,21 @@
 
         <div class="content">
             <div class="page-header">
-                <div>
-                    <h1>Tank Depletion Prediction</h1>
-                    <div class="breadcrumb">Dashboard / Fuel Inventory / <span>Prediction</span></div>
-                </div>
-            </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+        <lottie-player
+            src="{{ url_for('static', filename='animations/tank.json') }}"
+            background="transparent"
+            speed="1"
+            style="width:150px; height:150px; flex-shrink:0;"
+            loop
+            autoplay>
+        </lottie-player>
+        <div>
+            <h1>Tank Depletion Prediction</h1>
+            <div class="breadcrumb">Dashboard / Fuel Inventory / <span>Prediction</span></div>
+        </div>
+    </div>
+</div>
 
             <!-- Stat Row -->
             <div class="stat-row">
@@ -291,13 +303,7 @@
     <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 
 <script>
-    /* ── Clock ── */
-    function tick() {
-        const now = new Date();
-        document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { hour12: false });
-        document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-    }
-    tick(); setInterval(tick, 1000);
+    
 
     /* ── Sidebar toggle ── */
     document.getElementById('sidebarToggle').addEventListener('click', () => {

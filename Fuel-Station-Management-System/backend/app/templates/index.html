@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 <style>
 :root {
     --primary:#1a7a4a; --primary-light:#22a862; --primary-bg:#e6f4ed;
@@ -424,14 +425,22 @@
             </div>
         </div>
         <div class="hero-right">
-            <div class="hero-clock">
-                <div class="hero-time" id="heroClock">00:00:00</div>
-                <div class="hero-date" id="heroDate"></div>
-            </div>
-            <button class="hero-refresh-btn" id="refreshBtn" onclick="loadAll()">
-                <i class="fas fa-rotate-right"></i> Refresh
-            </button>
-        </div>
+    <lottie-player
+        src="{{ url_for('static', filename='animations/dashboard.json') }}"
+        background="transparent"
+        speed="0.8"
+        style="width:190px; height:190px; flex-shrink:0;"
+        loop
+        autoplay>
+    </lottie-player>
+    <div class="hero-clock">
+        <div class="hero-time" id="heroClock">00:00:00</div>
+        <div class="hero-date" id="heroDate"></div>
+    </div>
+    <button class="hero-refresh-btn" id="refreshBtn" onclick="loadAll()">
+        <i class="fas fa-rotate-right"></i> Refresh
+    </button>
+</div>
     </div>
 
     <!-- ═══ KPI ROW ═══ -->
