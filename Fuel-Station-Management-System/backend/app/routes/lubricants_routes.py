@@ -3,6 +3,7 @@ from ..models.lubricants import Lubricant, LubricantSale, LubricantPurchase
 from .. import db
 from datetime import datetime
 from collections import defaultdict
+from .auth_routes import login_required, role_required
 
 lubricants_bp = Blueprint('lubricants', __name__, url_prefix='/lubricants')
 
@@ -139,6 +140,8 @@ def add_sale():
 
 
 @lubricants_bp.route('/sales/update/<int:id>', methods=['PUT'])
+@login_required
+@role_required(1, 7) 
 def update_sale(id):
     sale = LubricantSale.query.get_or_404(id)
     data = request.json
@@ -165,6 +168,8 @@ def update_sale(id):
 
 
 @lubricants_bp.route('/sales/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7) 
 def delete_sale(id):
     sale = LubricantSale.query.get_or_404(id)
     # restore stock
@@ -254,6 +259,8 @@ def update_purchase(id):
 
 
 @lubricants_bp.route('/purchases/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7) 
 def delete_purchase(id):
     purchase = LubricantPurchase.query.get_or_404(id)
     product  = Lubricant.query.get(purchase.LubricantID)

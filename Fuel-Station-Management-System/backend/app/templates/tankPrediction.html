@@ -14,6 +14,49 @@
      <!-- CHANGE 1: Add auth.css in <head> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 
+        <style>
+
+/* ── NOTIFICATION DROPDOWN (shared) ── */
+.notifications { position: relative; cursor: pointer; }
+.notif-dropdown {
+    display: none; position: absolute; top: calc(100% + 10px); right: 0;
+    width: 340px; background: #fff; border: 1px solid #dee2e6;
+    border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    z-index: 9999; overflow: hidden; animation: notifFade 0.18s ease;
+}
+.notif-dropdown.open { display: block; }
+@keyframes notifFade { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.notif-dd-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 12px 16px 10px; border-bottom: 1px solid #dee2e6;
+    background: linear-gradient(135deg,#f4faf7 0%,#fff 100%);
+}
+.notif-dd-title { font-size:0.85rem; font-weight:700; color:#0d1f15; display:flex; align-items:center; gap:7px; }
+.notif-dd-title i { color:#1a7a4a; font-size:0.82rem; }
+.notif-dd-count { font-size:0.68rem; font-weight:700; background:#c62828; color:#fff; padding:2px 7px; border-radius:99px; }
+.notif-dd-count.zero { background:#1a7a4a; }
+.notif-dd-body { max-height:380px; overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:6px; }
+.notif-dd-empty { text-align:center; padding:28px 16px; color:#6b8070; }
+.notif-dd-empty i { font-size:1.6rem; display:block; margin-bottom:8px; color:#1a7a4a; opacity:0.7; }
+.notif-dd-empty p { font-size:0.8rem; font-weight:600; margin:0; }
+.notif-dd-footer { padding:10px 14px; border-top:1px solid #dee2e6; text-align:center; background:#f9fcfa; }
+.notif-dd-footer a { font-size:0.76rem; font-weight:600; color:#1a7a4a; text-decoration:none; }
+.notif-alert-item {
+    display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+    border-radius:9px; text-decoration:none; transition:opacity 0.2s;
+}
+.notif-alert-item:hover { opacity:0.85; }
+.notif-alert-item.critical { background:#ffebee; border:1px solid #ffcdd2; }
+.notif-alert-item.warning  { background:#fff8e1; border:1px solid #ffe082; }
+.notif-alert-item.info     { background:#e3f2fd; border:1px solid #bbdefb; }
+.notif-alert-icon { width:30px; height:30px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.82rem; }
+.critical .notif-alert-icon { background:#c62828; color:#fff; }
+.warning  .notif-alert-icon { background:#c17b00; color:#fff; }
+.info     .notif-alert-icon { background:#1565c0; color:#fff; }
+.notif-alert-title { font-size:0.78rem; font-weight:700; color:#0d1f15; }
+.notif-alert-msg   { font-size:0.72rem; color:#3d5a47; margin-top:2px; }
+
+        </style>
 
 </head>
 <body data-page="tank">
@@ -50,15 +93,32 @@
     <!-- ══════ MAIN ══════ -->
     <main class="main-content">
         <header>
-                <div class="search-bar">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Search...">
+                <div style="flex: 1;">
+                    <h1>Tank Depletion Prediction</h1>
                 </div>
                 <div class="user-actions">
-                    <div class="notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </div>
+                    <div class="notifications" id="notifBell">
+    <i class="fas fa-bell"></i>
+    <span class="badge" id="alert-badge">0</span>
+    <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-dd-header">
+            <div class="notif-dd-title">
+                <i class="fas fa-triangle-exclamation"></i>
+                Alerts &amp; Warnings
+            </div>
+            <span class="notif-dd-count zero" id="notifDdCount">0</span>
+        </div>
+        <div class="notif-dd-body" id="notifDdBody">
+            <div class="notif-dd-empty">
+                <i class="fas fa-circle-check"></i>
+                <p>Loading…</p>
+            </div>
+        </div>
+        <div class="notif-dd-footer">
+            <a href="/inventory/page">View Fuel Inventory →</a>
+        </div>
+    </div>
+</div>
                     <div class="user-profile" id="user-profile-btn">
                         <img id="auth-user-image" src="https://via.placeholder.com/40" alt="User">
                         <span id="auth-user-name">...</span>
@@ -95,31 +155,13 @@
             autoplay>
         </lottie-player>
         <div>
-            <h1>Tank Depletion Prediction</h1>
+            
             <div class="breadcrumb">Dashboard / Fuel Inventory / <span>Prediction</span></div>
         </div>
     </div>
 </div>
 
-            <!-- Stat Row -->
-            <div class="stat-row">
-                <div class="stat-card">
-                    <div class="stat-icon green"><i class="fas fa-gas-pump"></i></div>
-                    <div class="stat-info"><div class="label">Total Tanks</div><div class="value" id="statTotal">5</div></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon yellow"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-info"><div class="label">Tanks Healthy</div><div class="value" id="statHealthy">–</div></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div class="stat-info"><div class="label">Low Warning</div><div class="value" id="statWarning">–</div></div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon red"><i class="fas fa-fire"></i></div>
-                    <div class="stat-info"><div class="label">Critical</div><div class="value" id="statCritical">–</div></div>
-                </div>
-            </div>
+           
 
             <!-- Main Prediction Grid -->
             <div class="prediction-grid">
@@ -449,5 +491,71 @@
         if (e.key === 'Escape' && resultsCard.style.display === 'block') resetForm();
     });
 </script>
+
+<script>
+(function () {
+    const bell     = document.getElementById('notifBell');
+    const dropdown = document.getElementById('notifDropdown');
+    const ddCount  = document.getElementById('notifDdCount');
+    const ddBody   = document.getElementById('notifDdBody');
+    const badgeEl  = document.getElementById('alert-badge');
+
+    function esc(s) {
+        return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function fetchAlerts() {
+        try {
+            const data   = await fetch('/dashboard/alerts').then(r => r.json());
+            const items  = data.alerts || [];
+            const count  = data.count  || 0;
+
+            // update nav badge
+            if (badgeEl) badgeEl.textContent = count;
+
+            // update dropdown count chip
+            ddCount.textContent = count;
+            ddCount.className   = 'notif-dd-count' + (count === 0 ? ' zero' : '');
+
+            if (!items.length) {
+                ddBody.innerHTML = `
+                    <div class="notif-dd-empty">
+                        <i class="fas fa-circle-check"></i>
+                        <p>All systems normal</p>
+                        <span style="font-size:0.72rem;">No alerts at this time</span>
+                    </div>`;
+                return;
+            }
+
+            ddBody.innerHTML = items.slice(0, 10).map(a => `
+                <a href="${a.link}" class="notif-alert-item ${esc(a.severity)}" style="text-decoration:none;">
+                    <div class="notif-alert-icon"><i class="fas ${esc(a.icon)}"></i></div>
+                    <div>
+                        <div class="notif-alert-title">${esc(a.title)}</div>
+                        <div class="notif-alert-msg">${esc(a.message)}</div>
+                    </div>
+                </a>`).join('');
+        } catch (err) {
+            ddBody.innerHTML = `<div class="notif-dd-empty"><i class="fas fa-circle-xmark"></i><p>Could not load alerts</p></div>`;
+        }
+    }
+
+    bell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const opening = !dropdown.classList.contains('open');
+        dropdown.classList.toggle('open');
+        if (opening) fetchAlerts();   // refresh on each open
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!bell.contains(e.target)) dropdown.classList.remove('open');
+    });
+
+    // initial badge count on page load (silent fetch)
+    fetchAlerts();
+})();
+</script>
+
+
 </body>
 </html>

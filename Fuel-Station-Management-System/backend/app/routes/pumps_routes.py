@@ -3,6 +3,7 @@ from ..models.pumps import Pump, PumpMaintenance, PumpFault
 from ..models.user import User                   # reuse existing User model
 from .. import db
 from datetime import datetime, date
+from .auth_routes import login_required, role_required
 
 pumps_bp = Blueprint('pumps', __name__, url_prefix='/pumps')
 
@@ -59,6 +60,7 @@ def add_pump():
 
 
 @pumps_bp.route('/update/<int:id>', methods=['PUT'])
+
 def update_pump(id):
     p = Pump.query.get_or_404(id)
     d = request.json
@@ -78,6 +80,8 @@ def update_pump(id):
 
 
 @pumps_bp.route('/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7) 
 def delete_pump(id):
     p = Pump.query.get_or_404(id)
     db.session.delete(p)
