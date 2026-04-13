@@ -68,10 +68,10 @@ def get_shifts():
     return jsonify(result)
 
 
-# Get all staff for dropdown
+# Get all active staff for dropdown
 @shift_bp.route('/staff', methods=['GET'])
 def get_staff():
-    users = User.query.all()
+    users = User.query.filter_by(status='Active').all()
     return jsonify([{'id': u.user_id, 'name': u.full_name, 'role_id': u.role_id } for u in users])
 
 # Add a shift

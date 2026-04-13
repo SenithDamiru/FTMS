@@ -11,6 +11,8 @@ from .. import db
 from datetime import datetime, date, timedelta
 from sqlalchemy import func
 
+from .auth_routes import login_required, role_required
+
 sales_bp = Blueprint('sales', __name__, url_prefix='/sales')
 
 FUEL_TYPES = ['92 Octane', '95 Octane', 'Auto Diesel', 'Super Diesel']
@@ -99,6 +101,8 @@ def get_prices():
     return jsonify([p.to_dict() for p in FuelPrice.query.order_by(FuelPrice.fuel_type).all()])
 
 @sales_bp.route('/prices/update/<int:id>', methods=['PUT'])
+@login_required
+@role_required(1, 7)
 def update_price(id):
     fp = FuelPrice.query.get_or_404(id)
     d  = request.json
@@ -164,6 +168,8 @@ def add_daily_sale():
     return jsonify({'message': 'Sale recorded', 'id': sale.sale_id}), 201
 
 @sales_bp.route('/daily/update/<int:id>', methods=['PUT'])
+@login_required
+@role_required(1, 7)
 def update_daily_sale(id):
     sale       = DailySale.query.get_or_404(id)
     d          = request.json
@@ -194,6 +200,8 @@ def update_daily_sale(id):
     return jsonify({'message': 'Sale updated'})
 
 @sales_bp.route('/daily/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7)
 def delete_daily_sale(id):
     sale = DailySale.query.get_or_404(id)
     pump = Pump.query.get(sale.pump_id)
@@ -249,9 +257,11 @@ def update_credit_account(id):
     return jsonify({'message': 'Account updated'})
 
 @sales_bp.route('/credit/accounts/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7)
 def delete_credit_account(id):
     a = CreditAccount.query.get_or_404(id)
-    if a.credit_sales.count() > 0 or a.credit_payments.count() > 0:
+    if len(a.credit_sales) > 0 or len(a.credit_payments) > 0:
         return jsonify({'message': 'Cannot delete account with existing transactions'}), 400
     db.session.delete(a)
     db.session.commit()
@@ -315,6 +325,7 @@ def add_credit_sale():
     return jsonify({'message': 'Credit sale recorded', 'id': sale.credit_sale_id}), 201
 
 @sales_bp.route('/credit/sales/update/<int:id>', methods=['PUT'])
+
 def update_credit_sale(id):
     sale       = CreditSale.query.get_or_404(id)
     d          = request.json
@@ -344,6 +355,8 @@ def update_credit_sale(id):
     return jsonify({'message': 'Credit sale updated'})
 
 @sales_bp.route('/credit/sales/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7)
 def delete_credit_sale(id):
     sale    = CreditSale.query.get_or_404(id)
     account = CreditAccount.query.get(sale.account_id)
@@ -394,6 +407,8 @@ def add_credit_payment():
     return jsonify({'message': 'Payment recorded', 'id': payment.payment_id}), 201
 
 @sales_bp.route('/credit/payments/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7)
 def delete_credit_payment(id):
     payment = CreditPayment.query.get_or_404(id)
     account = CreditAccount.query.get(payment.account_id)
@@ -555,6 +570,8 @@ def update_delivery(id):
     return jsonify({'message': 'Delivery updated'})
 
 @sales_bp.route('/deliveries/delete/<int:id>', methods=['DELETE'])
+@login_required
+@role_required(1, 7)
 def delete_delivery(id):
     delivery = FuelDelivery.query.get_or_404(id)
     try:

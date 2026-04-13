@@ -69,14 +69,24 @@ def summary():
     pump_maint = sum(1 for p in pumps if p.Status == 'Under Maintenance')
     open_faults = PumpFault.query.filter(PumpFault.Status != 'Resolved').count()
 
-    # ── Staff on shift now ──
+          # ── Staff on shift now (handles midnight-crossing shifts) ──
     current_time = now.time()
-    current_shifts = Shift.query.filter(
+    all_shifts = db.session.query(Shift).join(
+        User, Shift.UserID == User.user_id
+    ).filter(
         Shift.ShiftDate == today,
-        Shift.StartTime <= current_time,
-        Shift.EndTime   >= current_time
+        User.status == 'Active'
     ).all()
-    staff_on_duty = len(current_shifts)
+    
+    # Filter shifts that are currently active (handling midnight-crossing)
+    staff_on_duty = 0
+    for shift in all_shifts:
+        if shift.StartTime <= shift.EndTime:  # Normal shift (same day)
+            if shift.StartTime <= current_time <= shift.EndTime:
+                staff_on_duty += 1
+        else:  # Midnight-crossing shift
+            if current_time >= shift.StartTime or current_time <= shift.EndTime:
+                staff_on_duty += 1
 
     # ── Today's expense total ──
     today_expenses = db.session.query(func.sum(Expense.Amount)
