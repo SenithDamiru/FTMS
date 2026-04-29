@@ -10,6 +10,9 @@ cd fuel-station-management/backend
 python3 -m venv venv
 source backend/venv/bin/activate
 
+source venv/bin/activate
+
+
 python3 backend/main.py
 
 🧪 2. Install Required Packages
