@@ -473,9 +473,18 @@
   <!-- Main Content -->
   <main class="main-content">
     <header>
-       <div style="flex: 1;">
-        <h1 style="font-size:1.8rem; font-weight:750; color:#0f172a; letter-spacing:-0.5px; margin:0;">Settings</h1>
+       <div style="flex: 1; display: flex; align-items: center; gap: 20px;">
+        <lottie-player
+            src="{{ url_for('static', filename='animations/Revenue.json') }}"
+            speed="1"
+            style="width:160px; height:160px; flex-shrink:0;"
+            loop
+            autoplay>
+        </lottie-player>
+        <div>
+            <h1 style="font-size:1.8rem; font-weight:750; color:#0f172a; letter-spacing:-0.5px; margin:0;">Settings</h1>
             <p style="color:#64748b; font-size:13px; margin:4px 0 0 0;">Manage station configuration and preferences</p>
+        </div>
        </div>
       <div class="user-actions">
         <div class="notifications" id="notifBell">
@@ -522,19 +531,6 @@
     </header>
 
  <div class="content">
-    <div style="margin-bottom:24px; display:flex; align-items:center; gap:16px;">
-        <lottie-player
-            src="{{ url_for('static', filename='animations/Revenue.json') }}"
-            
-            speed="1"
-            style="width:160px; height:160px; flex-shrink:0;"
-            loop
-            autoplay>
-        </lottie-player>
-        <div>
-            
-        </div>
-    </div>
     <div class="settings-layout">
 
         <!-- Left nav -->
